@@ -24,6 +24,7 @@ import LifeMemberReport from "./pages/report/MemberReport/LifeMemberReport";
 import TrusteeMemberReport from "./pages/report/MemberReport/TrusteeMemberReport";
 import NotRegisterNotScanned from "./pages/report/NotregisteredNotScanned/NotRegisterNotScanned";
 import RegisteredNotScanned from "./pages/report/registerednotscanned/RegisteredNotScanned";
+import ReportFormat from "./pages/reportformats/ReportFormat";
 
 function App() {
   return (
@@ -87,6 +88,10 @@ function App() {
                 <Route
                   path="/report-notregister-notscanned"
                   element={<NotRegisterNotScanned />}
+                />
+                <Route
+                  path="/report-format"
+                  element={<ReportFormat />}
                 />
               </Routes>
             </ProtectedLayout>

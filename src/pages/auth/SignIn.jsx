@@ -70,7 +70,7 @@ const SignIn = () => {
             <div className="text-center mb-6">
               <img
                 // src={finalUserImage || ""}
-                src={""}
+                src={logo || ""}
                 alt="Logo"
                 className="h-20 mx-auto"
               />
@@ -136,7 +136,7 @@ const SignIn = () => {
           </div>
           <div className="hidden md:flex items-center justify-center">
             <img
-              src=""
+              src={logo}
               alt="Login Illustration"
               className="w-60 h-60 object-contain rounded-md"
             />

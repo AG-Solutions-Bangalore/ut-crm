@@ -3,6 +3,7 @@ import {
   BarChartOutlined,
   CarOutlined,
   CloseOutlined,
+  FileOutlined,
   HomeOutlined,
   LockOutlined,
   MailOutlined,
@@ -18,7 +19,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
-import { FileChartColumn } from "lucide-react";
 
 const getMenuItems = (collapsed, userTypeRaw) => {
   const uType = Number(userTypeRaw);
@@ -50,7 +50,6 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
   ];
 
-  // --- userType == 2 → ONLY Event + Event Report ---
   if (isOnlyEventMode) {
     if (collapsed) {
       return [
@@ -97,9 +96,9 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     ];
   }
 
-  // --- All other userTypes → FULL MENU (include Event too) ---
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
+    { key: "/report-format", icon: <FileOutlined /> , label: "Report Format" },
     {
       key: "/new-registration-list",
       icon: <TagsOutlined />,
@@ -285,8 +284,8 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     >
       <div className="flex items-center justify-center h-14 px-4 !bg-[#e6f4ff]">
         <motion.img
-          src=""
           // src={collapsed ? logo1 : finalUserImage}
+          src={collapsed ? logo1 : logo1}
           alt="Header Logo"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -374,7 +373,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 29-08-2025
+                    Updated on: 29-10-2025
                   </div>
                 </div>
               }
