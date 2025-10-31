@@ -3,7 +3,7 @@ import { Button, Card, Input, Space, Spin, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { EVENT_REGISTER } from "../../api";
-import SGSTable from "../../components/STTable/STTable";
+import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import EventRegisterForm from "./EventRegisterForm";
 const { Search } = Input;
@@ -182,7 +182,7 @@ const EvenRegisterList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <SGSTable data={users} columns={columns} />
+          <DataTable data={users} columns={columns} />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}

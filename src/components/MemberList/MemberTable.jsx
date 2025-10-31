@@ -6,7 +6,7 @@ import {
 import { Button, Popconfirm, Space, Tag, Tooltip } from "antd";
 import dayjs from "dayjs";
 import AvatarCell from "../common/AvatarCell";
-import STTable from "../STTable/STTable";
+import STTable from "../DataTable/DataTable";
 
 const MemberTable = ({ users, onEdit, imageUrls, handleToggleStatus }) => {
   const highlightMatch = (text, match) => {

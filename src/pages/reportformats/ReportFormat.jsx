@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs } from "antd";
 import PurchaseOrder from "./PurchaseOrder";
+import FeaturedCarousel from "../../components/FeaturedCarousel";
 
 const { TabPane } = Tabs;
 
@@ -15,7 +16,9 @@ const ReportFormat = () => {
         <TabPane tab="Sales Report" key="2">
           {/* Import your component here */}
           {/* <SalesReport /> */}
-          <div>Sales Report content goes here</div>
+          <section className="w-full max-w-7xl mx-auto">
+            {/* <FeaturedCarousel /> */}
+          </section>
         </TabPane>
 
         <TabPane tab="Inventory Summary" key="3">
@@ -30,6 +33,7 @@ const ReportFormat = () => {
           <div>Expense Report content goes here</div>
         </TabPane>
       </Tabs>
+      
     </div>
   );
 };

@@ -25,6 +25,9 @@ import TrusteeMemberReport from "./pages/report/MemberReport/TrusteeMemberReport
 import NotRegisterNotScanned from "./pages/report/NotregisteredNotScanned/NotRegisterNotScanned";
 import RegisteredNotScanned from "./pages/report/registerednotscanned/RegisteredNotScanned";
 import ReportFormat from "./pages/reportformats/ReportFormat";
+import NotFoundPage from "./components/common/NotFoundPage";
+import MillList from "./pages/mill/mill-list";
+import MillForm from "./pages/mill/mill-form";
 
 function App() {
   return (
@@ -40,63 +43,14 @@ function App() {
           element={
             <ProtectedLayout>
               <Routes>
-                <Route path="/home" element={<Dashboard />} />
-                <Route path="/event" element={<EventList />} />
-                <Route
-                  path="/event-attend-member/:id"
-                  element={<EventAttendMember />}
-                />
-                <Route path="/event-register" element={<EvenRegisterList />} />
-                <Route path="/event-track" element={<EventTrackList />} />
-                <Route
-                  path="/new-registration-list"
-                  element={<NewRegisterationList />}
-                />
-                <Route
-                  path="/new-registration-form/:newId"
-                  element={<NewRegisterationForm />}
-                />
-                <Route path="/life-member" element={<LifeMembersPage />} />
-                <Route path="/couple-member" element={<CoupleMembersPage />} />
-                <Route path="/truste-member" element={<TrusteMemberPage />} />
-                <Route
-                  path="/members/edit/:memberId"
-                  element={<MemberForm />}
-                />
-                <Route path="/event-details" element={<EventDetailsPage />} />
-                <Route
-                  path="/report-life-member"
-                  element={<LifeMemberReport />}
-                />
-                <Route
-                  path="/report-couple-member"
-                  element={<CoupleMemberReport />}
-                />
-                <Route
-                  path="/report-truste-member"
-                  element={<TrusteeMemberReport />}
-                />
-                <Route path="/report-event" element={<EventReport />} />
-                <Route
-                  path="/report-event-details"
-                  element={<EventDetailsReport />}
-                />
-                <Route
-                  path="/report-register-notscanned"
-                  element={<RegisteredNotScanned />}
-                />
-                <Route
-                  path="/report-notregister-notscanned"
-                  element={<NotRegisterNotScanned />}
-                />
-                <Route
-                  path="/report-format"
-                  element={<ReportFormat />}
-                />
+                <Route path="/master/mill" element={<MillList />} />
+                <Route path="/master/mill/create" element={<MillForm />} />
+                <Route path="/master/mill/:id" element={<MillForm />} />
               </Routes>
             </ProtectedLayout>
           }
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppInitializer>
   );
