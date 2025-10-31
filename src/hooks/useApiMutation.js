@@ -17,7 +17,6 @@ export function useApiMutation() {
     setLoading(true);
     setError(null);
     try {
-
       const response = await axiosInstance({
         url,
         method,

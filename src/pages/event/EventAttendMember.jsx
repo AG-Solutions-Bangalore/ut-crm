@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { EVENT, EVENT_TRACK, REGESTRATION_DATA } from "../../api";
-import SGSTable from "../../components/STTable/STTable";
+import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import EventTrackForm from "../eventtrack/EventTrackForm";
 import { useSelector } from "react-redux";
@@ -199,7 +199,7 @@ const EventAttendMember = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <SGSTable data={users} columns={columns} />
+          <DataTable data={users} columns={columns} />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}

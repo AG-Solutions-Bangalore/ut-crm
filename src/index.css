@@ -75,8 +75,8 @@ body {
   transition: transform 0.2s ease;
 }
 .ant-table-wrapper .ant-table-thead > tr > th {
-  background-color: #1677ff;
-  color: #ffffff !important;
+  background-color: #e6f4ff;
+  color: #030303 !important;
 }
 :where(.css-dev-only-do-not-override-1v28nim).ant-menu-light.ant-menu-inline
   .ant-menu-sub.ant-menu-inline {
@@ -123,4 +123,10 @@ body {
 }
 .ant-table-tbody > tr:hover > td {
   background-color: inherit !important;
+}
+:where(.ant-table-wrapper) .ant-table.ant-table-small .ant-table-footer {
+  padding: 0 !important;
+}
+:where(.ant-form-item) {
+  margin-bottom: 18px !important;
 }

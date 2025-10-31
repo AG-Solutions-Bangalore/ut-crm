@@ -24,7 +24,7 @@ import {
   REGESTRATION_DATA,
 } from "../../api";
 import AvatarCell from "../../components/common/AvatarCell";
-import SGSTable from "../../components/STTable/STTable";
+import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useSelector } from "react-redux";
 
@@ -319,7 +319,7 @@ const NewRegisterationList = () => {
             <Spin size="large" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          <SGSTable data={filteredUsers} columns={columns} />
+          <DataTable data={filteredUsers} columns={columns} />
         ) : (
           <div className="text-center text-gray-500 py-20">No data found.</div>
         )}

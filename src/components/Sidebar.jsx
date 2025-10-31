@@ -22,8 +22,10 @@ import useFinalUserImage from "./common/Logo";
 
 const getMenuItems = (collapsed, userTypeRaw) => {
   const uType = Number(userTypeRaw);
-  const isOnlyEventMode = uType === 2;
-
+  // const isOnlyEventMode = uType == 2;
+  const isOnlyEventMode = false;
+  console.log(isOnlyEventMode)
+// console.log(isOnlyEventMode,"isOnlyEventMode")
   // --- Common building blocks ---
   const eventChildren = [
     { key: "/event", icon: <SolutionOutlined />, label: "Event" },
@@ -50,78 +52,72 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
   ];
 
-  if (isOnlyEventMode) {
-    if (collapsed) {
-      return [
-        {
-          key: "sub1",
-          icon: <MailOutlined />,
-          label: <span id="report-scroll-anchor">Event</span>,
-          children: eventChildren,
-        },
-        {
-          key: "sub2",
-          icon: <BarChartOutlined />,
-          label: <span id="report-scroll-anchor">Report</span>,
-          children: eventReportChildren,
-        },
-      ];
-    }
+  // if (isOnlyEventMode) {
+  //   if (collapsed) {
+  //     return [
+  //       {
+  //         key: "sub1",
+  //         icon: <MailOutlined />,
+  //         label: <span id="report-scroll-anchor">Event</span>,
+  //         children: eventChildren,
+  //       },
+  //       {
+  //         key: "sub2",
+  //         icon: <BarChartOutlined />,
+  //         label: <span id="report-scroll-anchor">Report</span>,
+  //         children: eventReportChildren,
+  //       },
+  //     ];
+  //   }
 
-    return [
-      {
-        type: "group",
-        label: "Event",
-        children: [
-          {
-            key: "sub1",
-            icon: <MailOutlined />,
-            label: "Event",
-            children: eventChildren,
-          },
-        ],
-      },
-      {
-        type: "group",
-        label: "Report",
-        children: [
-          {
-            key: "sub2",
-            icon: <BarChartOutlined />,
-            label: "Report",
-            children: eventReportChildren,
-          },
-        ],
-      },
-    ];
-  }
+  //   return [
+  //     {
+  //       type: "group",
+  //       label: "Event",
+  //       children: [
+  //         {
+  //           key: "sub1",
+  //           icon: <MailOutlined />,
+  //           label: "Event",
+  //           children: eventChildren,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       type: "group",
+  //       label: "Report",
+  //       children: [
+  //         {
+  //           key: "sub2",
+  //           icon: <BarChartOutlined />,
+  //           label: "Report",
+  //           children: eventReportChildren,
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // }
 
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
     { key: "/report-format", icon: <FileOutlined /> , label: "Report Format" },
-    {
-      key: "/new-registration-list",
-      icon: <TagsOutlined />,
-      label: "New Registration",
-    },
+ 
   ];
 
   const managementChildren = [
-    { key: "/life-member", icon: <LockOutlined />, label: "Life Membership" },
+    { key: "/master/mill", icon: <LockOutlined />, label: "Mill" },
     {
-      key: "/couple-member",
+      key: "/master/party",
       icon: <SolutionOutlined />,
-      label: "Couple Membership",
+      label: "Party",
     },
-    { key: "/truste-member", icon: <CarOutlined />, label: "Trustee" },
   ];
 
   const fullReportChildren = [
     {
       key: "sales-submenu",
       icon: <ProfileOutlined />,
-      // label: "Member",
-      label: <span id="report-scroll-anchor">Member</span>,
+      label: <span id="report-scroll-anchor">Master</span>,
       children: [
         {
           key: "/report-life-member",
@@ -140,7 +136,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
         },
       ],
     },
-    ...eventReportChildren,
+    // ...eventReportChildren,
   ];
 
   if (collapsed) {
@@ -152,18 +148,18 @@ const getMenuItems = (collapsed, userTypeRaw) => {
         label: "Management",
         children: managementChildren,
       },
-      {
-        key: "sub1",
-        icon: <MailOutlined />,
-        label: "Event",
-        children: eventChildren,
-      },
-      {
-        key: "sub2",
-        icon: <BarChartOutlined />,
-        label: <span id="report-scroll-anchor">Report</span>,
-        children: fullReportChildren,
-      },
+      // {
+      //   key: "sub1",
+      //   icon: <MailOutlined />,
+      //   label: "Event",
+      //   children: eventChildren,
+      // },
+      // {
+      //   key: "sub2",
+      //   icon: <BarChartOutlined />,
+      //   label: <span id="report-scroll-anchor">Report</span>,
+      //   children: fullReportChildren,
+      // },
     ];
   }
 
@@ -171,40 +167,40 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     { type: "group", label: "Dashboard", children: dashboardItems },
     {
       type: "group",
-      label: "Member",
+      label: "Master",
       children: [
         {
           key: "sub",
           icon: <MailOutlined />,
-          label: "Member",
+          label: "Master",
           children: managementChildren,
         },
       ],
     },
-    {
-      type: "group",
-      label: "Event",
-      children: [
-        {
-          key: "sub1",
-          icon: <MailOutlined />,
-          label: "Event",
-          children: eventChildren,
-        },
-      ],
-    },
-    {
-      type: "group",
-      label: "Report",
-      children: [
-        {
-          key: "sub2",
-          icon: <BarChartOutlined />,
-          label: "Report",
-          children: fullReportChildren,
-        },
-      ],
-    },
+    // {
+    //   type: "group",
+    //   label: "Event",
+    //   children: [
+    //     {
+    //       key: "sub1",
+    //       icon: <MailOutlined />,
+    //       label: "Event",
+    //       children: eventChildren,
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: "group",
+    //   label: "Report",
+    //   children: [
+    //     {
+    //       key: "sub2",
+    //       icon: <BarChartOutlined />,
+    //       label: "Report",
+    //       children: fullReportChildren,
+    //     },
+    //   ],
+    // },
   ];
 };
 
@@ -373,7 +369,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 29-10-2025
+                    Updated on: 31-10-2025
                   </div>
                 </div>
               }
