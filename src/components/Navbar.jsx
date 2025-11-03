@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -7,11 +8,13 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown } from "antd";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useLogout from "../hooks/useLogout";
 import ChangePassword from "../pages/profile/ChangePassword";
 import { useState } from "react";
 export default function Navbar({ collapsed, onToggle }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpenDialog] = useState(false);
   const imageUrls = useSelector((state) => state?.auth?.userImage);
   const userImagePath = useSelector((state) => state?.auth?.user?.avatar_photo);
@@ -30,8 +33,7 @@ export default function Navbar({ collapsed, onToggle }) {
     if (key === "logout") {
       try {
         await logout();
-      } catch (error) {
-      }
+      } catch (error) {}
     } else if (key === "profile") {
       naviagte("/user-form");
     } else if (key === "chnagepassword") {
@@ -79,13 +81,25 @@ export default function Navbar({ collapsed, onToggle }) {
   return (
     <>
       <header className="bg-white h-14 shadow px-4 flex items-center justify-between">
-        <Button
-          type="text"
-          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={onToggle}
-          className="text-lg"
-        />
+        <div className="flex items-center gap-2">
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={onToggle}
+            className="text-lg"
+          />
 
+          {location.pathname != "/home" && (
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate(-1)}
+              className="text-lg flex items-center gap-1"
+            >
+              Back
+            </Button>
+          )}
+        </div>
         <Dropdown menu={profileMenu} placement="bottomRight" arrow>
           <div className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-full hover:bg-gray-100 transition-all">
             <Avatar size="large" src={finalUserImage} />

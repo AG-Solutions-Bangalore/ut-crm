@@ -12,7 +12,7 @@ const HighlightText = ({ text, match }) => {
           <mark
             key={index}
             style={{
-              backgroundColor: "#3b82f6",
+              backgroundColor: "#261d54",
               color: "#ffffff",
               padding: "0 0.25rem",
               borderRadius: "0.25rem",

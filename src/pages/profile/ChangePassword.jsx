@@ -22,10 +22,6 @@ const ChangePassword = ({ open, setOpenDialog }) => {
         url: PANEL_CHANGE_PASSWORD,
         method: "post", 
         data: payload,
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        //   "Content-Type": "application/json",
-        // },
       });
 
       if (response.code === 201) {
@@ -58,9 +54,9 @@ const ChangePassword = ({ open, setOpenDialog }) => {
       onCancel={() => setOpenDialog(false)}
       width={800}
     >
-      <h2 className="text-2xl font-bold text-[#fb6332]">Change Password</h2>
+      <h2 className="text-2xl font-bold mb-2 text-[var(--primary)]">Change Password</h2>
 
-      <Card>
+      {/* <Card> */}
         <Form
           form={form}
           layout="vertical"
@@ -129,7 +125,7 @@ const ChangePassword = ({ open, setOpenDialog }) => {
             </Form.Item>
           </div>
         </Form>
-      </Card>
+      {/* </Card> */}
     </Modal>
   );
 };

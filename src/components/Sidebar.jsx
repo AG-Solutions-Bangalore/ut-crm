@@ -1,15 +1,24 @@
 import {
   ArrowRightOutlined,
-  BarChartOutlined,
+  BookOutlined,
+  BorderOutlined,
   CarOutlined,
   CloseOutlined,
   FileOutlined,
   HomeOutlined,
-  LockOutlined,
+  LineChartOutlined,
   MailOutlined,
   ProfileOutlined,
   SolutionOutlined,
-  TagsOutlined,
+  TagsOutlined
+} from "@ant-design/icons";
+
+import {
+  ApartmentOutlined,
+  AppstoreOutlined,
+  BgColorsOutlined,
+  TeamOutlined,
+  UserSwitchOutlined
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -24,7 +33,6 @@ const getMenuItems = (collapsed, userTypeRaw) => {
   const uType = Number(userTypeRaw);
   // const isOnlyEventMode = uType == 2;
   const isOnlyEventMode = false;
-  console.log(isOnlyEventMode)
 // console.log(isOnlyEventMode,"isOnlyEventMode")
   // --- Common building blocks ---
   const eventChildren = [
@@ -104,14 +112,50 @@ const getMenuItems = (collapsed, userTypeRaw) => {
  
   ];
 
-  const managementChildren = [
-    { key: "/master/mill", icon: <LockOutlined />, label: "Mill" },
-    {
-      key: "/master/party",
-      icon: <SolutionOutlined />,
-      label: "Party",
-    },
-  ];
+
+const managementChildren = [
+  {
+    key: "/master/mill",
+    icon: <ApartmentOutlined />,
+    label: "Mill",
+  },
+  {
+    key: "/master/party",
+    icon: <TeamOutlined />,
+    label: "Party",
+  },
+  {
+    key: "/master/bf",
+    icon: <UserSwitchOutlined />,
+    label: "BF",
+  },
+  {
+    key: "/master/delivery",
+    icon: <CarOutlined />,
+    label: "Delivery",
+  },
+  {
+    key: "/master/unit",
+    icon: <AppstoreOutlined />,
+    label: "Unit",
+  },
+{
+  key: "/master/subject",
+  icon: <BookOutlined />, 
+  label: "Subject",
+},
+{
+  key: "/master/deckle",
+  icon: <BorderOutlined />, 
+  label: "Deckle",
+},
+{
+  key: "/master/gsm",
+  icon: <LineChartOutlined />, 
+  label: "GSM",
+},
+];
+
 
   const fullReportChildren = [
     {
@@ -278,7 +322,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
       className={`h-full bg-white shadow-xl  overflow-hidden flex flex-col font-[Inter] transition-all duration-300
         ${isMobile ? "fixed z-50 h-screen" : "relative"}`}
     >
-      <div className="flex items-center justify-center h-14 px-4 !bg-[#e6f4ff]">
+      <div className="flex items-center justify-center h-14 px-4 bg-gray-100">
         <motion.img
           // src={collapsed ? logo1 : finalUserImage}
           src={collapsed ? logo1 : logo1}
@@ -337,7 +381,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-xs text-gray-500 text-center border-t border-blue-400 bg-white"
+          className="text-xs text-gray-500 text-center border-t border-[var(--primary)] bg-white"
         >
           {showDialog ? (
             <div
@@ -356,7 +400,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                 type="warning"
                 banner
                 showIcon={false}
-                className="rounded-md !bg-[#e6f4ff] !text-blue-400  px-4 py-1"
+                className="rounded-md !bg-gray-100 !text-[var(--primary)]  px-4 py-1"
               />
             </div>
           ) : (
@@ -369,14 +413,14 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 31-10-2025
+                    Updated on: 03-11-2025
                   </div>
                 </div>
               }
               type="info"
               banner
               showIcon={false}
-              className="rounded-md !bg-[#e6f4ff] !text-blue-400  px-4 py-1"
+                className="rounded-md !bg-gray-100 !text-[var(--primary)]  px-4 py-1"
             />
           )}
         </motion.div>
