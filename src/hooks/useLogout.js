@@ -11,14 +11,6 @@ const useLogout = () => {
 
   const handleLogout = async () => {
     try {
-      // await trigger({
-      //   url: PANEL_LOGOUT,
-      //   method: "post",
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      // });
-
       await persistor.flush();
       // localStorage.clear();
       dispatch(logout());

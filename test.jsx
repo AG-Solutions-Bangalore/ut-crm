@@ -1,6 +1,6 @@
 import { App, Button, Card, Form, Input, Select, Spin, Switch } from "antd";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { MILL_LIST } from "../../api";
 
@@ -16,7 +16,7 @@ const MillForm = () => {
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const { id } = useParams();
   const isEditMode = Boolean(id);
-
+  const navigate = useNavigate();
   const [initialData, setInitialData] = useState({});
 
   const resetForm = () => {
@@ -29,8 +29,13 @@ const MillForm = () => {
         url: `${MILL_LIST}/${id}`,
       });
       if (res?.data) {
-        setInitialData(res.data);
-        form.setFieldsValue(res.data);
+        const formattedData = {
+          ...res.data,
+          mill_status: res.data.mill_status == "Active",
+        };
+
+        setInitialData(formattedData);
+        form.setFieldsValue(formattedData);
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -44,15 +49,22 @@ const MillForm = () => {
   }, [id]);
 
   const handleSubmit = async (values) => {
+    const payload = isEditMode
+      ? {
+          ...values,
+          mill_status: values?.mill_status ? "Active" : "Inactive",
+        }
+      : values;
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${MILL_LIST}/${id}` : MILL,
+        url: isEditMode ? `${MILL_LIST}/${id}` : MILL_LIST,
         method: isEditMode ? "put" : "post",
-        data: values,
+        data: payload,
       });
 
-      if (res.code === 201 || res.code === 200) {
+      if (res.code == 201) {
         message.success(res.message || "Mill saved successfully!");
+        navigate("/master/mill");
       } else {
         message.error(res.message || "Failed to save mill.");
       }
@@ -156,7 +168,7 @@ const MillForm = () => {
               </Form.Item>
 
               <Form.Item label="Email" name="mill_email">
-                <Input type="email" placeholder="Enter Email" maxLength={30}/>
+                <Input type="email" placeholder="Enter Email" maxLength={30} />
               </Form.Item>
             </div>
 
@@ -167,19 +179,19 @@ const MillForm = () => {
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <Form.Item label="Bank Name" name="mill_bank_name">
-                  <Input placeholder="Enter Bank Name" maxLength={30}/>
+                  <Input placeholder="Enter Bank Name" maxLength={30} />
                 </Form.Item>
 
                 <Form.Item label="Account Number" name="mill_bank_ac_no">
-                  <Input placeholder="Enter Account Number" maxLength={20}/>
+                  <Input placeholder="Enter Account Number" maxLength={20} />
                 </Form.Item>
 
                 <Form.Item label="IFSC Code" name="mill_bank_ifsc">
-                  <Input placeholder="Enter IFSC Code" maxLength={50}/>
+                  <Input placeholder="Enter IFSC Code" maxLength={50} />
                 </Form.Item>
 
                 <Form.Item label="Branch Name" name="mill_bank_branch_name">
-                  <Input placeholder="Enter Branch Name" maxLength={50}/>
+                  <Input placeholder="Enter Branch Name" maxLength={50} />
                 </Form.Item>
 
                 <Form.Item
@@ -193,7 +205,7 @@ const MillForm = () => {
                     },
                   ]}
                 >
-                  <Input placeholder="Enter commission" maxLength={5}/>
+                  <Input placeholder="Enter commission" maxLength={5} />
                 </Form.Item>
               </div>
             </Card>

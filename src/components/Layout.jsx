@@ -18,21 +18,7 @@ export default function Layout({ children }) {
   }, []);
 
   return (
-    // <ConfigProvider
-    //   theme={{
-    //     token: {
-    //       colorPrimary: "#fb6332",
-    //     },
-    //     components: {
-    //       Menu: {
-    //         itemSelectedBg: "#fb6332",
-    //         itemSelectedColor: "#ffffff",
-    //         itemHoverBg: "#fb7c55",
-    //         itemHoverColor: "#ffffff",
-    //       },
-    //     },
-    //   }}
-    // >
+ 
       <div className="flex h-screen overflow-hidden">
         {!isMobile && <Sidebar collapsed={collapsed} isMobile={isMobile} />}
 
@@ -69,6 +55,5 @@ export default function Layout({ children }) {
           </main>
         </div>
       </div>
-    // </ConfigProvider>
   );
 }

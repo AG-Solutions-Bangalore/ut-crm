@@ -4,6 +4,7 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
+
 .ant-menu,
 .ant-menu * {
   font-family: "Poppins", sans-serif !important;
@@ -27,7 +28,7 @@ body {
    */
   border-top-right-radius: 100px;
   border-bottom-right-radius: 100px;
-  margin: 4px;
+  margin: 4px 0px 4px 0px;
   transition: all 0.2s;
 }
 
@@ -74,10 +75,7 @@ body {
   transform: scale(1.2);
   transition: transform 0.2s ease;
 }
-.ant-table-wrapper .ant-table-thead > tr > th {
-  background-color: #e6f4ff;
-  color: #030303 !important;
-}
+
 :where(.css-dev-only-do-not-override-1v28nim).ant-menu-light.ant-menu-inline
   .ant-menu-sub.ant-menu-inline {
   background-color: transparent !important;
