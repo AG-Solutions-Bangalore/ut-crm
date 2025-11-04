@@ -1,9 +1,9 @@
 import { App, Button, Form, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { BF_LIST } from "../../api";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { DELIVERY_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
-const BFForm = ({ id, onSuccess }) => {
+const DeliveryForm = ({ id, onSuccess }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
@@ -13,25 +13,25 @@ const BFForm = ({ id, onSuccess }) => {
 
   const resetForm = () => form.resetFields();
 
-  const fetchBf = async () => {
+  const fetchDelivery = async () => {
     try {
-      const res = await fetchTrigger({ url: `${BF_LIST}/${id}` });
+      const res = await fetchTrigger({ url: `${DELIVERY_LIST}/${id}` });
       if (res?.data) {
         const formattedData = {
           ...res.data,
-          bf_status: res.data.bf_status == "Active",
+          delivery_status: res.data.delivery_status == "Active",
         };
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
       }
     } catch (err) {
-      message.error("Failed to load BF details.");
+      message.error("Failed to load Delivery details.");
     }
   };
 
   useEffect(() => {
     if (id) {
-      fetchBf();
+      fetchDelivery();
     } else {
       resetForm();
     }
@@ -40,25 +40,25 @@ const BFForm = ({ id, onSuccess }) => {
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
-      bf_status: values?.bf_status ? "Active" : "Inactive",
+      delivery_status: values?.delivery_status ? "Active" : "Inactive",
     };
 
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${BF_LIST}/${id}` : BF_LIST,
+        url: isEditMode ? `${DELIVERY_LIST}/${id}` : DELIVERY_LIST,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
 
       if (res.code === 201) {
-        message.success(res.message || "BF saved successfully!");
+        message.success(res.message || "Delivery saved successfully!");
         onSuccess?.();
         form.resetFields();
       } else {
-        message.error(res.message || "Failed to save BF.");
+        message.error(res.message || "Failed to save Delivery.");
       }
     } catch {
-      message.error("Something went wrong while saving BF.");
+      message.error("Something went wrong while saving Delivery.");
     }
   };
 
@@ -79,20 +79,25 @@ const BFForm = ({ id, onSuccess }) => {
       requiredMark={false}
     >
       <Form.Item
-        name="bf"
+        name="delivery"
         label={
           <span>
-            BF <span className="text-red-500">*</span>
+            Delivery <span className="text-red-500">*</span>
           </span>
         }
-        rules={[{ required: true, message: "BF name is required" }]}
+        rules={[{ required: true, message: "Delivery name is required" }]}
       >
-        <Input maxLength={50} placeholder="Enter BF" autoFocus />
+        <Input.TextArea
+          maxLength={200}
+          placeholder="Enter Delivery Details"
+          autoSize={{ minRows: 2, maxRows: 4 }}
+          autoFocus
+        />
       </Form.Item>
 
       {isEditMode && (
         <Form.Item
-          name="bf_status"
+          name="delivery_status"
           label="Status"
           rules={[{ required: true, message: "Please select status" }]}
         >
@@ -120,4 +125,4 @@ const BFForm = ({ id, onSuccess }) => {
   );
 };
 
-export default BFForm;
+export default DeliveryForm;

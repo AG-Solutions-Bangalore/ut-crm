@@ -1,32 +1,32 @@
 import {
-    EditOutlined,
-    EyeInvisibleOutlined,
-    EyeOutlined,
-    PlusOutlined,
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
-    App,
-    Button,
-    Card,
-    Input,
-    Popconfirm,
-    Space,
-    Spin,
-    Tag,
-    Tooltip,
+  App,
+  Button,
+  Card,
+  Input,
+  Popconfirm,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
 } from "antd";
 import { useState } from "react";
-import { SHADE_LIST, UPDATE_STATUS_SHADE } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useDebounce } from "../../components/common/useDebounce";
-import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import ShadeForm from "./shade-form";
+import { ITEM_LIST, UPDATE_STATUS_ITEM } from "../../../api";
+import HighlightText from "../../../components/common/HighlightText";
+import { useDebounce } from "../../../components/common/useDebounce";
+import DataTable from "../../../components/DataTable/DataTable";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
+import ItemForm from "./item-form";
 
 const { Search } = Input;
 
-const ShadeList = () => {
+const ItemList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -36,12 +36,12 @@ const ShadeList = () => {
   const [editId, setEditId] = useState(null);
 
   const {
-    data: shadedata,
+    data: itemdata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: SHADE_LIST,
-    queryKey: ["shadedata", debouncedSearch, page],
+    url: ITEM_LIST,
+    queryKey: ["itemdata", debouncedSearch, page],
     params: { search: debouncedSearch, page },
   });
 
@@ -50,14 +50,14 @@ const ShadeList = () => {
   const handleToggleStatus = async (user) => {
     try {
       const newStatus =
-        user.shade_status === "Active" || user.shade_status === true
+        user.bf_status === "Active" || user.bf_status === true
           ? "Inactive"
           : "Active";
 
       const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_SHADE}/${user.id}/status`,
+        url: `${UPDATE_STATUS_ITEM}/${user.id}/status`,
         method: "patch",
-        data: { shade_status: newStatus },
+        data: { bf_status: newStatus },
       });
 
       if (res?.code === 201) {
@@ -74,27 +74,26 @@ const ShadeList = () => {
 
   const columns = [
     {
-      title: "Shade",
-      dataIndex: "shade",
-      key: "shade",
+      title: "Item",
+      dataIndex: "bf",
+      key: "bf",
       render: (_, record) => (
-        <HighlightText text={record.shade} match={debouncedSearch} />
+        <HighlightText text={record.bf} match={debouncedSearch} />
       ),
     },
     {
       title: "Status",
-      dataIndex: "shade_status",
-      key: "shade_status",
+      dataIndex: "bf_status",
+      key: "bf_status",
       render: (_, user) => {
-        const isActive =
-          user.shade_status === "Active" || user.shade_status === true;
+        const isActive = user.bf_status === "Active" || user.bf_status === true;
         return (
           <div className="flex justify-start">
             <Popconfirm
-              title={`Mark shade as ${isActive ? "Inactive" : "Active"}?`}
+              title={`Mark bf as ${isActive ? "Inactive" : "Active"}?`}
               okText="Yes"
-              className="cursor-pointer"
               cancelText="No"
+              className="cursor-pointer"
               onConfirm={() => handleToggleStatus(user)}
             >
               <Tag
@@ -113,7 +112,7 @@ const ShadeList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Shade">
+          <Tooltip title="Edit Item">
             <Button
               type="primary"
               icon={<EditOutlined />}
@@ -130,14 +129,14 @@ const ShadeList = () => {
     },
   ];
 
-  const apiData = shadedata?.data || {};
+  const apiData = itemdata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Shade List</h2>
+        <h2 className="text-2xl font-bold heading">Item List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -156,7 +155,7 @@ const ShadeList = () => {
               setShowForm(true);
             }}
           >
-            Add Shade
+            Add Item
           </Button>
         </div>
       </div>
@@ -181,16 +180,20 @@ const ShadeList = () => {
             />
           ) : (
             <div className="text-center text-gray-500 py-20">
-              No Shade data found.
+              No Item data found.
             </div>
           )}
         </div>
 
         {showForm && (
-          <div className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${editId ? "max-h-72" : "max-h-52" }`}>
+          <div
+            className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${
+              editId ? "max-h-72" : "max-h-52"
+            }`}
+          >
             <div className="flex justify-between items-center mb-2 bg-[var(--primary)] text-white px-3 py-2 rounded-md">
               <h3 className="text-lg font-semibold">
-                {editId ? "Update Shade" : "Create Shade"}
+                {editId ? "Update Item" : "Create Item"}
               </h3>
               <Button
                 size="small"
@@ -204,7 +207,7 @@ const ShadeList = () => {
               </Button>
             </div>
 
-            <ShadeForm
+            <ItemForm
               id={editId}
               onSuccess={() => {
                 refetch();
@@ -219,4 +222,4 @@ const ShadeList = () => {
   );
 };
 
-export default ShadeList;
+export default ItemList;

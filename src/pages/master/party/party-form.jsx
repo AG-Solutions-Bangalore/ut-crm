@@ -2,8 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { App, Button, Card, Form, Input, Spin, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PARTY_LIST } from "../../api";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { PARTY_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
 const PartyForm = () => {
   const { message } = App.useApp();

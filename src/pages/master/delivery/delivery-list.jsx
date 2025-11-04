@@ -16,17 +16,17 @@ import {
   Tooltip,
 } from "antd";
 import { useState } from "react";
-import { BF_LIST, UPDATE_STATUS_BF } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useDebounce } from "../../components/common/useDebounce";
-import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import BFForm from "./bf-form";
+import { DELIVERY_LIST, UPDATE_STATUS_DELIVERY } from "../../../api";
+import HighlightText from "../../../components/common/HighlightText";
+import { useDebounce } from "../../../components/common/useDebounce";
+import DataTable from "../../../components/DataTable/DataTable";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
+import DeliveryForm from "./delivery-form";
 
 const { Search } = Input;
 
-const BfList = () => {
+const DeliveryList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -36,12 +36,12 @@ const BfList = () => {
   const [editId, setEditId] = useState(null);
 
   const {
-    data: bfdata,
+    data: deliverydata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: BF_LIST,
-    queryKey: ["bfdata", debouncedSearch, page],
+    url: DELIVERY_LIST,
+    queryKey: ["deliverydata", debouncedSearch, page],
     params: { search: debouncedSearch, page },
   });
 
@@ -50,14 +50,14 @@ const BfList = () => {
   const handleToggleStatus = async (user) => {
     try {
       const newStatus =
-        user.bf_status === "Active" || user.bf_status === true
+        user.delivery_status === "Active" || user.delivery_status === true
           ? "Inactive"
           : "Active";
 
       const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_BF}/${user.id}/status`,
+        url: `${UPDATE_STATUS_DELIVERY}/${user.id}/status`,
         method: "patch",
-        data: { bf_status: newStatus },
+        data: { delivery_status: newStatus },
       });
 
       if (res?.code === 201) {
@@ -74,26 +74,27 @@ const BfList = () => {
 
   const columns = [
     {
-      title: "BF",
-      dataIndex: "bf",
-      key: "bf",
+      title: "Delivery",
+      dataIndex: "delivery",
+      key: "delivery",
       render: (_, record) => (
-        <HighlightText text={record.bf} match={debouncedSearch} />
+        <HighlightText text={record.delivery} match={debouncedSearch} />
       ),
     },
     {
       title: "Status",
-      dataIndex: "bf_status",
-      key: "bf_status",
+      dataIndex: "delivery_status",
+      key: "delivery_status",
       render: (_, user) => {
-        const isActive = user.bf_status === "Active" || user.bf_status === true;
+        const isActive =
+          user.delivery_status === "Active" || user.delivery_status === true;
         return (
           <div className="flex justify-start">
             <Popconfirm
-              title={`Mark bf as ${isActive ? "Inactive" : "Active"}?`}
+              title={`Mark delivery as ${isActive ? "Inactive" : "Active"}?`}
               okText="Yes"
-              cancelText="No"
               className="cursor-pointer"
+              cancelText="No"
               onConfirm={() => handleToggleStatus(user)}
             >
               <Tag
@@ -112,7 +113,7 @@ const BfList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit BF">
+          <Tooltip title="Edit Delivery">
             <Button
               type="primary"
               icon={<EditOutlined />}
@@ -129,14 +130,14 @@ const BfList = () => {
     },
   ];
 
-  const apiData = bfdata?.data || {};
+  const apiData = deliverydata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">BF List</h2>
+        <h2 className="text-2xl font-bold heading">Delivery List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -155,7 +156,7 @@ const BfList = () => {
               setShowForm(true);
             }}
           >
-            Add BF
+            Add Delivery
           </Button>
         </div>
       </div>
@@ -180,16 +181,20 @@ const BfList = () => {
             />
           ) : (
             <div className="text-center text-gray-500 py-20">
-              No BF data found.
+              No Delivery data found.
             </div>
           )}
         </div>
 
         {showForm && (
-          <div className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${editId ? "max-h-72" : "max-h-52" }`}>
+          <div
+            className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${
+              editId ? "max-h-80" : "max-h-56"
+            }`}
+          >
             <div className="flex justify-between items-center mb-2 bg-[var(--primary)] text-white px-3 py-2 rounded-md">
               <h3 className="text-lg font-semibold">
-                {editId ? "Update BF" : "Create BF"}
+                {editId ? "Update Delivery" : "Create Delivery"}
               </h3>
               <Button
                 size="small"
@@ -203,7 +208,7 @@ const BfList = () => {
               </Button>
             </div>
 
-            <BFForm
+            <DeliveryForm
               id={editId}
               onSuccess={() => {
                 refetch();
@@ -218,4 +223,4 @@ const BfList = () => {
   );
 };
 
-export default BfList;
+export default DeliveryList;

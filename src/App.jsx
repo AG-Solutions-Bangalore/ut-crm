@@ -6,18 +6,17 @@ import ProtectedLayout from "./components/ProtectedLayout";
 import VersionCheck from "./components/VersionCheck";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import SignIn from "./pages/auth/SignIn";
-import MillForm from "./pages/mill/mill-form";
-import MillList from "./pages/mill/mill-list";
-import PartyForm from "./pages/party/party-form";
-import PartyList from "./pages/party/party-list";
+import MillList from "./pages/master/mill/mill-list";
+import PartyForm from "./pages/master/party/party-form";
+import PartyList from "./pages/master/party/party-list";
 import Dashboard from "./pages/home/Dashboard";
-import BfList from "./pages/bf/bf-list";
-import DeliveryList from "./pages/delivery/delivery-list";
-import UnitList from "./pages/unit/unit-list";
-import ShadeList from "./pages/shade/shade-list";
-import SubjectList from "./pages/subject/subject-list";
-import DeckleList from "./pages/deckle/deckle-list";
-import GsmList from "./pages/gsm/gsm-list";
+import ItemList from "./pages/master/item/item-list";
+// import DeliveryList from "./pages/master/delivery/delivery-list";
+import UnitList from "./pages/master/unit/unit-list";
+import ShadeList from "./pages/master/shade/shade-list";
+import MillForm from "./pages/master/mill/mill-form";
+import PurchaseList from "./pages/purchase/PurchaseList";
+import PurchaseForm from "./pages/purchase/PurchaseForm";
 
 function App() {
   return (
@@ -39,14 +38,15 @@ function App() {
           <Route path="/master/party" element={<PartyList />} />
           <Route path="/master/party/create" element={<PartyForm />} />
           <Route path="/master/party/:id" element={<PartyForm />} />
-         
-          <Route path="/master/bf" element={<BfList />} />
-          <Route path="/master/delivery" element={<DeliveryList />} />
+
+          <Route path="/master/item" element={<ItemList />} />
+          {/* <Route path="/master/delivery" element={<DeliveryList />} /> */}
           <Route path="/master/unit" element={<UnitList />} />
           <Route path="/master/shade" element={<ShadeList />} />
-          <Route path="/master/subject" element={<SubjectList />} />
-          <Route path="/master/deckle" element={<DeckleList />} />
-          <Route path="/master/gsm" element={<GsmList />} />
+
+          <Route path="/purchase" element={<PurchaseList />} />
+          <Route path="/purchase/create" element={<PurchaseForm />} />
+          <Route path="/purchase/edit/:id" element={<PurchaseForm />} />
         </Route>
 
         {/* Fallback route */}
