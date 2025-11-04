@@ -1,7 +1,7 @@
 import { App, Button, Form, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { SHADE_LIST } from "../../api";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { SHADE_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
 const ShadeForm = ({ id, onSuccess }) => {
   const { message } = App.useApp();

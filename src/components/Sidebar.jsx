@@ -10,7 +10,7 @@ import {
   MailOutlined,
   ProfileOutlined,
   SolutionOutlined,
-  TagsOutlined
+  TagsOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -18,7 +18,7 @@ import {
   AppstoreOutlined,
   BgColorsOutlined,
   TeamOutlined,
-  UserSwitchOutlined
+  UserSwitchOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -33,7 +33,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
   const uType = Number(userTypeRaw);
   // const isOnlyEventMode = uType == 2;
   const isOnlyEventMode = false;
-// console.log(isOnlyEventMode,"isOnlyEventMode")
+  // console.log(isOnlyEventMode,"isOnlyEventMode")
   // --- Common building blocks ---
   const eventChildren = [
     { key: "/event", icon: <SolutionOutlined />, label: "Event" },
@@ -60,102 +60,43 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
   ];
 
-  // if (isOnlyEventMode) {
-  //   if (collapsed) {
-  //     return [
-  //       {
-  //         key: "sub1",
-  //         icon: <MailOutlined />,
-  //         label: <span id="report-scroll-anchor">Event</span>,
-  //         children: eventChildren,
-  //       },
-  //       {
-  //         key: "sub2",
-  //         icon: <BarChartOutlined />,
-  //         label: <span id="report-scroll-anchor">Report</span>,
-  //         children: eventReportChildren,
-  //       },
-  //     ];
-  //   }
-
-  //   return [
-  //     {
-  //       type: "group",
-  //       label: "Event",
-  //       children: [
-  //         {
-  //           key: "sub1",
-  //           icon: <MailOutlined />,
-  //           label: "Event",
-  //           children: eventChildren,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       type: "group",
-  //       label: "Report",
-  //       children: [
-  //         {
-  //           key: "sub2",
-  //           icon: <BarChartOutlined />,
-  //           label: "Report",
-  //           children: eventReportChildren,
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // }
-
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    { key: "/report-format", icon: <FileOutlined /> , label: "Report Format" },
- 
+    { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
   ];
 
-
-const managementChildren = [
-  {
-    key: "/master/mill",
-    icon: <ApartmentOutlined />,
-    label: "Mill",
-  },
-  {
-    key: "/master/party",
-    icon: <TeamOutlined />,
-    label: "Party",
-  },
-  {
-    key: "/master/bf",
-    icon: <UserSwitchOutlined />,
-    label: "BF",
-  },
-  {
-    key: "/master/delivery",
-    icon: <CarOutlined />,
-    label: "Delivery",
-  },
-  {
-    key: "/master/unit",
-    icon: <AppstoreOutlined />,
-    label: "Unit",
-  },
-{
-  key: "/master/subject",
-  icon: <BookOutlined />, 
-  label: "Subject",
-},
-{
-  key: "/master/deckle",
-  icon: <BorderOutlined />, 
-  label: "Deckle",
-},
-{
-  key: "/master/gsm",
-  icon: <LineChartOutlined />, 
-  label: "GSM",
-},
-];
-
+  const managementChildren = [
+    {
+      key: "/master/mill",
+      icon: <ApartmentOutlined />,
+      label: "Mill",
+    },
+    {
+      key: "/master/party",
+      icon: <TeamOutlined />,
+      label: "Party",
+    },
+    {
+      key: "/master/item",
+      icon: <UserSwitchOutlined />,
+      label: "Item",
+    },
+    {
+      key: "/master/shade",
+      icon: <BookOutlined />,
+      label: "Shade",
+    },
+    // {
+    //   key: "/master/delivery",
+    //   icon: <CarOutlined />,
+    //   label: "Delivery",
+    // },
+    // {
+    //   key: "/master/unit",
+    //   icon: <AppstoreOutlined />,
+    //   label: "Unit",
+    // },
+  ];
 
   const fullReportChildren = [
     {
@@ -192,6 +133,9 @@ const managementChildren = [
         label: "Management",
         children: managementChildren,
       },
+      { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+      { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+
       // {
       //   key: "sub1",
       //   icon: <MailOutlined />,
@@ -221,6 +165,9 @@ const managementChildren = [
         },
       ],
     },
+    { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+    { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+
     // {
     //   type: "group",
     //   label: "Event",
@@ -420,7 +367,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
               type="info"
               banner
               showIcon={false}
-                className="rounded-md !bg-gray-100 !text-[var(--primary)]  px-4 py-1"
+              className="rounded-md !bg-gray-100 !text-[var(--primary)]  px-4 py-1"
             />
           )}
         </motion.div>

@@ -1,9 +1,9 @@
 import { App, Button, Form, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { DELIVERY_LIST } from "../../api";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { ITEM_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
-const DeliveryForm = ({ id, onSuccess }) => {
+const ItemForm = ({ id, onSuccess }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
@@ -13,25 +13,25 @@ const DeliveryForm = ({ id, onSuccess }) => {
 
   const resetForm = () => form.resetFields();
 
-  const fetchDelivery = async () => {
+  const fetchItem = async () => {
     try {
-      const res = await fetchTrigger({ url: `${DELIVERY_LIST}/${id}` });
+      const res = await fetchTrigger({ url: `${ITEM_LIST}/${id}` });
       if (res?.data) {
         const formattedData = {
           ...res.data,
-          delivery_status: res.data.delivery_status == "Active",
+          bf_status: res.data.bf_status == "Active",
         };
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
       }
     } catch (err) {
-      message.error("Failed to load Delivery details.");
+      message.error("Failed to load Item details.");
     }
   };
 
   useEffect(() => {
     if (id) {
-      fetchDelivery();
+      fetchItem();
     } else {
       resetForm();
     }
@@ -40,25 +40,25 @@ const DeliveryForm = ({ id, onSuccess }) => {
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
-      delivery_status: values?.delivery_status ? "Active" : "Inactive",
+      bf_status: values?.bf_status ? "Active" : "Inactive",
     };
 
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${DELIVERY_LIST}/${id}` : DELIVERY_LIST,
+        url: isEditMode ? `${ITEM_LIST}/${id}` : ITEM_LIST,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
 
       if (res.code === 201) {
-        message.success(res.message || "Delivery saved successfully!");
+        message.success(res.message || "Item saved successfully!");
         onSuccess?.();
         form.resetFields();
       } else {
-        message.error(res.message || "Failed to save Delivery.");
+        message.error(res.message || "Failed to save Item.");
       }
     } catch {
-      message.error("Something went wrong while saving Delivery.");
+      message.error("Something went wrong while saving Item.");
     }
   };
 
@@ -79,25 +79,20 @@ const DeliveryForm = ({ id, onSuccess }) => {
       requiredMark={false}
     >
       <Form.Item
-        name="delivery"
+        name="bf"
         label={
           <span>
-            Delivery <span className="text-red-500">*</span>
+            Item <span className="text-red-500">*</span>
           </span>
         }
-        rules={[{ required: true, message: "Delivery name is required" }]}
+        rules={[{ required: true, message: "Item name is required" }]}
       >
-        <Input.TextArea
-          maxLength={200}
-          placeholder="Enter Delivery Details"
-          autoSize={{ minRows: 2, maxRows: 4 }}
-          autoFocus
-        />
+        <Input maxLength={50} placeholder="Enter Item" autoFocus />
       </Form.Item>
 
       {isEditMode && (
         <Form.Item
-          name="delivery_status"
+          name="bf_status"
           label="Status"
           rules={[{ required: true, message: "Please select status" }]}
         >
@@ -125,4 +120,4 @@ const DeliveryForm = ({ id, onSuccess }) => {
   );
 };
 
-export default DeliveryForm;
+export default ItemForm;

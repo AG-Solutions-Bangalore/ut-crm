@@ -16,17 +16,17 @@ import {
   Tooltip,
 } from "antd";
 import { useState } from "react";
-import { DELIVERY_LIST, UPDATE_STATUS_DELIVERY } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useDebounce } from "../../components/common/useDebounce";
-import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import DeliveryForm from "./delivery-form";
+import { UNIT_LIST, UPDATE_STATUS_UNIT } from "../../../api";
+import HighlightText from "../../../components/common/HighlightText";
+import { useDebounce } from "../../../components/common/useDebounce";
+import DataTable from "../../../components/DataTable/DataTable";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
+import UnitForm from "./unit-form";
 
 const { Search } = Input;
 
-const DeliveryList = () => {
+const UnitList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -36,12 +36,12 @@ const DeliveryList = () => {
   const [editId, setEditId] = useState(null);
 
   const {
-    data: deliverydata,
+    data: unitdata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: DELIVERY_LIST,
-    queryKey: ["deliverydata", debouncedSearch, page],
+    url: UNIT_LIST,
+    queryKey: ["unitdata", debouncedSearch, page],
     params: { search: debouncedSearch, page },
   });
 
@@ -50,14 +50,14 @@ const DeliveryList = () => {
   const handleToggleStatus = async (user) => {
     try {
       const newStatus =
-        user.delivery_status === "Active" || user.delivery_status === true
+        user.unit_status === "Active" || user.unit_status === true
           ? "Inactive"
           : "Active";
 
       const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_DELIVERY}/${user.id}/status`,
+        url: `${UPDATE_STATUS_UNIT}/${user.id}/status`,
         method: "patch",
-        data: { delivery_status: newStatus },
+        data: { unit_status: newStatus },
       });
 
       if (res?.code === 201) {
@@ -74,24 +74,24 @@ const DeliveryList = () => {
 
   const columns = [
     {
-      title: "Delivery",
-      dataIndex: "delivery",
-      key: "delivery",
+      title: "Unit",
+      dataIndex: "unit",
+      key: "unit",
       render: (_, record) => (
-        <HighlightText text={record.delivery} match={debouncedSearch} />
+        <HighlightText text={record.unit} match={debouncedSearch} />
       ),
     },
     {
       title: "Status",
-      dataIndex: "delivery_status",
-      key: "delivery_status",
+      dataIndex: "unit_status",
+      key: "unit_status",
       render: (_, user) => {
         const isActive =
-          user.delivery_status === "Active" || user.delivery_status === true;
+          user.unit_status === "Active" || user.unit_status === true;
         return (
           <div className="flex justify-start">
             <Popconfirm
-              title={`Mark delivery as ${isActive ? "Inactive" : "Active"}?`}
+              title={`Mark unit as ${isActive ? "Inactive" : "Active"}?`}
               okText="Yes"
               className="cursor-pointer"
               cancelText="No"
@@ -113,7 +113,7 @@ const DeliveryList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Delivery">
+          <Tooltip title="Edit Unit">
             <Button
               type="primary"
               icon={<EditOutlined />}
@@ -130,14 +130,14 @@ const DeliveryList = () => {
     },
   ];
 
-  const apiData = deliverydata?.data || {};
+  const apiData = unitdata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Delivery List</h2>
+        <h2 className="text-2xl font-bold heading">Unit List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -156,7 +156,7 @@ const DeliveryList = () => {
               setShowForm(true);
             }}
           >
-            Add Delivery
+            Add Unit
           </Button>
         </div>
       </div>
@@ -181,16 +181,20 @@ const DeliveryList = () => {
             />
           ) : (
             <div className="text-center text-gray-500 py-20">
-              No Delivery data found.
+              No Unit data found.
             </div>
           )}
         </div>
 
         {showForm && (
-          <div className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${editId ? "max-h-80" : "max-h-56" }`}>
+          <div
+            className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${
+              editId ? "max-h-72" : "max-h-52"
+            }`}
+          >
             <div className="flex justify-between items-center mb-2 bg-[var(--primary)] text-white px-3 py-2 rounded-md">
               <h3 className="text-lg font-semibold">
-                {editId ? "Update Delivery" : "Create Delivery"}
+                {editId ? "Update Unit" : "Create Unit"}
               </h3>
               <Button
                 size="small"
@@ -204,7 +208,7 @@ const DeliveryList = () => {
               </Button>
             </div>
 
-            <DeliveryForm
+            <UnitForm
               id={editId}
               onSuccess={() => {
                 refetch();
@@ -219,4 +223,4 @@ const DeliveryList = () => {
   );
 };
 
-export default DeliveryList;
+export default UnitList;

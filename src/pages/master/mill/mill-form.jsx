@@ -2,8 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { App, Button, Card, Form, Input, Select, Spin, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MILL_LIST } from "../../api";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { MILL_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
 const millTypes = [
   { label: "Mill", value: "Mill" },

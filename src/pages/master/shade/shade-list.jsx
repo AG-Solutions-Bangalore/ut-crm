@@ -1,32 +1,32 @@
 import {
-    EditOutlined,
-    EyeInvisibleOutlined,
-    EyeOutlined,
-    PlusOutlined,
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
-    App,
-    Button,
-    Card,
-    Input,
-    Popconfirm,
-    Space,
-    Spin,
-    Tag,
-    Tooltip,
+  App,
+  Button,
+  Card,
+  Input,
+  Popconfirm,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
 } from "antd";
 import { useState } from "react";
-import { UNIT_LIST, UPDATE_STATUS_UNIT } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useDebounce } from "../../components/common/useDebounce";
-import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import UnitForm from "./unit-form";
+import { SHADE_LIST, UPDATE_STATUS_SHADE } from "../../../api";
+import HighlightText from "../../../components/common/HighlightText";
+import { useDebounce } from "../../../components/common/useDebounce";
+import DataTable from "../../../components/DataTable/DataTable";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
+import ShadeForm from "./shade-form";
 
 const { Search } = Input;
 
-const UnitList = () => {
+const ShadeList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -36,12 +36,12 @@ const UnitList = () => {
   const [editId, setEditId] = useState(null);
 
   const {
-    data: unitdata,
+    data: shadedata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: UNIT_LIST,
-    queryKey: ["unitdata", debouncedSearch, page],
+    url: SHADE_LIST,
+    queryKey: ["shadedata", debouncedSearch, page],
     params: { search: debouncedSearch, page },
   });
 
@@ -50,14 +50,14 @@ const UnitList = () => {
   const handleToggleStatus = async (user) => {
     try {
       const newStatus =
-        user.unit_status === "Active" || user.unit_status === true
+        user.shade_status === "Active" || user.shade_status === true
           ? "Inactive"
           : "Active";
 
       const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_UNIT}/${user.id}/status`,
+        url: `${UPDATE_STATUS_SHADE}/${user.id}/status`,
         method: "patch",
-        data: { unit_status: newStatus },
+        data: { shade_status: newStatus },
       });
 
       if (res?.code === 201) {
@@ -74,24 +74,24 @@ const UnitList = () => {
 
   const columns = [
     {
-      title: "Unit",
-      dataIndex: "unit",
-      key: "unit",
+      title: "Shade",
+      dataIndex: "shade",
+      key: "shade",
       render: (_, record) => (
-        <HighlightText text={record.unit} match={debouncedSearch} />
+        <HighlightText text={record.shade} match={debouncedSearch} />
       ),
     },
     {
       title: "Status",
-      dataIndex: "unit_status",
-      key: "unit_status",
+      dataIndex: "shade_status",
+      key: "shade_status",
       render: (_, user) => {
         const isActive =
-          user.unit_status === "Active" || user.unit_status === true;
+          user.shade_status === "Active" || user.shade_status === true;
         return (
           <div className="flex justify-start">
             <Popconfirm
-              title={`Mark unit as ${isActive ? "Inactive" : "Active"}?`}
+              title={`Mark shade as ${isActive ? "Inactive" : "Active"}?`}
               okText="Yes"
               className="cursor-pointer"
               cancelText="No"
@@ -113,7 +113,7 @@ const UnitList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Unit">
+          <Tooltip title="Edit Shade">
             <Button
               type="primary"
               icon={<EditOutlined />}
@@ -130,14 +130,14 @@ const UnitList = () => {
     },
   ];
 
-  const apiData = unitdata?.data || {};
+  const apiData = shadedata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Unit List</h2>
+        <h2 className="text-2xl font-bold heading">Shade List</h2>
 
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
@@ -156,7 +156,7 @@ const UnitList = () => {
               setShowForm(true);
             }}
           >
-            Add Unit
+            Add Shade
           </Button>
         </div>
       </div>
@@ -181,16 +181,20 @@ const UnitList = () => {
             />
           ) : (
             <div className="text-center text-gray-500 py-20">
-              No Unit data found.
+              No Shade data found.
             </div>
           )}
         </div>
 
         {showForm && (
-          <div className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${editId ? "max-h-72" : "max-h-52" }`}>
+          <div
+            className={`border border-gray-200 rounded-md p-4 shadow-sm bg-white ${
+              editId ? "max-h-72" : "max-h-52"
+            }`}
+          >
             <div className="flex justify-between items-center mb-2 bg-[var(--primary)] text-white px-3 py-2 rounded-md">
               <h3 className="text-lg font-semibold">
-                {editId ? "Update Unit" : "Create Unit"}
+                {editId ? "Update Shade" : "Create Shade"}
               </h3>
               <Button
                 size="small"
@@ -204,7 +208,7 @@ const UnitList = () => {
               </Button>
             </div>
 
-            <UnitForm
+            <ShadeForm
               id={editId}
               onSuccess={() => {
                 refetch();
@@ -219,4 +223,4 @@ const UnitList = () => {
   );
 };
 
-export default UnitList;
+export default ShadeList;
