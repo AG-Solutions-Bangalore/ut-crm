@@ -1,4 +1,5 @@
 import {
+  DeleteOutlined,
   EditOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -22,6 +23,8 @@ import HighlightText from "../../components/common/HighlightText";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useDebounce } from "../../components/common/useDebounce";
+import DataTable from "../../components/DataTable/DataTable";
+import dayjs from "dayjs";
 
 const { Search } = Input;
 
@@ -29,22 +32,22 @@ const PurchaseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const { trigger: deleteTrigger } = useApiMutation();
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const {
-    data: partydata,
+    data: purchasedata,
     isLoading,
     refetch,
   } = useGetApiMutation({
     url: PURCHASE_ORDER_LIST,
-    queryKey: ["partydata", debouncedSearch, page],
+    queryKey: ["purchasedata", debouncedSearch, page],
     params: { search: debouncedSearch, page },
   });
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    // refetch();
   };
   const handleToggleStatus = async (order) => {
     try {
@@ -57,7 +60,7 @@ const PurchaseList = () => {
         data: { purchase_orders_status: newStatus },
       });
 
-      if (res?.code === 201) {
+      if (res?.code === 200 || res?.code === 201) {
         message.success(
           res.message ||
             `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
@@ -67,68 +70,88 @@ const PurchaseList = () => {
         message.error(res.message || "Failed to update order status.");
       }
     } catch (error) {
-      console.error("Error updating status:", error);
-      message.error(error.message || "Error updating order status.");
+      console.error("Error updating status:", error?.response?.data || error);
+      message.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Error updating order status."
+      );
+    }
+  };
+  const handleDelete = async (subId) => {
+    if (!subId) {
+      message.error("Invalid Purchase ID.");
+      return;
+    }
+
+    try {
+      const res = await deleteTrigger({
+        url: `${PURCHASE_ORDER_LIST}/${subId}`,
+        method: "delete",
+      });
+
+      if (res?.code === 201) {
+        message.success(res?.message || "Purchase deleted successfully!");
+        refetch();
+      } else {
+        message.error(res?.message || "Failed to delete Purchase item.");
+      }
+    } catch (error) {
+      console.error("Delete Error:", error);
+      message.error(error?.message || "Error while deleting Purchase.");
     }
   };
   const columns = [
     {
+      title: "Purchase Ref No",
+      dataIndex: "purchase_orders_ref",
+      key: "purchase_orders_ref",
+      render: (text, record) => (
+        <span className="font-medium text-blue-600">
+          {record.purchase_orders_ref}
+        </span>
+      ),
+    },
+    {
+      title: "Purchase Date",
+      dataIndex: "purchase_orders_date",
+      key: "purchase_orders_date",
+      render: (_, record) =>
+        dayjs(record.purchase_orders_date).format("DD-MM-YYYY"),
+    },
+    {
+      title: "Mill Name",
+      dataIndex: "mill_name",
+      key: "mill_name",
+      render: (text) => <span className="text-gray-800">{text}</span>,
+    },
+    {
       title: "Party Name",
       dataIndex: "party_name",
       key: "party_name",
-      render: (_, record) => (
-        <HighlightText text={record.party_name} match={debouncedSearch} />
-      ),
+      render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Short Name",
-      dataIndex: "party_short",
-      key: "party_short",
-      render: (_, record) => (
-        <HighlightText text={record.party_short} match={debouncedSearch} />
-      ),
-    },
-
-    {
-      title: "State",
-      dataIndex: "party_state",
-      key: "party_state",
-      render: (_, record) => (
-        <HighlightText text={record.party_state} match={debouncedSearch} />
-      ),
+      title: "Total Bill Rate",
+      dataIndex: "total_bill_rate",
+      key: "total_bill_rate",
+      align: "right",
+      render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Due Date",
-      dataIndex: "party_due_days",
-      key: "party_due_days",
-      align: "center",
-      render: (_, record) => {
-        const days = record.party_due_days ?? 0;
-        return (
-          <div className="flex justify-center">
-            <span
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
-                days > 30
-                  ? "bg-red-100 text-red-700"
-                  : days > 10
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-green-100 text-green-700"
-              }`}
-            >
-              {days} Days
-            </span>
-          </div>
-        );
-      },
+      title: "Total Agreed Rate",
+      dataIndex: "total_adreed_rate",
+      key: "total_adreed_rate",
+      align: "right",
+      render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
-
-    // Column definition
     {
       title: "Status",
       dataIndex: "purchase_orders_status",
       key: "purchase_orders_status",
       render: (_, order) => {
-        const isOpen = order.purchase_orders_status === "Open";
+        const isOpen = order.purchase_orders_status == "Open";
+        console.log(order, "order");
         return (
           <div className="flex justify-start">
             <Popconfirm
@@ -142,14 +165,13 @@ const PurchaseList = () => {
                 icon={isOpen ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                 className="cursor-pointer"
               >
-                {isOpen ? "Open" : "Closed"}
+                {isOpen ? "Open" : "Close"}
               </Tag>
             </Popconfirm>
           </div>
         );
       },
     },
-
     {
       title: "Actions",
       key: "actions",
@@ -163,13 +185,22 @@ const PurchaseList = () => {
               onClick={() => navigate(`/purchase/edit/${record.id}`)}
             />
           </Tooltip>
+          <Tooltip title="Delete Purchase">
+            <Popconfirm
+              title="Are you sure you want to delete this item?"
+              onConfirm={() => handleDelete(record?.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Tooltip>
         </Space>
       ),
-      width: 130,
+      width: 120,
     },
   ];
-
-  const apiData = partydata?.data || {};
+  const apiData = purchasedata?.data || {};
   const tableData = apiData.data || [];
 
   return (

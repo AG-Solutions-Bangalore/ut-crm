@@ -134,6 +134,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
         children: managementChildren,
       },
       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+      { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
 
       // {
       //   key: "sub1",
@@ -165,6 +166,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       ],
     },
     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+    { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
 
     // {
     //   type: "group",

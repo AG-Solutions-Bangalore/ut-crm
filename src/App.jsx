@@ -15,8 +15,10 @@ import ItemList from "./pages/master/item/item-list";
 import UnitList from "./pages/master/unit/unit-list";
 import ShadeList from "./pages/master/shade/shade-list";
 import MillForm from "./pages/master/mill/mill-form";
-import PurchaseList from "./pages/purchase/PurchaseList";
-import PurchaseForm from "./pages/purchase/PurchaseForm";
+import PurchaseList from "./pages/purchase/purchase-list";
+import PurchaseForm from "./pages/purchase/purchase-form";
+import QuotationList from "./pages/quotation/quotation-list";
+import QuotationForm from "./pages/quotation/quotation-form";
 
 function App() {
   return (
@@ -47,6 +49,10 @@ function App() {
           <Route path="/purchase" element={<PurchaseList />} />
           <Route path="/purchase/create" element={<PurchaseForm />} />
           <Route path="/purchase/edit/:id" element={<PurchaseForm />} />
+
+          <Route path="/quotation" element={<QuotationList />} />
+          <Route path="/quotation/create" element={<QuotationForm />} />
+          <Route path="/quotation/edit/:id" element={<QuotationForm />} />
         </Route>
 
         {/* Fallback route */}
