@@ -212,6 +212,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const items = getMenuItems(collapsed, Number(userType));
   const dispatch = useDispatch();
   const finalUserImage = useFinalUserImage();
+  const company = useSelector(state => state.company.companyDetails);
   const [delayedCollapse, setDelayedCollapse] = useState(collapsed);
   const localVersion = useSelector((state) => state.auth?.version);
   const serverVersion = useSelector((state) => state?.version?.version);
@@ -280,10 +281,14 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
           className={`object-contain transition-all duration-300 ${
-            collapsed ? "w-12" : ""
+            collapsed ? "w-12" : "w-12"
           }`}
         />
+        {!collapsed &&(
 
+      
+<span className="font-semibold  ">{company?.company_name}</span>
+  )}
         {isMobile && (
           <motion.button
             whileHover={{ scale: 1.1 }}

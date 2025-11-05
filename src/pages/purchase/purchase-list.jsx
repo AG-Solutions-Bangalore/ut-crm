@@ -187,6 +187,14 @@ const PurchaseList = () => {
               onClick={() => navigate(`/purchase/edit/${record.id}`)}
             />
           </Tooltip>
+          <Tooltip title="View Purchase">
+            <Button
+              type="primary"
+              icon={<EyeOutlined />}
+              size="small"
+              onClick={() => navigate(`/purchase/view/${record.id}`)}
+            />
+          </Tooltip>
           <Tooltip title="Delete Purchase">
             <Popconfirm
               title="Are you sure you want to delete this item?"

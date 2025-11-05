@@ -85,7 +85,7 @@ const SignIn = () => {
               onFinish={onFinish}
               className="w-full"
               initialValues={{
-                email: "9876543210",
+                email: "9999999993",
                 password: "123456",
               }}
               requiredMark={false}
@@ -97,11 +97,12 @@ const SignIn = () => {
                   </span>
                 }
                 name="email"
+                
                 rules={[
                   { required: true, message: "Please enter your username" },
                 ]}
               >
-                <Input size="large" placeholder="Enter username" autoFocus />
+                <Input size="large" placeholder="Enter username" autoFocus  maxLength={10} />
               </Form.Item>
 
               <Form.Item

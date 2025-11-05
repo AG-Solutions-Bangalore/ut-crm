@@ -22,6 +22,7 @@ import QuotationForm from "./pages/quotation/quotation-form";
 import BillingList from "./pages/billing/billing-list";
 import BillingForm from "./pages/billing/billing-form";
 import ReportFormat from "./pages/reportformats/ReportFormat";
+import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/purchase" element={<PurchaseList />} />
           <Route path="/purchase/create" element={<PurchaseForm />} />
           <Route path="/purchase/edit/:id" element={<PurchaseForm />} />
+          <Route path="/purchase/view/:id" element={<PurchaseOrderTab />} />
 
           <Route path="/quotation" element={<QuotationList />} />
           <Route path="/quotation/create" element={<QuotationForm />} />
