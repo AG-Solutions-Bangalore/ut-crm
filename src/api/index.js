@@ -54,7 +54,11 @@ export const UPDATE_STATUS_PURCHASE_ORDER = `/purchase-orders`;
 export const DELETE_ORDER_SUB = `/purchase-order-sub`;
 // ------------QUOTATION-------------------
 export const QUOTATION_LIST = `/quotation`;
+export const QUOTATION_REF = `/quotation-ref`;
 export const UPDATE_STATUS_QUOTATION_ORDER = `/quotations`;
 export const DELETE_QUOTATION_SUB = `/quotation-sub`;
+// ------------BILLING-------------------
+export const BILLING_LIST = `/billing`;
+export const UPDATE_STATUS_BILLING_ORDER = `/billings`;
 
 

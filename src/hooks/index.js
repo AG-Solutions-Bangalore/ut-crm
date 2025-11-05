@@ -7,6 +7,7 @@ import {
   ACTIVE_SHADE,
   ACTIVE_UNIT,
   ACTIVE_ITEM,
+  QUOTATION_REF,
 } from "../api/index";
 
 export const useMasterData = () => {
@@ -37,6 +38,14 @@ export const useMasterData = () => {
   } = useGetApiMutation({
     url: PURCHASE_ORDER_REF,
     queryKey: ["purchaseorderrefdata", formattedDateTime],
+  });
+  const {
+    data: QuotationOrderRef,
+    isLoading: QuotationRefLoading,
+    refetch: refetchQuotationRefNo,
+  } = useGetApiMutation({
+    url: QUOTATION_REF,
+    queryKey: ["quotationrefdata", formattedDateTime],
   });
 
   const {
@@ -77,6 +86,11 @@ export const useMasterData = () => {
       data: PurchaseOrderRef,
       loading: poRefLoading,
       refetch: refetchRefNo,
+    },
+    quotationRef: {
+      data: QuotationOrderRef,
+      loading: QuotationRefLoading,
+      refetch: refetchQuotationRefNo,
     },
     shade: {
       data: ShadeActiveData,

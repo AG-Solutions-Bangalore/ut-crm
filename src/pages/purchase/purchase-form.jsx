@@ -219,100 +219,108 @@ const PurchaseForm = () => {
             }
             variant="borderless"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Form.Item
-                label={
-                  <span>
-                    Mill <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="purchase_orders_mill_id"
-                rules={[{ required: true, message: "Select mill" }]}
-              >
-                <Select
-                  placeholder="Select Mill"
-                  options={millOptions}
-                  onChange={handleMillChange}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
+            <Card
+              size="small"
+              title={<span className="font-semibold">Purchase Info</span>}
+              className="!mb-2 !bg-gray-50 "
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Form.Item
+                  label={
+                    <span>
+                      Mill <span className="text-red-500">*</span>
+                    </span>
                   }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Party <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="purchase_orders_party_id"
-                rules={[{ required: true, message: "Select party" }]}
-              >
-                <Select
-                  placeholder="Select Party"
-                  options={partyOptions}
-                  onChange={handlePartyChange}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
+                  name="purchase_orders_mill_id"
+                  rules={[{ required: true, message: "Select mill" }]}
+                >
+                  <Select
+                    placeholder="Select Mill"
+                    options={millOptions}
+                    onChange={handleMillChange}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span>
+                      Party <span className="text-red-500">*</span>
+                    </span>
                   }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Purchase Date <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="purchase_orders_date"
-                rules={[{ required: true, message: "Please select date" }]}
-              >
-                <DatePicker className="w-full" format="DD-MM-YYYY" />
-              </Form.Item>
+                  name="purchase_orders_party_id"
+                  rules={[{ required: true, message: "Select party" }]}
+                >
+                  <Select
+                    placeholder="Select Party"
+                    options={partyOptions}
+                    onChange={handlePartyChange}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span>
+                      Purchase Date <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="purchase_orders_date"
+                  rules={[{ required: true, message: "Please select date" }]}
+                >
+                  <DatePicker className="w-full" format="DD-MM-YYYY" />
+                </Form.Item>
 
-              <Form.Item
-                label={
-                  <span>
-                    Purchase Ref No <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="purchase_orders_ref"
-                rules={[{ required: true, message: "Enter reference number" }]}
-              >
-                <Input disabled value={purchaseRef?.data?.data} />
-              </Form.Item>
+                <Form.Item
+                  label={
+                    <span>
+                      Purchase Ref No <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="purchase_orders_ref"
+                  rules={[
+                    { required: true, message: "Enter reference number" },
+                  ]}
+                >
+                  <Input disabled value={purchaseRef?.data?.data} />
+                </Form.Item>
 
-              <Form.Item>
-                <Input.TextArea
-                  value={selectedMill?.mill_billing_address}
-                  rows={3}
-                  readOnly
-                  className="bg-gray-50"
-                />
-              </Form.Item>
-              <Form.Item>
-                <Input.TextArea
-                  value={selectedParty?.party_delivery_address}
-                  rows={3}
-                  readOnly
-                  className="bg-gray-50"
-                />
-              </Form.Item>
+                <Form.Item>
+                  <Input.TextArea
+                    value={selectedMill?.mill_billing_address}
+                    rows={3}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Input.TextArea
+                    value={selectedParty?.party_delivery_address}
+                    rows={3}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </Form.Item>
 
-              <Form.Item
-                label="Notes"
-                name="purchase_orders_note"
-                className="md:col-span-2"
-              >
-                <Input.TextArea rows={2} placeholder="Enter Notes" />
-              </Form.Item>
-            </div>
+                <Form.Item
+                  label="Notes"
+                  name="purchase_orders_note"
+                  className="md:col-span-2"
+                >
+                  <Input.TextArea rows={2} placeholder="Enter Notes" />
+                </Form.Item>
+              </div>
+            </Card>
             <Card size="small" className="bg-gray-50 my-4">
               <Form.List
                 name="subs"
@@ -364,7 +372,7 @@ const PurchaseForm = () => {
                         <Card
                           key={key}
                           size="small"
-                          className="!mb-3 bg-white border relative"
+                          className="!mb-3 !bg-gray-50 border relative"
                         >
                           {fields.length > 1 &&
                             (hasId ? (

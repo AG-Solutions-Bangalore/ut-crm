@@ -58,10 +58,10 @@ const PurchaseOrder = () => {
                 010, A-2 BLOCK, 7TH MAIN, 8TH CROSS, 2ND BLOCK JAYNAGAR,
                 BANGALORE 560011
               </div>
-              <div>
+              <p>
                 Correspondence Address : #1141, 2nd Main, 1st Cross,
                 Hoskerehalli, BSK 3rd Stage, Bangalore 560085,Email : united1141@gmail.com
-              </div>
+              </p>
 
               {/* Title */}
               <div className="mt-2 text-xl font-bold underline">
