@@ -135,6 +135,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       },
       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+      { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
 
       // {
       //   key: "sub1",
@@ -167,6 +168,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+    { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
 
     // {
     //   type: "group",
@@ -360,7 +362,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 03-11-2025
+                    Updated on: 05-11-2025
                   </div>
                 </div>
               }

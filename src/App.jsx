@@ -19,6 +19,9 @@ import PurchaseList from "./pages/purchase/purchase-list";
 import PurchaseForm from "./pages/purchase/purchase-form";
 import QuotationList from "./pages/quotation/quotation-list";
 import QuotationForm from "./pages/quotation/quotation-form";
+import BillingList from "./pages/billing/billing-list";
+import BillingForm from "./pages/billing/billing-form";
+import ReportFormat from "./pages/reportformats/ReportFormat";
 
 function App() {
   return (
@@ -53,6 +56,11 @@ function App() {
           <Route path="/quotation" element={<QuotationList />} />
           <Route path="/quotation/create" element={<QuotationForm />} />
           <Route path="/quotation/edit/:id" element={<QuotationForm />} />
+
+          <Route path="/billing" element={<BillingList />} />
+          <Route path="/billing/create" element={<BillingForm />} />
+          <Route path="/billing/edit/:id" element={<BillingForm />} />
+          <Route path="/report-format" element={<ReportFormat />} />
         </Route>
 
         {/* Fallback route */}

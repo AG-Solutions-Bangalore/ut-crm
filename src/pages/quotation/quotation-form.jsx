@@ -19,7 +19,12 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DELETE_ORDER_SUB, PURCHASE_ORDER_LIST } from "../../api";
+import {
+  DELETE_ORDER_SUB,
+  DELETE_QUOTATION_SUB,
+  PURCHASE_ORDER_LIST,
+  QUOTATION_LIST,
+} from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
@@ -30,9 +35,25 @@ const QuotationForm = () => {
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { mill, party, purchaseRef, shade, unit, item } = useMasterData();
-  const [selectedMill, setSelectedMill] = useState(null);
-  const [selectedParty, setSelectedParty] = useState(null);
+  const [initialData, setInitialData] = useState({
+    quotation_date: null,
+    quotation_ref: "",
+    quotation_mill_id: null,
+    quotation_party_id: null,
+    quotation_subject: "",
+    quotation_deckle: "",
+    quotation_gsm_range: "",
+    quotation_extra_charge: "FOR GYT - Rs 1.00 KG",
+    quotation_freight: null,
+    quotation_payment: "WITH IN 15 DAYS",
+    quotation_delivery: "",
+    quotation_furnish: "INDIAN + IMPORTED waste",
+    quotation_samples: "",
+    quotation_footer:
+      "We assure of our prompt and efficient services and look forward",
+  });
+
+  const { mill, party, quotationRef, item } = useMasterData();
   const millOptions =
     mill?.data?.data?.map((item) => ({
       label: item.mill_name,
@@ -46,27 +67,16 @@ const QuotationForm = () => {
       value: item.id,
       party_delivery_address: item.party_delivery_address,
     })) || [];
-  const handleMillChange = (millId) => {
-    const mill = millOptions.find((m) => m.value === millId);
-    setSelectedMill(mill || null);
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef?.data?.data);
-    }
-  };
 
-  const handlePartyChange = (partyId) => {
-    const party = partyOptions.find((p) => p.value === partyId);
-    setSelectedParty(party || null);
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef.data?.data);
+  const handleChange = () => {
+    if (quotationRef?.data?.data) {
+      form.setFieldValue("quotation_ref", quotationRef.data?.data);
     }
   };
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const { trigger: deleteTrigger } = useApiMutation();
-  const [initialData, setInitialData] = useState({});
-
   const fetchQuotation = async () => {
     try {
       const res = await fetchTrigger({
@@ -75,14 +85,11 @@ const QuotationForm = () => {
       if (res?.data) {
         const formattedData = {
           ...res.data,
-          purchase_orders_status:
-            res.data.purchase_orders_status == "Open" ? true : false,
-          purchase_orders_date: res.data.purchase_orders_date
-            ? dayjs(res.data.purchase_orders_date)
+          quotation_status: res.data.quotation_status == "Open" ? true : false,
+          quotation_date: res.data.quotation_date
+            ? dayjs(res.data.quotation_date)
             : null,
         };
-        setSelectedMill(res?.mill || null);
-        setSelectedParty(res?.party || null);
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
       }
@@ -100,33 +107,28 @@ const QuotationForm = () => {
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
-      purchase_orders_billref: initialData.purchase_orders_billref || "",
-      purchase_orders_date: values.purchase_orders_date
-        ? dayjs(values.purchase_orders_date).format("YYYY-MM-DD")
+      quotation_ref: initialData.quotation_ref || "",
+      quotation_date: values.quotation_date
+        ? dayjs(values.quotation_date).format("YYYY-MM-DD")
         : null,
       subs: (values.subs || []).map((sub) => ({
         id: sub?.id || "",
-        shade: sub?.shade || "",
-        bf: sub?.bf || "",
-        gsm: sub?.gsm || "",
-        size: sub?.size || "",
-        qnty: sub?.qnty || "",
-        unit: sub?.unit || "",
-        bill_rate: sub?.bill_rate || "",
-        agreed_rate: sub?.agreed_rate || "",
-        remarks: sub?.remarks || "",
+        quotation_quality: sub?.quotation_quality || "",
+        quotation_basic_price: sub?.quotation_basic_price || "",
+        quotation_gst: sub?.quotation_gst || "",
+        quotation_insurance: sub?.quotation_insurance || "",
+        quotation_tmill: sub?.quotation_tmill || "",
+        quotation_net_gst: sub?.quotation_net_gst || "",
       })),
     };
 
     if (isEditMode) {
-      payload.purchase_orders_status = values?.purchase_orders_status
-        ? "Open"
-        : "Close";
+      payload.quotation_status = values?.quotation_status ? "Open" : "Close";
     }
 
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${PURCHASE_ORDER_LIST}/${id}` : PURCHASE_ORDER_LIST,
+        url: isEditMode ? `${QUOTATION_LIST}/${id}` : QUOTATION_LIST,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
@@ -151,7 +153,7 @@ const QuotationForm = () => {
 
     try {
       const res = await deleteTrigger({
-        url: `${DELETE_ORDER_SUB}/${subId}`,
+        url: `${DELETE_QUOTATION_SUB}/${subId}`,
         method: "delete",
       });
 
@@ -167,13 +169,7 @@ const QuotationForm = () => {
     }
   };
 
-  const loading =
-    fetchLoading ||
-    mill?.loading ||
-    party?.loading ||
-    shade?.loading ||
-    unit?.loading ||
-    item?.loading;
+  const loading = fetchLoading || mill?.loading || party?.loading;
   return (
     <>
       {loading ? (
@@ -200,13 +196,13 @@ const QuotationForm = () => {
             extra={
               <>
                 {isEditMode && (
-                <Form.Item
-                  name="purchase_orders_status"
-                  valuePropName="checked"
-                  className="!mb-0"
-                >
-                  <Switch />
-                </Form.Item>
+                  <Form.Item
+                    name="quotation_status"
+                    valuePropName="checked"
+                    className="!mb-0"
+                  >
+                    <Switch />
+                  </Form.Item>
                 )}
                 <Form.Item className="text-center !mt-4">
                   <Button
@@ -234,7 +230,7 @@ const QuotationForm = () => {
                 <Select
                   placeholder="Select Mill"
                   options={millOptions}
-                  onChange={handleMillChange}
+                  onChange={handleChange}
                   filterOption={(input, option) =>
                     (option?.label ?? "")
                       .toLowerCase()
@@ -256,7 +252,7 @@ const QuotationForm = () => {
                 <Select
                   placeholder="Select Party"
                   options={partyOptions}
-                  onChange={handlePartyChange}
+                  onChange={handleChange}
                   filterOption={(input, option) =>
                     (option?.label ?? "")
                       .toLowerCase()
@@ -269,10 +265,10 @@ const QuotationForm = () => {
               <Form.Item
                 label={
                   <span>
-                    Purchase Date <span className="text-red-500">*</span>
+                    Quotation Date <span className="text-red-500">*</span>
                   </span>
                 }
-                name="purchase_orders_date"
+                name="quotation_date"
                 rules={[{ required: true, message: "Please select date" }]}
               >
                 <DatePicker className="w-full" format="DD-MM-YYYY" />
@@ -281,38 +277,150 @@ const QuotationForm = () => {
               <Form.Item
                 label={
                   <span>
-                    Purchase Ref No <span className="text-red-500">*</span>
+                    Quotation Ref No <span className="text-red-500">*</span>
                   </span>
                 }
-                name="purchase_orders_ref"
+                name="quotation_ref"
                 rules={[{ required: true, message: "Enter reference number" }]}
               >
-                <Input disabled value={purchaseRef?.data?.data} />
+                <Input disabled value={quotationRef?.data?.data} />
               </Form.Item>
-
-              <Form.Item>
-                <Input.TextArea
-                  value={selectedMill?.mill_billing_address}
-                  rows={3}
-                  readOnly
-                  className="bg-gray-50"
-                />
-              </Form.Item>
-              <Form.Item>
-                <Input.TextArea
-                  value={selectedParty?.party_delivery_address}
-                  rows={3}
-                  readOnly
-                  className="bg-gray-50"
-                />
-              </Form.Item>
-
               <Form.Item
-                label="Notes"
-                name="purchase_orders_note"
+                label={
+                  <span>
+                    Deckle <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_deckle"
+                rules={[{ required: true, message: "Select Deckle" }]}
+              >
+                <Select
+                  placeholder="Select Deckle"
+                  options={partyOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    GSM <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_gsm_range"
+                rules={[{ required: true, message: "Select GSM" }]}
+              >
+                <Select
+                  placeholder="Select GSM"
+                  options={partyOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    Freight <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_freight"
+                rules={[{ required: true, message: "Select Freight" }]}
+              >
+                <Select
+                  placeholder="Select Freight"
+                  options={partyOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    Samples <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_samples"
+                rules={[{ required: true, message: "Select Samples" }]}
+              >
+                <Select
+                  placeholder="Select Samples"
+                  options={partyOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item name="quotation_payment" label="Payment">
+                <Input placeholder="Enter Payment" />
+              </Form.Item>
+              <Form.Item name="quotation_furnish" label="Furnish">
+                <Input placeholder="Enter Furnish" />
+              </Form.Item>
+              <Form.Item name="quotation_extra_charge" label="Extra Charge">
+                <Input placeholder="Enter Extra Charge" />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    Delivery <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_delivery"
+                rules={[{ required: true, message: "Select Delivery" }]}
+              >
+                <Select
+                  placeholder="Select Delivery"
+                  options={partyOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    Subject <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_subject"
+                rules={[{ required: true, message: "Select Subject" }]}
+              >
+                <Select
+                  placeholder="Select Subject"
+                  options={partyOptions}
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                name="quotation_footer"
+                label="Footer"
                 className="md:col-span-2"
               >
-                <Input.TextArea rows={2} placeholder="Enter Notes" />
+                <Input placeholder="Enter Footer" value="" />
               </Form.Item>
             </div>
             <Card size="small" className="bg-gray-50 my-4">
@@ -393,32 +501,10 @@ const QuotationForm = () => {
                               />
                             ))}
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-10 gap-3 mt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
                             <Form.Item
                               {...restField}
-                              name={[name, "shade"]}
-                              label="Shade"
-                            >
-                              <Select
-                                placeholder="Select Shade"
-                                options={shade?.data?.data?.map((item) => ({
-                                  label: item.shade,
-                                  value: item.shade,
-                                }))}
-                                loading={shade?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "bf"]}
+                              name={[name, "quotation_quality"]}
                               label="Item"
                             >
                               <Select
@@ -440,73 +526,42 @@ const QuotationForm = () => {
 
                             <Form.Item
                               {...restField}
-                              name={[name, "gsm"]}
-                              label="GSM"
+                              name={[name, "quotation_basic_price"]}
+                              label="Basic Price"
                             >
-                              <Input placeholder="GSM" />
+                              <Input placeholder="Basic Price" />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "size"]}
-                              label="Size"
+                              name={[name, "quotation_gst"]}
+                              label="Gst"
                             >
-                              <Input placeholder="Size" />
+                              <Input placeholder="Gst" />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "qnty"]}
-                              label="Quantity"
+                              name={[name, "quotation_insurance"]}
+                              label="Insurance"
                             >
-                              <Input type="number" placeholder="Qty" />
+                              <Input type="number" placeholder="Insurance" />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "unit"]}
-                              label="Unit"
+                              name={[name, "quotation_tmill"]}
+                              label="T Mill"
                             >
-                              <Select
-                                placeholder="Select Unit"
-                                options={unit?.data?.data?.map((item) => ({
-                                  label: item.unit,
-                                  value: item.unit,
-                                }))}
-                                loading={unit?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
+                              <Input type="number" placeholder="T Mill" />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "bill_rate"]}
-                              label="Bill Rate"
+                              name={[name, "quotation_net_gst"]}
+                              label="Net Gst"
                             >
-                              <Input type="number" placeholder="Rate" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "agreed_rate"]}
-                              label="Mill Rate"
-                            >
-                              <Input type="number" placeholder="Mill Rate" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "remarks"]}
-                              label="Remarks"
-                              className="md:col-span-2"
-                            >
-                              <Input.TextArea rows={1} placeholder="Remarks" />
+                              <Input type="number" placeholder="Net Gst" />
                             </Form.Item>
                           </div>
                         </Card>

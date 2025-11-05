@@ -1,51 +1,47 @@
 import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  PlusOutlined,
+    EditOutlined,
+    EyeInvisibleOutlined,
+    EyeOutlined,
+    PlusOutlined
 } from "@ant-design/icons";
 import {
-  App,
-  Button,
-  Card,
-  Input,
-  Popconfirm,
-  Space,
-  Spin,
-  Tabs,
-  Tag,
-  Tooltip,
+    App,
+    Button,
+    Card,
+    Input,
+    Popconfirm,
+    Space,
+    Spin,
+    Tag,
+    Tooltip,
 } from "antd";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PURCHASE_ORDER_LIST, UPDATE_STATUS_PURCHASE_ORDER } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { BILLING_LIST, UPDATE_STATUS_BILLING_ORDER } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
-import dayjs from "dayjs";
+import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 
-const PurchaseList = () => {
+const BillingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("Open");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { trigger: deleteTrigger } = useApiMutation();
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const {
-    data: purchasedata,
+    data: billingdata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: PURCHASE_ORDER_LIST,
-    queryKey: ["purchasedata", debouncedSearch, page, activeTab],
-    params: { search: debouncedSearch, page, type: activeTab },
+    url: BILLING_LIST,
+    queryKey: ["billingdata", debouncedSearch, page],
+    params: { search: debouncedSearch, page },
   });
 
   const handlePageChange = (newPage) => {
@@ -54,12 +50,12 @@ const PurchaseList = () => {
   const handleToggleStatus = async (order) => {
     try {
       const newStatus =
-        order.purchase_orders_status === "Open" ? "Close" : "Open";
+        order.billing_status === "Open" ? "Close" : "Open";
 
       const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_PURCHASE_ORDER}/${order.id}/status`,
+        url: `${UPDATE_STATUS_BILLING_ORDER}/${order.id}/status`,
         method: "patch",
-        data: { purchase_orders_status: newStatus },
+        data: { billing_status: newStatus },
       });
 
       if (res?.code === 200 || res?.code === 201) {
@@ -80,29 +76,7 @@ const PurchaseList = () => {
       );
     }
   };
-  const handleDelete = async (subId) => {
-    if (!subId) {
-      message.error("Invalid Purchase ID.");
-      return;
-    }
 
-    try {
-      const res = await deleteTrigger({
-        url: `${PURCHASE_ORDER_LIST}/${subId}`,
-        method: "delete",
-      });
-
-      if (res?.code === 201) {
-        message.success(res?.message || "Purchase deleted successfully!");
-        refetch();
-      } else {
-        message.error(res?.message || "Failed to delete Purchase item.");
-      }
-    } catch (error) {
-      console.error("Delete Error:", error);
-      message.error(error?.message || "Error while deleting Purchase.");
-    }
-  };
   const columns = [
     {
       title: "Purchase Ref No",
@@ -149,10 +123,10 @@ const PurchaseList = () => {
     },
     {
       title: "Status",
-      dataIndex: "purchase_orders_status",
-      key: "purchase_orders_status",
+      dataIndex: "billing_status",
+      key: "billing_status",
       render: (_, order) => {
-        const isOpen = order.purchase_orders_status == "Open";
+        const isOpen = order.billing_status == "Open";
         console.log(order, "order");
         return (
           <div className="flex justify-start">
@@ -179,47 +153,28 @@ const PurchaseList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Purchase">
+          <Tooltip title="Edit Billing">
             <Button
               type="primary"
               icon={<EditOutlined />}
               size="small"
-              onClick={() => navigate(`/purchase/edit/${record.id}`)}
+              onClick={() => navigate(`/billing/edit/${record.id}`)}
             />
           </Tooltip>
-          <Tooltip title="Delete Purchase">
-            <Popconfirm
-              title="Are you sure you want to delete this item?"
-              onConfirm={() => handleDelete(record?.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Tooltip>
+
         </Space>
       ),
       width: 120,
     },
   ];
-  const apiData = purchasedata?.data || {};
+  const apiData = billingdata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        {/* <h2 className="text-2xl font-bold heading">Purchase List</h2> */}
-        <Tabs
-          activeKey={activeTab}
-          onChange={(key) => {
-            setActiveTab(key);
-            setPage(1);
-          }}
-          items={[
-            { key: "Open", label: "Open Purchase List" },
-            { key: "Close", label: "Closed Purchase List" },
-          ]}
-        />
+        <h2 className="text-2xl font-bold heading">Billing List</h2>
+
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"
@@ -232,9 +187,9 @@ const PurchaseList = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate("/purchase/create")}
+            onClick={() => navigate("/billing/create")}
           >
-            Add Purchase
+            Add Billing
           </Button>
         </div>
       </div>
@@ -257,7 +212,7 @@ const PurchaseList = () => {
           />
         ) : (
           <div className="text-center text-gray-500 py-20">
-            No Purchase data found.
+            No Billing data found.
           </div>
         )}
       </div>
@@ -265,4 +220,4 @@ const PurchaseList = () => {
   );
 };
 
-export default PurchaseList;
+export default BillingList;

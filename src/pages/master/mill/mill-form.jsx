@@ -106,15 +106,26 @@ const MillForm = () => {
               </h2>
             }
             extra={
-              isEditMode && (
-                <Form.Item
-                  name="mill_status"
-                  valuePropName="checked"
-                  className="!mb-0"
-                >
-                  <Switch />
+              <div className="flex items-center gap-2">
+                {isEditMode && (
+                  <Form.Item
+                    name="mill_status"
+                    valuePropName="checked"
+                    className="!mb-0"
+                  >
+                    <Switch />
+                  </Form.Item>
+                )}
+                <Form.Item className="text-center !mt-2">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={submitLoading}
+                  >
+                    {isEditMode ? "Update" : "Create"}
+                  </Button>
                 </Form.Item>
-              )
+              </div>
             }
             variant="borderless"
           >
@@ -278,11 +289,6 @@ const MillForm = () => {
                 </div>
               </Card>
             </div>
-            <Form.Item className="text-center !mt-2">
-              <Button type="primary" htmlType="submit" loading={submitLoading}>
-                {isEditMode ? "Update" : "Create"}
-              </Button>
-            </Form.Item>
           </Card>
         </Form>
       )}
