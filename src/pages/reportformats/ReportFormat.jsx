@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs } from "antd";
-import PurchaseOrder from "./PurchaseOrder";
-import FeaturedCarousel from "../../components/FeaturedCarousel";
+
+import PurchaseOrderDuplex from "./PurchaseOrderDuplex";
 
 const { TabPane } = Tabs;
 
@@ -10,7 +10,7 @@ const ReportFormat = () => {
     <div className="p-4 bg-white rounded-lg shadow-md">
       <Tabs defaultActiveKey="1" type="card">
         <TabPane tab="Purchase Order" key="1">
-          <PurchaseOrder />
+          <PurchaseOrderDuplex />
         </TabPane>
 
         <TabPane tab="Sales Report" key="2">
