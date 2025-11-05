@@ -1,19 +1,20 @@
 import {
-    EditOutlined,
-    EyeInvisibleOutlined,
-    EyeOutlined,
-    PlusOutlined
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
-    App,
-    Button,
-    Card,
-    Input,
-    Popconfirm,
-    Space,
-    Spin,
-    Tag,
-    Tooltip,
+  App,
+  Button,
+  Card,
+  Input,
+  Popconfirm,
+  Space,
+  Spin,
+  Tabs,
+  Tag,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -29,8 +30,8 @@ const { Search } = Input;
 const BillingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("Open");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const { trigger: deleteTrigger } = useApiMutation();
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ const BillingList = () => {
     refetch,
   } = useGetApiMutation({
     url: BILLING_LIST,
-    queryKey: ["billingdata", debouncedSearch, page],
-    params: { search: debouncedSearch, page },
+    queryKey: ["billingdata", debouncedSearch, page, activeTab],
+    params: { search: debouncedSearch, page, type: activeTab },
   });
 
   const handlePageChange = (newPage) => {
@@ -49,8 +50,7 @@ const BillingList = () => {
   };
   const handleToggleStatus = async (order) => {
     try {
-      const newStatus =
-        order.billing_status === "Open" ? "Close" : "Open";
+      const newStatus = order.billing_status === "Open" ? "Close" : "Open";
 
       const res = await UpdateStatus({
         url: `${UPDATE_STATUS_BILLING_ORDER}/${order.id}/status`,
@@ -89,12 +89,26 @@ const BillingList = () => {
       ),
     },
     {
-      title: "Purchase Date",
-      dataIndex: "purchase_orders_date",
-      key: "purchase_orders_date",
-      render: (_, record) =>
-        dayjs(record.purchase_orders_date).format("DD-MM-YYYY"),
+      title: "Date",
+      key: "date",
+      render: (_, record) => (
+        <div className="flex flex-col">
+          <span className="text-gray-800">
+            Purchase:{" "}
+            {record.purchase_date
+              ? dayjs(record.purchase_date).format("DD-MM-YYYY")
+              : "-"}
+          </span>
+          <span className="text-gray-600">
+            Sale:{" "}
+            {record.sale_date
+              ? dayjs(record.sale_date).format("DD-MM-YYYY")
+              : "-"}
+          </span>
+        </div>
+      ),
     },
+
     {
       title: "Mill Name",
       dataIndex: "mill_name",
@@ -108,26 +122,54 @@ const BillingList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Total Bill Rate",
-      dataIndex: "total_bill_rate",
-      key: "total_bill_rate",
+      title: "Purchase Amount",
+      dataIndex: "purchase_amount",
+      key: "purchase_amount",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Total Agreed Rate",
-      dataIndex: "total_adreed_rate",
-      key: "total_adreed_rate",
+      title: "Billing Tones",
+      dataIndex: "billing_tones",
+      key: "billing_tones",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
+    },
+    {
+      title: "Rate",
+      key: "rate",
+      align: "left",
+      render: (_, record) => (
+        <div className="flex flex-col items-end">
+          <span className="text-green-600">
+            Sale: {Number(record.sale_rate).toFixed(2)}
+          </span>
+          <span className="text-blue-600">
+            Purchase: {Number(record.purchase_rate).toFixed(2)}
+          </span>
+        </div>
+      ),
+    },
+
+    {
+      title: "Billing Type",
+      dataIndex: "billing_type",
+      key: "billing_type",
+      render: (text) => <span className="capitalize">{text}</span>,
+    },
+
+    {
+      title: "Billing BF",
+      dataIndex: "billing_bf",
+      key: "billing_bf",
+      render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
       title: "Status",
       dataIndex: "billing_status",
       key: "billing_status",
       render: (_, order) => {
-        const isOpen = order.billing_status == "Open";
-        console.log(order, "order");
+        const isOpen = order.billing_status === "Open";
         return (
           <div className="flex justify-start">
             <Popconfirm
@@ -151,6 +193,7 @@ const BillingList = () => {
     {
       title: "Actions",
       key: "actions",
+      width: 120,
       render: (_, record) => (
         <Space>
           <Tooltip title="Edit Billing">
@@ -161,20 +204,29 @@ const BillingList = () => {
               onClick={() => navigate(`/billing/edit/${record.id}`)}
             />
           </Tooltip>
-
         </Space>
       ),
-      width: 120,
     },
   ];
+
   const apiData = billingdata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Billing List</h2>
-
+        {/* <h2 className="text-2xl font-bold heading">Billing List</h2> */}
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => {
+            setActiveTab(key);
+            setPage(1);
+          }}
+          items={[
+            { key: "Open", label: "Open Billing List" },
+            { key: "Close", label: "Closed Billing List" },
+          ]}
+        />
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"

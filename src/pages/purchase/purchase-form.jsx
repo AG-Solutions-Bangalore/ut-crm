@@ -15,6 +15,7 @@ import {
   Select,
   Spin,
   Switch,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -30,7 +31,14 @@ const PurchaseForm = () => {
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { mill, party, purchaseRef, shade, unit, item } = useMasterData();
+  const { mill, party, purchaseRef, shade, unit, item } = useMasterData({
+    mill: true,
+    party: true,
+    item: true,
+    purchaseRef: true,
+    shade: true,
+    unit: true,
+  });
   const [selectedMill, setSelectedMill] = useState(null);
   const [selectedParty, setSelectedParty] = useState(null);
   const millOptions =
@@ -203,7 +211,12 @@ const PurchaseForm = () => {
                     valuePropName="checked"
                     className="!mb-0"
                   >
-                    <Switch />
+                    {/* <Tooltip title="Status" placement="top"> */}
+                      <Switch
+                        checkedChildren="Open"
+                        unCheckedChildren="Close"
+                      />
+                    {/* </Tooltip> */}
                   </Form.Item>
                 )}
                 <Form.Item className="text-center !mt-4">
