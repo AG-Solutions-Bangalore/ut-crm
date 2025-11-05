@@ -133,7 +133,6 @@ const BillingForm = () => {
       });
     }
   };
-
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
