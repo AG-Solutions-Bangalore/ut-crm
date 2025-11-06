@@ -5,6 +5,7 @@ import {
   EyeOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   App,
   Button,
@@ -17,15 +18,14 @@ import {
   Tag,
   Tooltip,
 } from "antd";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PURCHASE_ORDER_LIST, UPDATE_STATUS_PURCHASE_ORDER } from "../../api";
-import HighlightText from "../../components/common/HighlightText";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import { useApiMutation } from "../../hooks/useApiMutation";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
-import dayjs from "dayjs";
+import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 
@@ -38,6 +38,7 @@ const PurchaseList = () => {
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     data: purchasedata,
     isLoading,
@@ -67,7 +68,13 @@ const PurchaseList = () => {
           res.message ||
             `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
         );
-        refetch();
+        setActiveTab(newStatus);
+        queryClient.invalidateQueries([
+          "purchasedata",
+          debouncedSearch,
+          page,
+          newStatus,
+        ]);
       } else {
         message.error(res.message || "Failed to update order status.");
       }

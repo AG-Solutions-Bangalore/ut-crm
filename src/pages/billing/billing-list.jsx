@@ -24,6 +24,7 @@ import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Search } = Input;
 
@@ -35,6 +36,7 @@ const BillingList = () => {
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     data: billingdata,
     isLoading,
@@ -50,7 +52,7 @@ const BillingList = () => {
   };
   const handleToggleStatus = async (order) => {
     try {
-      const newStatus = order.billing_status === "Open" ? "Close" : "Open";
+      const newStatus = order.billing_status == "Open" ? "Close" : "Open";
 
       const res = await UpdateStatus({
         url: `${UPDATE_STATUS_BILLING_ORDER}/${order.id}/status`,
@@ -63,7 +65,15 @@ const BillingList = () => {
           res.message ||
             `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
         );
-        refetch();
+        console.log(newStatus,"newStatus")
+        setActiveTab(newStatus);
+        // refetch();
+        queryClient.invalidateQueries([
+          "billingdata",
+          debouncedSearch,
+          page,
+          newStatus,
+        ]);
       } else {
         message.error(res.message || "Failed to update order status.");
       }

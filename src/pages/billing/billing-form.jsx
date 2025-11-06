@@ -149,7 +149,7 @@ const BillingForm = () => {
         ? dayjs(values.sale_date).format("YYYY-MM-DD")
         : null,
       ...(isEditMode && {
-        billing_status: values?.billing_status == "Open" ? "Open" : "Close",
+        billing_status: values?.billing_status === true ? "Open" : "Close",
       }),
     };
 
