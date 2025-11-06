@@ -23,6 +23,7 @@ import BillingList from "./pages/billing/billing-list";
 import BillingForm from "./pages/billing/billing-form";
 import ReportFormat from "./pages/reportformats/ReportFormat";
 import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
+import AuthReport from "./pages/auth-report/AuthReport";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         {/* Protected routes inside layout */}
         <Route element={<ProtectedLayout />}>
           <Route path="/home" element={<Dashboard />} />
+          <Route path="/auth-report" element={<AuthReport />} />
           <Route path="/master/mill" element={<MillList />} />
           <Route path="/master/mill/create" element={<MillForm />} />
           <Route path="/master/mill/:id" element={<MillForm />} />

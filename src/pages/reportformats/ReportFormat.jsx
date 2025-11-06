@@ -1,7 +1,9 @@
 import React from "react";
 import { Tabs } from "antd";
 
-import PurchaseOrderDuplex from "./PurchaseOrderDuplex";
+
+import TradeInvoice from "./TradeInvoice";
+import Quotation from "./Quotation";
 
 const { TabPane } = Tabs;
 
@@ -10,25 +12,18 @@ const ReportFormat = () => {
     <div className="p-4 bg-white rounded-lg shadow-md">
       <Tabs defaultActiveKey="1" type="card">
         <TabPane tab="Purchase Order" key="1">
-          <PurchaseOrderDuplex />
+<TradeInvoice/>
         </TabPane>
 
         <TabPane tab="Sales Report" key="2">
-          {/* Import your component here */}
+        
           {/* <SalesReport /> */}
-          <section className="w-full max-w-7xl mx-auto">
-            {/* <FeaturedCarousel /> */}
-          </section>
+          <Quotation/>
         </TabPane>
 
-        <TabPane tab="Inventory Summary" key="3">
-          {/* Import your component here */}
-          {/* <InventorySummary /> */}
-          <div>Inventory Summary content goes here</div>
-        </TabPane>
 
         <TabPane tab="Expense Report" key="4">
-          {/* Import your component here */}
+      
           {/* <ExpenseReport /> */}
           <div>Expense Report content goes here</div>
         </TabPane>

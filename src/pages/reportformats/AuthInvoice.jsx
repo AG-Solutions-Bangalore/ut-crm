@@ -1,16 +1,54 @@
-import { useRef, useState } from "react";
+import { useRef, useState, forwardRef } from "react";
 import reportlogo from "../../assets/report-logo.png";
 import ReportActions from "./ReportActions";
 
 const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
-// const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
 
-const AuthInvoice = () => {
+const AuthInvoice = forwardRef(({ partyData, thirdPartyData, invoiceData, onClose }, ref) => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
 
   const toggleSignature = () => {
     setShowSignature(!showSignature);
+  };
+
+
+  const formatDate = (dateString) => {
+    if (!dateString) return new Date().toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: '2-digit' 
+    }).replace(/ /g, '-');
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: '2-digit' 
+    }).replace(/ /g, '-');
+  };
+
+
+  const getTodayDate = () => {
+    return new Date().toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: '2-digit' 
+    }).replace(/ /g, '-');
+  };
+
+
+  const formatAmount = (amount) => {
+    if (!amount) return '₹0';
+    return '₹' + new Intl.NumberFormat('en-IN').format(amount);
+  };
+
+
+  const formatAddress = (address) => {
+    if (!address) return null;
+    return address.split('\n').map((line, index) => (
+      <div key={index}>{line}</div>
+    ));
   };
 
   return (
@@ -22,11 +60,12 @@ const AuthInvoice = () => {
         onToggleSignature={toggleSignature}
         showSignature={showSignature}
         includeSignatureToggle={true}
+        onClose={onClose}
       />
 
       <div className="flex justify-center bg-gray-50 p-4">
         <div className="w-full max-w-[210mm] bg-white p-8 relative" ref={componentRef}>
-
+    
           <div className="mb-6">
             <div className="flex justify-end text-xs mb-4">
               <div className="text-right">
@@ -35,7 +74,7 @@ const AuthInvoice = () => {
               </div>
             </div>
 
-         
+
             <div className="flex gap-4 items-start mb-4">
               <div className="flex-shrink-0 w-16 h-20 flex items-center justify-center">
                 <img
@@ -66,29 +105,34 @@ const AuthInvoice = () => {
           <div className="mb-6">
             <div className="flex justify-between items-start mb-4">
               <div className="text-xs font-bold">
-                <div>BAG FACTORY</div>
-                <div>NO 9 SY NO 69/70, BEHIND</div>
-                <div>BYRAVESHWAR SAW MILL, SEGEHALLI</div>
-                <div>MAGDI ROAD, BANGALORE 560091</div>
+                <div>{partyData?.party_name || "BAG FACTORY"}</div>
+                {formatAddress(partyData?.party_billing_address) || (
+                  <>
+                    <div>NO 9 SY NO 69/70, BEHIND</div>
+                    <div>BYRAVESHWAR SAW MILL, SEGEHALLI</div>
+                    <div>MAGDI ROAD, BANGALORE 560091</div>
+                  </>
+                )}
               </div>
               <div className="text-xs">
-                <span className="font-bold">Date :</span> 06-Nov-25
+                <span className="font-bold">Date :</span> {getTodayDate()}
               </div>
             </div>
 
             <div className="text-xs mb-4">Dear Sir,</div>
           </div>
 
-
+ 
           <div className="text-xs mb-4">
             <span className="font-bold">Sub : Regarding the payment of Bill</span>
           </div>
 
-     
+
           <div className="text-xs mb-6 leading-relaxed">
-            We hereby authorize M/s BAG FACTORY to collect the payment for the following Bill:
+            We hereby authorize M/s {thirdPartyData?.party_name || "BAG FACTORY"} to collect the payment for the following Bill:
           </div>
 
+   
           <div className="mb-6">
             <table className="w-full text-xs border-collapse border border-black">
               <thead>
@@ -102,24 +146,23 @@ const AuthInvoice = () => {
               <tbody>
                 <tr className="border-b border-black">
                   <td className="py-2 px-2 border-r border-black">1</td>
-                  <td className="py-2 px-2 border-r border-black">1212</td>
-                  <td className="py-2 px-2 border-r border-black">06-Nov-25</td>
-                  <td className="py-2 px-2">₹12,345</td>
+                  <td className="py-2 px-2 border-r border-black">{invoiceData?.invoiceNo || "1212"}</td>
+                  <td className="py-2 px-2 border-r border-black">{formatDate(invoiceData?.date)}</td>
+                  <td className="py-2 px-2">{formatAmount(invoiceData?.amount)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-    
+  
           <div className="text-xs mb-4 leading-relaxed">
-            Kindly make the payment in favour of M/s BAG FACTORY under intimation to us.
+            Kindly make the payment in favour of M/s {thirdPartyData?.party_name || "BAG FACTORY"} under intimation to us.
           </div>
 
-
+   
           <div className="text-xs mb-4">Thanks & Regards,</div>
           <div className="text-xs mb-2">Yours faithfully,</div>
           <div className="text-xs mb-2 font-bold">For THE UNITED TRADERS (Regd.)</div>
-
 
           <div className="relative mt-10 mb-16">
             {showSignature && (
@@ -132,18 +175,24 @@ const AuthInvoice = () => {
             <div className="text-xs text-left mt-20">Authorised Signatory</div>
           </div>
 
-
+ 
           <div className="text-xs mt-12">
             <div className="font-bold mb-2">CC To :</div>
-            <div>BAG FACTORY</div>
-            <div>NO 9 SY NO 69/70, BEHIND</div>
-            <div>BYRAVESHWAR SAW MILL, SEGEHALLI</div>
-            <div>MAGDI ROAD, BANGALORE 560091</div>
+            <div>{thirdPartyData?.party_name || "BAG FACTORY"}</div>
+            {formatAddress(thirdPartyData?.party_delivery_address) || (
+              <>
+                <div>NO 9 SY NO 69/70, BEHIND</div>
+                <div>BYRAVESHWAR SAW MILL, SEGEHALLI</div>
+                <div>MAGDI ROAD, BANGALORE 560091</div>
+              </>
+            )}
           </div>
         </div>
       </div>
     </>
   );
-};
+});
+
+AuthInvoice.displayName = 'AuthInvoice';
 
 export default AuthInvoice;
