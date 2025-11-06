@@ -62,6 +62,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
 
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
+    { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
     { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
   ];
 

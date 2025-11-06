@@ -1,14 +1,32 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import reportlogo from "../../assets/report-logo.png";
+import ReportActions from "./ReportActions";
+
+const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
+// const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
 
 const TradeInvoice = () => {
   const componentRef = useRef(null);
+    const [showSignature, setShowSignature] = useState(true);
+  
+    const toggleSignature = () => {
+      setShowSignature(!showSignature);
+    };
 
   return (
     <>
+     <ReportActions
+        componentRef={componentRef}
+        filename="Trade_Invoice.pdf"
+        documentTitle="Trade Invoice"
+        onToggleSignature={toggleSignature}
+        showSignature={showSignature}
+        includeSignatureToggle={true}
+      />
       <div className="flex justify-center bg-gray-50 p-4">
         <div className="w-full max-w-[210mm] bg-white border border-black" ref={componentRef}>
           
-          {/* Header Section */}
+        
           <div className="border-b border-black p-3">
             <div className="flex justify-between text-xs mb-3">
               <div>
@@ -25,16 +43,20 @@ const TradeInvoice = () => {
               </div>
             </div>
 
-            {/* Logo and Company Name */}
+  
             <div className="flex gap-4 items-start">
               <div className="flex-shrink-0 w-20 h-20 bg-blue-900 rounded-full flex items-center justify-center">
                 <div className="text-white text-center">
-                  <div className="text-2xl font-bold">UT</div>
+              <img
+                               src={reportlogo}
+                               alt="Company Logo"
+                               className="w-[120px] h-auto object-contain"
+                             />
                 </div>
               </div>
               
               <div className="flex-1 text-center">
-                <h1 className="text-3xl font-bold mb-1">THE UNITED TRADERS (Regd.)</h1>
+                <h1 className="text-xl font-bold mb-1 instrument-font">THE UNITED TRADERS (Regd.)</h1>
                 <p className="text-xs font-semibold mb-1">Dealers in : KRAFT PAPER & DUPLEX BOARD</p>
                 <p className="text-[10px] leading-tight">
                   010, A-2 BLOCK, 7TH MAIN, 8TH CROSS, 2ND BLOCK JAYNAGAR, BANGALORE 560011<br/>
@@ -44,10 +66,9 @@ const TradeInvoice = () => {
               </div>
             </div>
           </div>
-
-          {/* Customer and Invoice Details */}
+    
           <div className="grid grid-cols-2 border-b border-black">
-            {/* Left: Customer Details */}
+        
             <div className="border-r border-black p-3">
               <div className="text-xs space-y-1">
                 <div>
@@ -64,7 +85,7 @@ const TradeInvoice = () => {
               </div>
             </div>
 
-            {/* Right: Invoice Details */}
+         
             <div className="p-3">
               <div className="text-xs space-y-1">
                 <div className="flex">
@@ -87,11 +108,14 @@ const TradeInvoice = () => {
                   <span className="w-32">E Way Bill No.</span>
                   <span>: 1912 8158 1266</span>
                 </div>
+                <div className="flex">
+                  <span className="w-32">PaymentTerm</span>
+                  <span>: 30 DAYS</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Items Table */}
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr className="border-b border-black">
@@ -128,10 +152,9 @@ const TradeInvoice = () => {
             </tbody>
           </table>
 
-          {/* Bottom Section */}
           <div className="border-t border-black">
             <div className="flex">
-              {/* Left: HSN and Amount in Words */}
+          
               <div className="flex-1 border-r border-black p-3">
                 <div className="text-xs mb-2">
                   <span className="font-bold">HSN CODE : </span>48043900
@@ -146,7 +169,7 @@ const TradeInvoice = () => {
                 <div className="text-xs font-bold">Only .....</div>
               </div>
 
-              {/* Right: Totals */}
+           
               <div className="w-64">
                 <div className="flex justify-between border-b border-black p-2 text-xs">
                   <span className="font-bold">Gross Total :</span>
@@ -168,26 +191,37 @@ const TradeInvoice = () => {
             </div>
           </div>
 
-          {/* Terms and Signature */}
           <div className="border-t border-black flex">
-            <div className="flex-1 p-3 text-[10px]">
-              <div className="font-bold mb-1">Terms & Conditions :</div>
-              <div className="space-y-0.5">
-                <div>1. Any dispute is subject to Bangalore jurisdiction.</div>
-                <div>2. Payment to be made by A/c Payee cheque or DD only.</div>
-                <div>3. Late payment charges will be @ 24 % p.a.,</div>
-                <div className="ml-3">(If bill remains unpaid after Due Date)</div>
-              </div>
-            </div>
-            <div className="w-64 p-3 flex flex-col justify-between">
-              <div className="text-right text-xs">
-                <div className="font-bold">For THE UNITED TRADERS (Regd.)</div>
-              </div>
-              <div className="text-right text-xs mt-12">
-                <div>Authorised Signatory</div>
-              </div>
-            </div>
-          </div>
+ 
+  <div className="flex-1 p-3 text-[10px]">
+    <div className="font-bold mb-1">Terms & Conditions :</div>
+    <div className="space-y-0.5">
+      <div>1. Any dispute is subject to Bangalore jurisdiction.</div>
+      <div>2. Payment to be made by A/c Payee cheque or DD only.</div>
+      <div>3. Late payment charges will be @ 24 % p.a.,</div>
+      <div className="ml-3">(If bill remains unpaid after Due Date)</div>
+    </div>
+  </div>
+
+
+  <div className="w-64 p-3 flex flex-col justify-between relative">
+    <div className="text-right text-xs">
+      <div className="font-bold">For THE UNITED TRADERS (Regd.)</div>
+    </div>
+
+   
+    <div className="mt-4 h-20 relative">
+      {showSignature && (
+        <img
+          src={devUrl}
+          alt="Signature"
+          className="w-24 h-auto object-contain absolute right-0 top-0"
+        />
+      )}
+      <div className="absolute bottom-0 right-0 text-xs">Authorised Signatory</div>
+    </div>
+  </div>
+</div>
 
         </div>
       </div>
