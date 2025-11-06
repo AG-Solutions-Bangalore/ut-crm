@@ -19,7 +19,7 @@ import {
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BILLING_LIST, UPDATE_STATUS_BILLING_ORDER } from "../../api";
+import { BILLING_LIST, TAX_INVOICE_LIST, UPDATE_STATUS_BILLING_ORDER } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -28,7 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const { Search } = Input;
 
-const BillingList = () => {
+const TaxInvoiceList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState("Open");
@@ -38,54 +38,19 @@ const BillingList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
-    data: billingdata,
+    data: taxinvoicedata,
     isLoading,
     refetch,
   } = useGetApiMutation({
-    url: BILLING_LIST,
-    queryKey: ["billingdata", debouncedSearch, page, activeTab],
+    url: TAX_INVOICE_LIST,
+    queryKey: ["taxinvoicedata", debouncedSearch, page, activeTab],
     params: { search: debouncedSearch, page, type: activeTab },
   });
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
-  const handleToggleStatus = async (order) => {
-    try {
-      const newStatus = order.billing_status == "Open" ? "Close" : "Open";
 
-      const res = await UpdateStatus({
-        url: `${UPDATE_STATUS_BILLING_ORDER}/${order.id}/status`,
-        method: "patch",
-        data: { billing_status: newStatus },
-      });
-
-      if (res?.code === 200 || res?.code === 201) {
-        message.success(
-          res.message ||
-            `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
-        );
-        console.log(newStatus,"newStatus")
-        setActiveTab(newStatus);
-        // refetch();
-        queryClient.invalidateQueries([
-          "billingdata",
-          debouncedSearch,
-          page,
-          newStatus,
-        ]);
-      } else {
-        message.error(res.message || "Failed to update order status.");
-      }
-    } catch (error) {
-      console.error("Error updating status:", error?.response?.data || error);
-      message.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Error updating order status."
-      );
-    }
-  };
 
   const columns = [
     {
@@ -174,66 +139,33 @@ const BillingList = () => {
       key: "billing_bf",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
-    {
-      title: "Status",
-      dataIndex: "billing_status",
-      key: "billing_status",
-      render: (_, order) => {
-        const isOpen = order.billing_status === "Open";
-        return (
-          <div className="flex justify-start">
-            <Popconfirm
-              title={`Mark this order as ${isOpen ? "Close" : "Open"}?`}
-              okText="Yes"
-              cancelText="No"
-              onConfirm={() => handleToggleStatus(order)}
-            >
-              <Tag
-                color={isOpen ? "green" : "red"}
-                icon={isOpen ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                className="cursor-pointer"
-              >
-                {isOpen ? "Open" : "Close"}
-              </Tag>
-            </Popconfirm>
-          </div>
-        );
-      },
-    },
+ 
     {
       title: "Actions",
       key: "actions",
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Billing">
+          <Tooltip title="Edit Tax-Invoice">
             <Button
               type="primary"
               icon={<EditOutlined />}
               size="small"
-              onClick={() => navigate(`/billing/edit/${record.id}`)}
+              onClick={() => navigate(`/tax-invoice/edit/${record.id}`)}
             />
           </Tooltip>
-          <Tooltip title="View Billing">
-            <Button
-              type="primary"
-              icon={<EyeOutlined />}
-              size="small"
-              onClick={() => navigate(`/billing/view/${record.id}`)}
-            />
-          </Tooltip>
+  
         </Space>
       ),
     },
   ];
 
-  const apiData = billingdata?.data || {};
+  const apiData = taxinvoicedata?.data || {};
   const tableData = apiData.data || [];
 
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        {/* <h2 className="text-2xl font-bold heading">Billing List</h2> */}
         <Tabs
           activeKey={activeTab}
           onChange={(key) => {
@@ -241,8 +173,8 @@ const BillingList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Open", label: "Open Billing List" },
-            { key: "Close", label: "Closed Billing List" },
+            { key: "Open", label: "Open Tax-Invoice List" },
+            { key: "Close", label: "Closed Tax-Invoice List" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -257,9 +189,9 @@ const BillingList = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate("/billing/create")}
+            onClick={() => navigate("/tax-invoice/create")}
           >
-            Add Billing
+            Add Tax-Invoice
           </Button>
         </div>
       </div>
@@ -282,7 +214,7 @@ const BillingList = () => {
           />
         ) : (
           <div className="text-center text-gray-500 py-20">
-            No Billing data found.
+            No Tax-Invoice data found.
           </div>
         )}
       </div>
@@ -290,4 +222,4 @@ const BillingList = () => {
   );
 };
 
-export default BillingList;
+export default TaxInvoiceList;

@@ -137,6 +137,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
       { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+      { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
 
       // {
       //   key: "sub1",
@@ -170,6 +171,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
     { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+    { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
 
     // {
     //   type: "group",
@@ -213,7 +215,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const items = getMenuItems(collapsed, Number(userType));
   const dispatch = useDispatch();
   const finalUserImage = useFinalUserImage();
-  const company = useSelector(state => state.company.companyDetails);
+  const company = useSelector((state) => state.company.companyDetails);
   const [delayedCollapse, setDelayedCollapse] = useState(collapsed);
   const localVersion = useSelector((state) => state.auth?.version);
   const serverVersion = useSelector((state) => state?.version?.version);
@@ -285,11 +287,9 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
             collapsed ? "w-12" : "w-12"
           }`}
         />
-        {!collapsed &&(
-
-      
-<span className="font-semibold  ">{company?.company_name}</span>
-  )}
+        {!collapsed && (
+          <span className="font-semibold  ">{company?.company_name}</span>
+        )}
         {isMobile && (
           <motion.button
             whileHover={{ scale: 1.1 }}

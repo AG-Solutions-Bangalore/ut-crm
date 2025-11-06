@@ -11,6 +11,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Popconfirm,
   Select,
   Spin,
@@ -212,10 +213,7 @@ const PurchaseForm = () => {
                     className="!mb-0"
                   >
                     {/* <Tooltip title="Status" placement="top"> */}
-                      <Switch
-                        checkedChildren="Open"
-                        unCheckedChildren="Close"
-                      />
+                    <Switch checkedChildren="Open" unCheckedChildren="Close" />
                     {/* </Tooltip> */}
                   </Form.Item>
                 )}
@@ -234,7 +232,7 @@ const PurchaseForm = () => {
           >
             <Card
               size="small"
-              title={<span className="font-semibold">Purchase Info</span>}
+              // title={<span className="font-semibold">Purchase Info</span>}
               className="!mb-2 !bg-gray-50 "
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -338,214 +336,292 @@ const PurchaseForm = () => {
               <Form.List
                 name="subs"
                 initialValue={[{}]}
+                // rules={[
+                //   {
+                //     validator: async (_, subs) => {
+                //       if (!Array.isArray(subs) || subs.length === 0) {
+                //         return Promise.reject(
+                //           new Error("Please add at least one sub item.")
+                //         );
+                //       }
+
+                //       const hasAnyFilledRow = subs.some((row) =>
+                //         Object.values(row || {}).some(
+                //           (val) => val !== undefined && val !== ""
+                //         )
+                //       );
+
+                //       if (!hasAnyFilledRow) {
+                //         return Promise.reject(
+                //           new Error(
+                //             "Please fill at least one sub item before submitting."
+                //           )
+                //         );
+                //       }
+
+                //       return Promise.resolve();
+                //     },
+                //   },
+                // ]}
                 rules={[
                   {
                     validator: async (_, subs) => {
-                      if (!subs || subs.length < 1)
+                      if (!Array.isArray(subs) || subs.length === 0) {
                         return Promise.reject(
                           new Error("Please add at least one sub item.")
                         );
+                      }
 
-                      const hasAnyFilledRow = subs.some((row) =>
+                      // Filter rows that are completely empty
+                      const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
                           (val) => val !== undefined && val !== ""
                         )
                       );
 
-                      if (!hasAnyFilledRow)
+                      if (nonEmptyRows.length === 0) {
                         return Promise.reject(
                           new Error(
                             "Please fill at least one sub item before submitting."
                           )
                         );
+                      }
+
+                      // Check if there are empty rows in between
+                      const emptyRows = subs.filter((row) =>
+                        Object.values(row || {}).every(
+                          (val) => val === undefined || val === ""
+                        )
+                      );
+
+                      if (emptyRows.length > 0) {
+                        return Promise.reject(
+                          new Error(
+                            "Empty sub items are not allowed — please fill or remove them."
+                          )
+                        );
+                      }
 
                       return Promise.resolve();
                     },
                   },
                 ]}
+                validateTrigger={["onSubmit"]}
               >
                 {(fields, { add, remove }, { errors }) => (
                   <>
-                    <div className="flex justify-between mb-2">
-                      <div className="font-semibold text-lg mb-2">
-                        Sub Details
-                      </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="font-semibold text-lg">Sub Details</div>
                       <Button
                         type="dashed"
+                        htmlType="button"
                         onClick={() => add()}
                         icon={<PlusOutlined />}
                       >
                         Add Item
                       </Button>
                     </div>
-                    {fields.map(({ key, name, ...restField }) => {
-                      const subItem = form.getFieldValue(["subs", name]);
-                      const hasId = subItem?.id;
-                      return (
-                        <Card
-                          key={key}
-                          size="small"
-                          className="!mb-3 !bg-gray-50 border relative"
-                        >
-                          {fields.length > 1 &&
-                            (hasId ? (
-                              <Popconfirm
-                                title="Are you sure you want to delete this sub-item?"
-                                onConfirm={() => handleDelete(subItem?.id)}
-                                okText="Yes"
-                                cancelText="No"
+
+                    <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
+                        <div className="md:col-span-2">Shade</div>
+                        <div className="md:col-span-2">Item</div>
+                        <div>GSM</div>
+                        <div>Size</div>
+                        <div>Quantity</div>
+                        <div>Unit</div>
+                        <div>Bill Rate</div>
+                        <div>Mill Rate</div>
+                        <div className="md:col-span-2">Remarks</div>
+                      </div>
+
+                      <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+                        {fields.map(({ key, name, ...restField }) => {
+                          const subItem = form.getFieldValue(["subs", name]);
+                          const hasId = subItem?.id;
+
+                          return (
+                            <div
+                              key={key}
+                              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-3 p-2 items-center hover:bg-gray-50 transition relative"
+                            >
+                              {/* Delete button (absolute right) */}
+                              {fields.length > 1 &&
+                                (hasId ? (
+                                  <Popconfirm
+                                    title="Are you sure you want to delete this sub-item?"
+                                    onConfirm={() => handleDelete(subItem?.id)}
+                                    okText="Yes"
+                                    cancelText="No"
+                                  >
+                                    <Button
+                                      type="text"
+                                      danger
+                                      icon={<DeleteOutlined />}
+                                      className="!absolute top-0 right-0 z-10 text-red-500"
+                                    />
+                                  </Popconfirm>
+                                ) : (
+                                  <Button
+                                    type="text"
+                                    danger
+                                    icon={<MinusCircleOutlined />}
+                                    className="!absolute top-0 right-0 z-10"
+                                    onClick={() => remove(name)}
+                                  />
+                                ))}
+
+                              {/* Inputs */}
+                              <Form.Item
+                                {...restField}
+                                name={[name, "shade"]}
+                                noStyle
+                                className="!relative"
                               >
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<DeleteOutlined />}
-                                  className="!absolute top-2 right-2 text-red-500"
+                                <Select
+                                  className="md:col-span-2"
+                                  placeholder="Shade"
+                                  options={shade?.data?.data?.map((item) => ({
+                                    label: item.shade,
+                                    value: item.shade,
+                                  }))}
+                                  loading={shade?.loading}
+                                  showSearch
+                                  allowClear
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
                                 />
-                              </Popconfirm>
-                            ) : (
-                              <Button
-                                type="text"
-                                danger
-                                icon={<MinusCircleOutlined />}
-                                className="!absolute top-2 right-2"
-                                onClick={() => remove(name)}
-                              />
-                            ))}
+                              </Form.Item>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-10 gap-3 mt-6">
-                            <Form.Item
-                              {...restField}
-                              name={[name, "shade"]}
-                              label="Shade"
-                            >
-                              <Select
-                                placeholder="Select Shade"
-                                options={shade?.data?.data?.map((item) => ({
-                                  label: item.shade,
-                                  value: item.shade,
-                                }))}
-                                loading={shade?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "bf"]}
+                                noStyle
+                              >
+                                <Select
+                                  className="md:col-span-2"
+                                  placeholder="Item"
+                                  options={item?.data?.data?.map((item) => ({
+                                    label: item.bf,
+                                    value: item.bf,
+                                  }))}
+                                  loading={item?.loading}
+                                  showSearch
+                                  allowClear
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "bf"]}
-                              label="Item"
-                            >
-                              <Select
-                                placeholder="Select Item"
-                                options={item?.data?.data?.map((item) => ({
-                                  label: item.bf,
-                                  value: item.bf,
-                                }))}
-                                loading={item?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "gsm"]}
+                                noStyle
+                              >
+                                <Input placeholder="GSM" />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "gsm"]}
-                              label="GSM"
-                            >
-                              <Input placeholder="GSM" />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "size"]}
+                                noStyle
+                              >
+                                <Input placeholder="Size" />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "size"]}
-                              label="Size"
-                            >
-                              <Input placeholder="Size" />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "qnty"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  min={1}
+                                  className="!w-full"
+                                  placeholder="Qty"
+                                />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "qnty"]}
-                              label="Quantity"
-                            >
-                              <Input type="number" placeholder="Qty" />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "unit"]}
+                                noStyle
+                              >
+                                <Select
+                                  placeholder="Unit"
+                                  options={unit?.data?.data?.map((item) => ({
+                                    label: item.unit,
+                                    value: item.unit,
+                                  }))}
+                                  loading={unit?.loading}
+                                  showSearch
+                                  allowClear
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "unit"]}
-                              label="Unit"
-                            >
-                              <Select
-                                placeholder="Select Unit"
-                                options={unit?.data?.data?.map((item) => ({
-                                  label: item.unit,
-                                  value: item.unit,
-                                }))}
-                                loading={unit?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "bill_rate"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  min={1}
+                                  className="!w-full"
+                                  type="number"
+                                  placeholder="Rate"
+                                />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "bill_rate"]}
-                              label="Bill Rate"
-                            >
-                              <Input type="number" placeholder="Rate" />
-                            </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "agreed_rate"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  min={1}
+                                  className="!w-full"
+                                  type="number"
+                                  placeholder="Mill Rate"
+                                />
+                              </Form.Item>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "agreed_rate"]}
-                              label="Mill Rate"
-                            >
-                              <Input type="number" placeholder="Mill Rate" />
-                            </Form.Item>
+                              <div className="md:col-span-2">
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, "remarks"]}
+                                  noStyle
+                                >
+                                  <Input.TextArea
+                                    rows={1}
+                                    placeholder="Remarks"
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                            <Form.Item
-                              {...restField}
-                              name={[name, "remarks"]}
-                              label="Remarks"
-                              className="md:col-span-2"
-                            >
-                              <Input.TextArea rows={1} placeholder="Remarks" />
-                            </Form.Item>
-                          </div>
-                        </Card>
-                      );
-                    })}
                     {errors.length > 0 && (
                       <div className="text-red-500 text-sm mt-2">
                         {errors[0]}
                       </div>
-                    )}{" "}
+                    )}
                   </>
                 )}
               </Form.List>
             </Card>
-
-            {/* <Form.Item className="text-center !mt-4">
-              <Button type="primary" htmlType="submit" loading={submitLoading}>
-                {isEditMode ? "Update" : "Create"}
-              </Button>
-            </Form.Item> */}
           </Card>
         </Form>
       )}

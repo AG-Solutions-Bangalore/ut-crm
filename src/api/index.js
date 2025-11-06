@@ -60,5 +60,10 @@ export const DELETE_QUOTATION_SUB = `/quotation-sub`;
 // ------------BILLING-------------------
 export const BILLING_LIST = `/billing`;
 export const UPDATE_STATUS_BILLING_ORDER = `/billings`;
-
-
+// ------------TRADE_INVOICE-------------------
+export const TRADE_INVOICE_LIST = `/trade-invoice`;
+export const TRADE_INVOICE_REF = `/trade-invoice-ref`;
+// ------------TAX_INVOICE-------------------
+export const TAX_INVOICE_LIST = "/tax-invoice";
+export const TAX_INVOICE_REF = "/tax-invoice-ref";
+export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
