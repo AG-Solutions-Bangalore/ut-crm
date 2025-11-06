@@ -23,6 +23,9 @@ import BillingList from "./pages/billing/billing-list";
 import BillingForm from "./pages/billing/billing-form";
 import ReportFormat from "./pages/reportformats/ReportFormat";
 import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
+import BillingView from "./pages/billing/billing-view";
+import TaxInvoiceList from "./pages/tax-invoice/tax-invoice-list";
+import TaxInvoiceForm from "./pages/tax-invoice/tax-invoice-form";
 
 function App() {
   return (
@@ -62,6 +65,12 @@ function App() {
           <Route path="/billing" element={<BillingList />} />
           <Route path="/billing/create" element={<BillingForm />} />
           <Route path="/billing/edit/:id" element={<BillingForm />} />
+          <Route path="/billing/view/:id" element={<BillingView />} />
+
+          <Route path="/tax-invoice" element={<TaxInvoiceList />} />
+          <Route path="/tax-invoice/create" element={<TaxInvoiceForm />} />
+          <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
+
           <Route path="/report-format" element={<ReportFormat />} />
         </Route>
 

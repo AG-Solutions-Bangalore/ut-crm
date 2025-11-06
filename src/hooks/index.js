@@ -111,6 +111,7 @@ import {
   ACTIVE_UNIT,
   ACTIVE_ITEM,
   QUOTATION_REF,
+  TAX_INVOICE_REF,
 } from "../api/index";
 
 export const useMasterData = ({
@@ -121,6 +122,7 @@ export const useMasterData = ({
   shade = false,
   unit = false,
   item = false,
+  taxinvoice = false,
 } = {}) => {
   const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
@@ -163,6 +165,15 @@ export const useMasterData = ({
     error: quotationError,
   } = createApi(quotationRef, QUOTATION_REF, [
     "quotationrefdata",
+    formattedDateTime,
+  ]);
+  const {
+    data: TaxInvoiceRef,
+    isLoading: TaxInvoiceRefLoading,
+    refetch: refetchTaxInvoiceRefNo,
+    error: TaxInvoiceError,
+  } = createApi(taxinvoice, TAX_INVOICE_REF, [
+    "taxinvoicerefdata",
     formattedDateTime,
   ]);
 
@@ -229,6 +240,12 @@ export const useMasterData = ({
       loading: itemLoading,
       refetch: refetchItem,
       error: itemError,
+    },
+    taxinvoice: {
+      data: TaxInvoiceRef,
+      loading: TaxInvoiceRefLoading,
+      refetch: refetchTaxInvoiceRefNo,
+      error: TaxInvoiceError,
     },
   };
 };
