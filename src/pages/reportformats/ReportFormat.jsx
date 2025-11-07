@@ -4,6 +4,7 @@ import { Tabs } from "antd";
 
 import TradeInvoice from "./TradeInvoice";
 import Quotation from "./Quotation";
+import TaxInvoice from "./TaxInvoice";
 
 const { TabPane } = Tabs;
 
@@ -19,6 +20,11 @@ const ReportFormat = () => {
         
           {/* <SalesReport /> */}
           <Quotation/>
+        </TabPane>
+        <TabPane tab="tax Report" key="3">
+        
+          {/* <SalesReport /> */}
+          <TaxInvoice/>
         </TabPane>
 
 
