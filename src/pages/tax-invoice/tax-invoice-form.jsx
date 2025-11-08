@@ -22,11 +22,16 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DELETE_ORDER_SUB, PURCHASE_ORDER_LIST } from "../../api";
+import {
+  DELETE_ORDER_SUB,
+  PURCHASE_ORDER_LIST,
+  TAX_INVOICE_LIST,
+} from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useSelector } from "react-redux";
 import PendingBillsModal from "./pending-bill";
+import { useWatch } from "antd/es/form/Form";
 
 const TaxInvoiceForm = () => {
   const { message } = App.useApp();
@@ -38,6 +43,9 @@ const TaxInvoiceForm = () => {
   const companystate = useSelector(
     (state) => state?.auth?.userDetails?.company_state?.toLowerCase() || ""
   );
+  const [bills, setBills] = useState([]);
+  const [selectedBills, setSelectedBills] = useState([]);
+  const selectedMillId = useWatch("tax_invoice_mill_id", form);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMill, setSelectedMill] = useState(null);
   const { mill, taxinvoice } = useMasterData({
@@ -69,9 +77,11 @@ const TaxInvoiceForm = () => {
     tax_invoice_igst: "",
     tax_invoice_hsn_code: "",
     tax_invoice_payment_terms: "",
+    tax_invoice_type: "",
   });
   const handleMillChange = (millId) => {
     taxinvoice.refetch();
+    setSelectedBills([]);
     const selectedMill = millOptions.find((m) => m.value == millId);
     if (!selectedMill) {
       form.setFieldsValue({
@@ -104,20 +114,19 @@ const TaxInvoiceForm = () => {
   const fetchPurchase = async () => {
     try {
       const res = await fetchTrigger({
-        url: `${PURCHASE_ORDER_LIST}/${id}`,
+        url: `${TAX_INVOICE_LIST}/${id}`,
       });
       if (res?.data) {
         const formattedData = {
           ...res.data,
-          purchase_orders_status:
-            res.data.purchase_orders_status == "Open" ? true : false,
-          purchase_orders_date: res.data.purchase_orders_date
-            ? dayjs(res.data.purchase_orders_date)
+
+          tax_invoice_date: res.data.tax_invoice_date
+            ? dayjs(res.data.tax_invoice_date)
             : null,
         };
         setSelectedMill(res?.mill || null);
-        setSelectedParty(res?.party || null);
         setInitialData(formattedData);
+        setSelectedBills(formattedData.subs || []);
         form.setFieldsValue(formattedData);
       }
     } catch (err) {
@@ -130,51 +139,88 @@ const TaxInvoiceForm = () => {
     if (id) fetchPurchase();
     else form.resetFields();
   }, [id]);
-
   const handleSubmit = async (values) => {
-    const payload = {
-      ...values,
-      purchase_orders_billref: initialData.purchase_orders_billref || "",
-      purchase_orders_date: values.purchase_orders_date
-        ? dayjs(values.purchase_orders_date).format("YYYY-MM-DD")
-        : null,
-      subs: (values.subs || []).map((sub) => ({
-        id: sub?.id || "",
-        shade: sub?.shade || "",
-        bf: sub?.bf || "",
-        gsm: sub?.gsm || "",
-        size: sub?.size || "",
-        qnty: sub?.qnty || "",
-        unit: sub?.unit || "",
-        bill_rate: sub?.bill_rate || "",
-        agreed_rate: sub?.agreed_rate || "",
-        remarks: sub?.remarks || "",
-      })),
+    const subsdata = selectedBills.map((bill) => ({
+      id: isEditMode ? bill.id : null,
+      tax_invoice_sub_billing_ref: isEditMode
+        ? bill.tax_invoice_sub_billing_ref
+        : bill.billing_ref,
+
+      tax_invoice_sub_purchase_date: isEditMode
+        ? bill.tax_invoice_sub_purchase_date
+        : bill.purchase_date,
+
+      tax_invoice_sub_tones: isEditMode
+        ? bill.tax_invoice_sub_tones
+        : bill.billing_tones,
+
+      tax_invoice_sub_bf: isEditMode
+        ? bill.tax_invoice_sub_bf
+        : bill.billing_bf,
+
+      tax_invoice_sub_sale_rate: isEditMode
+        ? bill.tax_invoice_sub_sale_rate
+        : bill.sale_rate,
+
+      tax_invoice_sub_purchase_rate: isEditMode
+        ? bill.tax_invoice_sub_purchase_rate
+        : bill.purchase_rate,
+
+      tax_invoice_sub_rate_diff: isEditMode
+        ? bill.tax_invoice_sub_rate_diff
+        : bill.rate_diff,
+
+      tax_invoice_sub_commn: isEditMode
+        ? bill.tax_invoice_sub_commn
+        : bill.billing_commn,
+
+      tax_invoice_sub_mill_id: isEditMode
+        ? bill.tax_invoice_sub_mill_id
+        : bill.billing_mill_id,
+
+      tax_invoice_sub_party_id: isEditMode
+        ? bill.tax_invoice_sub_party_id
+        : bill.billing_party_id,
+    }));
+    const data = {
+      tax_invoice_date: values?.tax_invoice_date || null,
+      tax_invoice_ref: values?.tax_invoice_ref || "",
+      tax_invoice_mill_id: values?.tax_invoice_mill_id || null,
+      tax_invoice_description: values?.tax_invoice_description || "",
+      tax_invoice_discount: values?.tax_invoice_discount || "",
+      tax_invoice_sgst: values?.tax_invoice_sgst || "",
+      tax_invoice_cgst: values?.tax_invoice_cgst || "",
+      tax_invoice_igst: values?.tax_invoice_igst || "",
+      tax_invoice_hsn_code: values?.tax_invoice_hsn_code || "",
+      tax_invoice_payment_terms: values?.tax_invoice_payment_terms || "",
+      tax_invoice_type: values?.tax_invoice_type || "",
     };
 
-    if (isEditMode) {
-      payload.purchase_orders_status = values?.purchase_orders_status
-        ? "Open"
-        : "Close";
-    }
+    const payload = {
+      ...data,
+      tax_invoice_date: values.tax_invoice_date
+        ? dayjs(values.tax_invoice_date).format("YYYY-MM-DD")
+        : null,
+      subs: subsdata,
+    };
 
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${PURCHASE_ORDER_LIST}/${id}` : PURCHASE_ORDER_LIST,
+        url: isEditMode ? `${TAX_INVOICE_LIST}/${id}` : TAX_INVOICE_LIST,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
 
-      if (res.code === 201) {
-        message.success(res.message || "Purchase order saved successfully!");
-        await queryClient.invalidateQueries({ queryKey: ["purchasedata"] });
-        navigate("/purchase");
+      if (res.code == 201) {
+        message.success(res.message || "Tax data saved successfully!");
+        await queryClient.invalidateQueries({ queryKey: ["taxinvoicedata"] });
+        navigate("/tax-invoice");
       } else {
-        message.error(res.message || "Failed to save purchase order.");
+        message.error(res.message || "Failed to save Tax data.");
       }
     } catch (error) {
       console.error(error);
-      message.error(error?.message || "Error while saving purchase order.");
+      message.error(error?.message || "Error while saving Tax data.");
     }
   };
   const handleDelete = async (subId) => {
@@ -185,7 +231,7 @@ const TaxInvoiceForm = () => {
 
     try {
       const res = await deleteTrigger({
-        url: `${DELETE_ORDER_SUB}/${subId}`,
+        url: `${TAX_INVOICE_LIST}/${subId}`,
         method: "delete",
       });
 
@@ -221,20 +267,11 @@ const TaxInvoiceForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Purchase Order" : "Create Purchase Order"}
+                {isEditMode ? "Update Tax Invoice" : "Create Tax Invoice"}
               </h2>
             }
             extra={
               <div className="flex items-center gap-2">
-                {isEditMode && (
-                  <Form.Item
-                    name="purchase_orders_status"
-                    valuePropName="checked"
-                    className="!mb-0"
-                  >
-                    <Switch checkedChildren="Open" unCheckedChildren="Close" />
-                  </Form.Item>
-                )}
                 <Form.Item className="text-center !mt-4">
                   <Button
                     type="primary"
@@ -287,6 +324,30 @@ const TaxInvoiceForm = () => {
                 <Form.Item
                   label={
                     <span>
+                      Type <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="tax_invoice_type"
+                  rules={[{ required: true, message: "Select Type" }]}
+                >
+                  <Select
+                    placeholder="Select Type"
+                    options={["COM", "COD"].map((item) => ({
+                      label: item,
+                      value: item,
+                    }))}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span>
                       Tax Invoice Ref <span className="text-red-500">*</span>
                     </span>
                   }
@@ -297,7 +358,15 @@ const TaxInvoiceForm = () => {
                 >
                   <Input readOnly value={taxinvoice?.data?.data} />
                 </Form.Item>
-                <Form.Item label="Discount" name="tax_invoice_discount">
+                <Form.Item
+                  label={
+                    <span>
+                      Discount <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="tax_invoice_discount"
+                  rules={[{ required: true, message: "Enter Discount" }]}
+                >
                   <InputNumber min={1} className="!w-full" type="number" />
                 </Form.Item>
                 <div className="grid grid-cols-3 gap-4">
@@ -326,28 +395,97 @@ const TaxInvoiceForm = () => {
                 </Form.Item>
               </div>
             </Card>
+            {selectedMillId && (
+              <div className="flex justify-end !my-2">
+                <Button
+                  type="default"
+                  icon={<FileSearchOutlined />}
+                  onClick={() => {
+                    const millId = form.getFieldValue("tax_invoice_mill_id");
+                    if (millId) {
+                      setSelectedMill(millId);
+                      setIsModalOpen(true);
+                    } else {
+                      message.warning("Please select a mill first");
+                    }
+                  }}
+                >
+                  View Pending Bills
+                </Button>
+              </div>
+            )}
+
+            {selectedBills.length > 0 && (
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-100 text-gray-700 font-medium border-b">
+                  <tr>
+                    <th className="p-1 border border-gray-200">Purch Date</th>
+                    <th className="p-1 border border-gray-200">Billing Tons</th>
+                    <th className="p-1 border border-gray-200">Item</th>
+                    <th className="p-1 border border-gray-200">
+                      Purchase Rate
+                    </th>
+                    <th className="p-1 border border-gray-200">Sale Rate</th>
+                    <th className="p-1 border border-gray-200">Rate Diff</th>
+                    <th className="p-1 border border-gray-200">Commission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedBills?.map((bill) => (
+                    <tr
+                      key={bill.billing_ref || bill.tax_invoice_sub_billing_ref}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className="p-1 border border-gray-200">
+                        {dayjs(bill.tax_invoice_sub_purchase_date).format(
+                          "DD-MM-YYYY"
+                        )}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.tax_invoice_sub_tones || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200">
+                        {bill.tax_invoice_sub_bf || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.tax_invoice_sub_purchase_rate || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.tax_invoice_sub_sale_rate || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.tax_invoice_sub_rate_diff || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.tax_invoice_sub_commn || ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </Card>
-          <Button
-            type="default"
-            icon={<FileSearchOutlined />}
-            onClick={() => {
-              if (form.getFieldValue("tax_invoice_mill_id")) {
-                setSelectedMill(form.getFieldValue("tax_invoice_mill_id"));
-                setIsModalOpen(true);
-              } else {
-                message.warning("Please select a mill first");
-              }
-            }}
-          >
-            View Pending Bills
-          </Button>
         </Form>
       )}
-      <PendingBillsModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        millId={selectedMill}
-      />
+      {isModalOpen && (
+        <PendingBillsModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          millId={selectedMill}
+          selectedBills={selectedBills}
+          setSelectedBills={setSelectedBills}
+          setBills={setBills}
+          bills={bills}
+          isEditMode={isEditMode}
+          handleDelete={handleDelete}
+        />
+      )}
     </>
   );
 };

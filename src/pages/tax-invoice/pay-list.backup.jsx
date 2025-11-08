@@ -1,14 +1,9 @@
-import {
-  DeleteOutlined,
-  MinusOutlined,
-  PlusOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Empty, message, Modal, Popconfirm, Spin } from "antd";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { TAX_INVOICE_PENDING_BILLING } from "../../api";
+import { Modal, Card, Button, Spin, Empty, message } from "antd";
+import { PlusOutlined, DeleteOutlined, SaveOutlined } from "@ant-design/icons";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { TAX_INVOICE_PENDING_BILLING } from "../../api";
+import dayjs from "dayjs";
 
 const PendingBillsModal = ({
   open,
@@ -19,7 +14,6 @@ const PendingBillsModal = ({
   selectedBills,
   setSelectedBills,
   isEditMode,
-  handleDelete,
 }) => {
   const { trigger: fetchTrigger, loading } = useApiMutation();
   const [fetchedBills, setFetchedBills] = useState([]);
@@ -36,48 +30,17 @@ const PendingBillsModal = ({
       const res = await fetchTrigger({
         url: `${TAX_INVOICE_PENDING_BILLING}/${millId}`,
       });
-
       const data = res?.data || [];
+
+      // Remove already selected bills (existing + temp)
       const filtered = data.filter(
         (bill) =>
-          !selectedBills.some((sel) => {
-            const selectedRef =
-              sel.billing_ref || sel.tax_invoice_sub_billing_ref;
-            return selectedRef === bill.billing_ref;
-          })
+          !selectedBills.some((sel) => sel.billing_ref === bill.billing_ref)
       );
 
       setFetchedBills(data);
       setBills(filtered);
-
-      if (isEditMode && selectedBills?.length) {
-        const normalized = selectedBills.map((b) => ({
-          id: b.id || b.id,
-          tax_invoice_sub_billing_ref:
-            b.tax_invoice_sub_billing_ref || b.billing_ref,
-          tax_invoice_sub_purchase_date:
-            b.tax_invoice_sub_purchase_date || b.purchase_date || null,
-          tax_invoice_sub_tones:
-            b.tax_invoice_sub_tones || b.billing_tones || "",
-          tax_invoice_sub_bf: b.tax_invoice_sub_bf || b.billing_bf || "",
-          tax_invoice_sub_purchase_rate:
-            b.tax_invoice_sub_purchase_rate || b.purchase_rate || "",
-          tax_invoice_sub_sale_rate:
-            b.tax_invoice_sub_sale_rate || b.sale_rate || "",
-          tax_invoice_sub_rate_diff:
-            b.tax_invoice_sub_rate_diff || b.rate_diff || "",
-          tax_invoice_sub_commn:
-            b.tax_invoice_sub_commn || b.billing_commn || "",
-          tax_invoice_sub_mill_id:
-            b.tax_invoice_sub_mill_id || b.billing_mill_id || millId,
-          tax_invoice_sub_party_id:
-            b.tax_invoice_sub_party_id || b.billing_party_id || null,
-        }));
-
-        setTempSelectedBills(normalized);
-      } else {
-        setTempSelectedBills([]);
-      }
+      setTempSelectedBills(selectedBills); // preload selected bills when modal opens
     } catch (err) {
       console.error("Failed to fetch bills", err);
     }
@@ -139,6 +102,7 @@ const PendingBillsModal = ({
     setTempSelectedBills([]);
     onClose();
   };
+
   return (
     <Modal
       title="Pending Bills"
@@ -198,79 +162,70 @@ const PendingBillsModal = ({
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-100 text-gray-700 font-medium border-b">
                     <tr>
-                      <th className="p-1 border border-gray-200">Purch Date</th>
-                      <th className="p-1 border border-gray-200">
-                        Billing Tons
-                      </th>
-                      <th className="p-1 border border-gray-200">Item</th>
-                      <th className="p-1 border border-gray-200">
-                        Purchase Rate
-                      </th>
-                      <th className="p-1 border border-gray-200">Sale Rate</th>
-                      <th className="p-1 border border-gray-200">Rate Diff</th>
-                      <th className="p-1 border border-gray-200">Commission</th>
-                      <th className="p-1 border border-gray-200 text-center">
-                        Action
-                      </th>
+                      <th className="p-1 border">Bill Ref</th>
+                      <th className="p-1 border">Purch Date</th>
+                      <th className="p-1 border">Billing Tons</th>
+                      <th className="p-1 border">Item</th>
+                      <th className="p-1 border">Purchase Rate</th>
+                      <th className="p-1 border">Sale Rate</th>
+                      <th className="p-1 border">Rate Diff</th>
+                      <th className="p-1 border">Commission</th>
+                      <th className="p-1 border text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {tempSelectedBills.map((bill) => (
-                      <tr
-                        key={bill.tax_invoice_sub_billing_ref}
-                        className="hover:bg-gray-50"
-                      >
+                      <tr key={bill.billing_ref} className="hover:bg-gray-50">
                         <td className="p-1 border border-gray-200">
-                          {dayjs(bill.tax_invoice_sub_purchase_date).format(
-                            "DD-MM-YYYY"
-                          )}
+                          {dayjs(
+                            isEditMode
+                              ? bill.tax_invoice_sub_purchase_date
+                              : bill.purchase_date
+                          ).format("DD-MM-YYYY")}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_tones || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_tones
+                            : bill.billing_tones}
                         </td>
 
                         <td className="p-1 border border-gray-200">
-                          {bill.tax_invoice_sub_bf || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_bf
+                            : bill.billing_bf}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_purchase_rate || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_purchase_rate
+                            : bill.purchase_rate}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_sale_rate || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_sale_rate
+                            : bill.sale_rate}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_rate_diff || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_rate_diff
+                            : bill.rate_diff}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_commn || ""}
+                          {isEditMode
+                            ? bill.tax_invoice_sub_commn
+                            : bill.billing_commn}
                         </td>
-
-                        <td className="border border-gray-200 text-center">
-                          {bill.id ? (
-                            <Popconfirm
-                              title="Are you sure to delete this bill?"
-                              onConfirm={() => handleDelete(bill.id)}
-                              okText="Yes"
-                              cancelText="No"
-                            >
-                              <Button
-                                icon={<DeleteOutlined />}
-                                type="text"
-                                danger
-                              />
-                            </Popconfirm>
-                          ) : (
-                            <Button
-                              icon={<MinusOutlined />}
-                              type="text"
-                              onClick={() => handleRemove(bill)}
-                            />
-                          )}
+                        <td className="border text-center">
+                          <Button
+                            icon={<DeleteOutlined />}
+                            type="text"
+                            danger
+                            onClick={() => handleRemove(bill)}
+                          />
                         </td>
                       </tr>
                     ))}
