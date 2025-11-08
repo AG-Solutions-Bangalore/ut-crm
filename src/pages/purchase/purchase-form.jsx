@@ -16,7 +16,6 @@ import {
   Select,
   Spin,
   Switch,
-  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -336,33 +335,6 @@ const PurchaseForm = () => {
               <Form.List
                 name="subs"
                 initialValue={[{}]}
-                // rules={[
-                //   {
-                //     validator: async (_, subs) => {
-                //       if (!Array.isArray(subs) || subs.length === 0) {
-                //         return Promise.reject(
-                //           new Error("Please add at least one sub item.")
-                //         );
-                //       }
-
-                //       const hasAnyFilledRow = subs.some((row) =>
-                //         Object.values(row || {}).some(
-                //           (val) => val !== undefined && val !== ""
-                //         )
-                //       );
-
-                //       if (!hasAnyFilledRow) {
-                //         return Promise.reject(
-                //           new Error(
-                //             "Please fill at least one sub item before submitting."
-                //           )
-                //         );
-                //       }
-
-                //       return Promise.resolve();
-                //     },
-                //   },
-                // ]}
                 rules={[
                   {
                     validator: async (_, subs) => {
