@@ -28,6 +28,14 @@ import TaxInvoiceList from "./pages/tax-invoice/tax-invoice-list";
 import TaxInvoiceForm from "./pages/tax-invoice/tax-invoice-form";
 import AuthReport from "./pages/auth-report/AuthReport";
 
+import PartyWiseReport from "./pages/report/party/PartyWiseReport";
+import MillWiseReport from "./pages/report/mill/MillWiseReport";
+import BalanceOrderReport from "./pages/report/balance/BalanceOrderReport";
+import BalanceCloseOrderReport from "./pages/report/balance/BalanceCloseOrderReport";
+import PriceRateReport from "./pages/report/price-rate/PriceRateReport";
+import SalesReport from "./pages/report/sales/SalesReport";
+import BalancePayableReport from "./pages/report/balance/BalancePayableReport";
+
 function App() {
   return (
     <AppInitializer>
@@ -74,6 +82,15 @@ function App() {
           <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
 
           <Route path="/report-format" element={<ReportFormat />} />
+
+          {/* report  */}
+          <Route path="/report/balance-order" element={<BalanceOrderReport />} />
+          <Route path="/report/balance-close-order" element={<BalanceCloseOrderReport />} />
+          <Route path="/report/price-rate" element={<PriceRateReport />} />
+          <Route path="/report/sales" element={<SalesReport />} />
+          <Route path="/report/mill-wise" element={<MillWiseReport />} />
+          <Route path="/report/party-wise" element={<PartyWiseReport />} />
+          <Route path="/report/balance-payable" element={<BalancePayableReport />} />
         </Route>
 
         {/* Fallback route */}

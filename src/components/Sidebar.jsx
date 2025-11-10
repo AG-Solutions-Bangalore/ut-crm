@@ -98,33 +98,46 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     //   label: "Unit",
     // },
   ];
-
-  const fullReportChildren = [
+  const reportChildren = [
     {
-      key: "sales-submenu",
-      icon: <ProfileOutlined />,
-      label: <span id="report-scroll-anchor">Master</span>,
-      children: [
-        {
-          key: "/report-life-member",
-          icon: <ProfileOutlined />,
-          label: "Life Membership",
-        },
-        {
-          key: "/report-couple-member",
-          icon: <ProfileOutlined />,
-          label: "Couple Membership",
-        },
-        {
-          key: "/report-truste-member",
-          icon: <ProfileOutlined />,
-          label: "Trustee",
-        },
-      ],
+      key: "/report/balance-order",
+      icon: <ApartmentOutlined />,
+      label: "Balance Order",
     },
-    // ...eventReportChildren,
+    {
+      key: "/report/balance-close-order",
+      icon: <ApartmentOutlined />,
+      label: "Balance Close Order",
+    },
+    {
+      key: "/report/price-rate",
+      icon: <ApartmentOutlined />,
+      label: "Price Rate",
+    },
+    {
+      key: "/report/sales",
+      icon: <ApartmentOutlined />,
+      label: "Sales",
+    },
+    {
+      key: "/report/mill-wise",
+      icon: <ApartmentOutlined />,
+      label: "Mill Wise",
+    },
+    {
+      key: "/report/party-wise",
+      icon: <TeamOutlined />,
+      label: "Party Wise",
+    },
+    {
+      key: "/report/balance-payable",
+      icon: <TeamOutlined />,
+      label: "Balance  Payable",
+    },
+    
+   
   ];
-
+  
   if (collapsed) {
     return [
       ...dashboardItems,
@@ -138,6 +151,12 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
       { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
       { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+      {
+        key: "sub1",
+        icon: <MailOutlined />,
+        label: "Report",
+        children: reportChildren,
+      },
 
       // {
       //   key: "sub1",
@@ -172,6 +191,18 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
     { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
     { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+    {
+      type: "group",
+      label: "Report",
+      children: [
+        {
+          key: "sub1",
+          icon: <MailOutlined />,
+          label: "Report",
+          children: reportChildren,
+        },
+      ],
+    },
 
     // {
     //   type: "group",
