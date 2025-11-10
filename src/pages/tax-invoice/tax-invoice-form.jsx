@@ -1,9 +1,4 @@
-import {
-  DeleteOutlined,
-  FileSearchOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   App,
@@ -16,22 +11,16 @@ import {
   Popconfirm,
   Select,
   Spin,
-  Switch,
-  Tooltip,
 } from "antd";
+import { useWatch } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  DELETE_ORDER_SUB,
-  PURCHASE_ORDER_LIST,
-  TAX_INVOICE_LIST,
-} from "../../api";
+import { TAX_INVOICE_LIST, TAX_INVOICE_SUB_DELETE } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import { useSelector } from "react-redux";
 import PendingBillsModal from "./pending-bill";
-import { useWatch } from "antd/es/form/Form";
 
 const TaxInvoiceForm = () => {
   const { message } = App.useApp();
@@ -48,6 +37,7 @@ const TaxInvoiceForm = () => {
   const selectedMillId = useWatch("tax_invoice_mill_id", form);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMill, setSelectedMill] = useState(null);
+  console.log(selectedBills, "selectedBillsform");
   const { mill, taxinvoice } = useMasterData({
     mill: true,
     party: true,
@@ -75,9 +65,9 @@ const TaxInvoiceForm = () => {
     tax_invoice_sgst: "",
     tax_invoice_cgst: "",
     tax_invoice_igst: "",
-    tax_invoice_hsn_code: "",
+    tax_invoice_hsn_code: "996111",
     tax_invoice_payment_terms: "",
-    tax_invoice_type: "",
+    tax_invoice_type: null,
   });
   const handleMillChange = (millId) => {
     taxinvoice.refetch();
@@ -126,8 +116,28 @@ const TaxInvoiceForm = () => {
         };
         setSelectedMill(res?.mill || null);
         setInitialData(formattedData);
-        setSelectedBills(formattedData.subs || []);
+        // setSelectedBills(formattedData.subs || []);
         form.setFieldsValue(formattedData);
+
+        if (formattedData.subs?.length) {
+          const normalized = formattedData.subs.map((b) => ({
+            id: b.id || b.id,
+            billing_ref: b.tax_invoice_sub_billing_ref,
+            purchase_date: b.tax_invoice_sub_purchase_date || null,
+            billing_tones: b.tax_invoice_sub_tones || "",
+            billing_bf: b.tax_invoice_sub_bf || "",
+            purchase_rate: b.tax_invoice_sub_purchase_rate || "",
+            sale_rate: b.tax_invoice_sub_sale_rate || "",
+            rate_diff: b.tax_invoice_sub_rate_diff || "",
+            billing_commn: b.tax_invoice_sub_commn || "",
+            billing_mill_id: b.tax_invoice_sub_mill_id || "",
+            billing_party_id: b.tax_invoice_sub_party_id || null,
+          }));
+
+          setSelectedBills(normalized);
+        } else {
+          setSelectedBills([]);
+        }
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -142,55 +152,35 @@ const TaxInvoiceForm = () => {
   const handleSubmit = async (values) => {
     const subsdata = selectedBills.map((bill) => ({
       id: isEditMode ? bill.id : null,
-      tax_invoice_sub_billing_ref: isEditMode
-        ? bill.tax_invoice_sub_billing_ref
-        : bill.billing_ref,
+      tax_invoice_sub_billing_ref: bill.billing_ref,
 
-      tax_invoice_sub_purchase_date: isEditMode
-        ? bill.tax_invoice_sub_purchase_date
-        : bill.purchase_date,
+      tax_invoice_sub_purchase_date: bill.purchase_date,
 
-      tax_invoice_sub_tones: isEditMode
-        ? bill.tax_invoice_sub_tones
-        : bill.billing_tones,
+      tax_invoice_sub_tones: bill.billing_tones,
 
-      tax_invoice_sub_bf: isEditMode
-        ? bill.tax_invoice_sub_bf
-        : bill.billing_bf,
+      tax_invoice_sub_bf: bill.billing_bf,
 
-      tax_invoice_sub_sale_rate: isEditMode
-        ? bill.tax_invoice_sub_sale_rate
-        : bill.sale_rate,
+      tax_invoice_sub_sale_rate: bill.sale_rate,
 
-      tax_invoice_sub_purchase_rate: isEditMode
-        ? bill.tax_invoice_sub_purchase_rate
-        : bill.purchase_rate,
+      tax_invoice_sub_purchase_rate: bill.purchase_rate,
 
-      tax_invoice_sub_rate_diff: isEditMode
-        ? bill.tax_invoice_sub_rate_diff
-        : bill.rate_diff,
+      tax_invoice_sub_rate_diff: bill.rate_diff,
 
-      tax_invoice_sub_commn: isEditMode
-        ? bill.tax_invoice_sub_commn
-        : bill.billing_commn,
+      tax_invoice_sub_commn: bill.billing_commn,
 
-      tax_invoice_sub_mill_id: isEditMode
-        ? bill.tax_invoice_sub_mill_id
-        : bill.billing_mill_id,
+      tax_invoice_sub_mill_id: bill.billing_mill_id,
 
-      tax_invoice_sub_party_id: isEditMode
-        ? bill.tax_invoice_sub_party_id
-        : bill.billing_party_id,
+      tax_invoice_sub_party_id: bill.billing_party_id,
     }));
     const data = {
       tax_invoice_date: values?.tax_invoice_date || null,
       tax_invoice_ref: values?.tax_invoice_ref || "",
       tax_invoice_mill_id: values?.tax_invoice_mill_id || null,
       tax_invoice_description: values?.tax_invoice_description || "",
-      tax_invoice_discount: values?.tax_invoice_discount || "",
-      tax_invoice_sgst: values?.tax_invoice_sgst || "",
-      tax_invoice_cgst: values?.tax_invoice_cgst || "",
-      tax_invoice_igst: values?.tax_invoice_igst || "",
+      tax_invoice_discount: values?.tax_invoice_discount || 0,
+      tax_invoice_sgst: values?.tax_invoice_sgst || 0,
+      tax_invoice_cgst: values?.tax_invoice_cgst || 0,
+      tax_invoice_igst: values?.tax_invoice_igst || 0,
       tax_invoice_hsn_code: values?.tax_invoice_hsn_code || "",
       tax_invoice_payment_terms: values?.tax_invoice_payment_terms || "",
       tax_invoice_type: values?.tax_invoice_type || "",
@@ -231,13 +221,13 @@ const TaxInvoiceForm = () => {
 
     try {
       const res = await deleteTrigger({
-        url: `${TAX_INVOICE_LIST}/${subId}`,
+        url: `${TAX_INVOICE_SUB_DELETE}/${subId}`,
         method: "delete",
       });
 
-      if (res?.code === 201) {
+      if (res?.code == 201) {
         message.success(res?.message || "Sub-item deleted successfully!");
-        fetchPurchase();
+        // fetchPurchase();
       } else {
         message.error(res?.message || "Failed to delete sub-item.");
       }
@@ -248,7 +238,7 @@ const TaxInvoiceForm = () => {
   };
 
   const loading = fetchLoading || mill?.loading;
-
+  console.log(selectedBills, "selectedBills");
   return (
     <>
       {loading ? (
@@ -358,15 +348,7 @@ const TaxInvoiceForm = () => {
                 >
                   <Input readOnly value={taxinvoice?.data?.data} />
                 </Form.Item>
-                <Form.Item
-                  label={
-                    <span>
-                      Discount <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  name="tax_invoice_discount"
-                  rules={[{ required: true, message: "Enter Discount" }]}
-                >
+                <Form.Item label="Discount " name="tax_invoice_discount">
                   <InputNumber min={1} className="!w-full" type="number" />
                 </Form.Item>
                 <div className="grid grid-cols-3 gap-4">
@@ -428,42 +410,62 @@ const TaxInvoiceForm = () => {
                     <th className="p-1 border border-gray-200">Sale Rate</th>
                     <th className="p-1 border border-gray-200">Rate Diff</th>
                     <th className="p-1 border border-gray-200">Commission</th>
+
+                    {isEditMode && (
+                      <th className="p-1 border border-gray-200 text-center">
+                        Action
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {selectedBills?.map((bill) => (
-                    <tr
-                      key={bill.billing_ref || bill.tax_invoice_sub_billing_ref}
-                      className="hover:bg-gray-50"
-                    >
+                    <tr key={bill.billing_ref} className="hover:bg-gray-50">
                       <td className="p-1 border border-gray-200">
-                        {dayjs(bill.tax_invoice_sub_purchase_date).format(
-                          "DD-MM-YYYY"
+                        {dayjs(bill.purchase_date).format("DD-MM-YYYY")}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.billing_tones || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200">
+                        {bill.billing_bf || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.purchase_rate || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.sale_rate || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.rate_diff || ""}
+                      </td>
+
+                      <td className="p-1 border border-gray-200 text-right">
+                        {bill.billing_commn || ""}
+                      </td>
+
+                      <td className="border border-gray-200 text-center">
+                        {bill.id && (
+                          <Popconfirm
+                            title="Are you sure to delete this bill?"
+                            onConfirm={() => handleDelete(bill.id)}
+                            okText="Yes"
+                            cancelText="No"
+                            disabled={selectedBills.length <= 1}
+                          >
+                            <Button
+                              icon={<DeleteOutlined />}
+                              type="text"
+                              danger
+                              disabled={selectedBills.length <= 1}
+                            />
+                          </Popconfirm>
                         )}
-                      </td>
-
-                      <td className="p-1 border border-gray-200 text-right">
-                        {bill.tax_invoice_sub_tones || ""}
-                      </td>
-
-                      <td className="p-1 border border-gray-200">
-                        {bill.tax_invoice_sub_bf || ""}
-                      </td>
-
-                      <td className="p-1 border border-gray-200 text-right">
-                        {bill.tax_invoice_sub_purchase_rate || ""}
-                      </td>
-
-                      <td className="p-1 border border-gray-200 text-right">
-                        {bill.tax_invoice_sub_sale_rate || ""}
-                      </td>
-
-                      <td className="p-1 border border-gray-200 text-right">
-                        {bill.tax_invoice_sub_rate_diff || ""}
-                      </td>
-
-                      <td className="p-1 border border-gray-200 text-right">
-                        {bill.tax_invoice_sub_commn || ""}
                       </td>
                     </tr>
                   ))}

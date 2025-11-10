@@ -24,7 +24,7 @@ const PendingBillsModal = ({
   const { trigger: fetchTrigger, loading } = useApiMutation();
   const [fetchedBills, setFetchedBills] = useState([]);
   const [tempSelectedBills, setTempSelectedBills] = useState([]);
-
+  console.log(tempSelectedBills, "tempSelectedBills");
   useEffect(() => {
     if (open && millId) {
       fetchBills();
@@ -50,27 +50,21 @@ const PendingBillsModal = ({
       setFetchedBills(data);
       setBills(filtered);
 
-      if (isEditMode && selectedBills?.length) {
+      if (selectedBills?.length) {
         const normalized = selectedBills.map((b) => ({
           id: b.id || b.id,
-          tax_invoice_sub_billing_ref:
-            b.tax_invoice_sub_billing_ref || b.billing_ref,
-          tax_invoice_sub_purchase_date:
+          billing_ref: b.tax_invoice_sub_billing_ref || b.billing_ref,
+          purchase_date:
             b.tax_invoice_sub_purchase_date || b.purchase_date || null,
-          tax_invoice_sub_tones:
-            b.tax_invoice_sub_tones || b.billing_tones || "",
-          tax_invoice_sub_bf: b.tax_invoice_sub_bf || b.billing_bf || "",
-          tax_invoice_sub_purchase_rate:
+          billing_tones: b.tax_invoice_sub_tones || b.billing_tones || "",
+          billing_bf: b.tax_invoice_sub_bf || b.billing_bf || "",
+          purchase_rate:
             b.tax_invoice_sub_purchase_rate || b.purchase_rate || "",
-          tax_invoice_sub_sale_rate:
-            b.tax_invoice_sub_sale_rate || b.sale_rate || "",
-          tax_invoice_sub_rate_diff:
-            b.tax_invoice_sub_rate_diff || b.rate_diff || "",
-          tax_invoice_sub_commn:
-            b.tax_invoice_sub_commn || b.billing_commn || "",
-          tax_invoice_sub_mill_id:
-            b.tax_invoice_sub_mill_id || b.billing_mill_id || millId,
-          tax_invoice_sub_party_id:
+          sale_rate: b.tax_invoice_sub_sale_rate || b.sale_rate || "",
+          rate_diff: b.tax_invoice_sub_rate_diff || b.rate_diff || "",
+          billing_commn: b.tax_invoice_sub_commn || b.billing_commn || "",
+          billing_mill_id: b.tax_invoice_sub_mill_id || b.billing_mill_id || "",
+          billing_party_id:
             b.tax_invoice_sub_party_id || b.billing_party_id || null,
         }));
 
@@ -216,38 +210,33 @@ const PendingBillsModal = ({
                   </thead>
                   <tbody>
                     {tempSelectedBills.map((bill) => (
-                      <tr
-                        key={bill.tax_invoice_sub_billing_ref}
-                        className="hover:bg-gray-50"
-                      >
+                      <tr key={bill.billing_ref} className="hover:bg-gray-50">
                         <td className="p-1 border border-gray-200">
-                          {dayjs(bill.tax_invoice_sub_purchase_date).format(
-                            "DD-MM-YYYY"
-                          )}
+                          {dayjs(bill.purchase_date).format("DD-MM-YYYY")}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_tones || ""}
+                          {bill.billing_tones || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200">
-                          {bill.tax_invoice_sub_bf || ""}
+                          {bill.billing_bf || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_purchase_rate || ""}
+                          {bill.purchase_rate || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_sale_rate || ""}
+                          {bill.sale_rate || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_rate_diff || ""}
+                          {bill.rate_diff || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.tax_invoice_sub_commn || ""}
+                          {bill.billing_commn || ""}
                         </td>
 
                         <td className="border border-gray-200 text-center">
@@ -257,11 +246,14 @@ const PendingBillsModal = ({
                               onConfirm={() => handleDelete(bill.id)}
                               okText="Yes"
                               cancelText="No"
+                              disabled={tempSelectedBills.length <= 1}
                             >
                               <Button
                                 icon={<DeleteOutlined />}
                                 type="text"
                                 danger
+                                                              disabled={tempSelectedBills.length <= 1}
+
                               />
                             </Popconfirm>
                           ) : (
