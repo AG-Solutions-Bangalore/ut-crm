@@ -99,18 +99,6 @@ const TaxInvoiceList = () => {
       ),
     },
     {
-      title: "HSN Code",
-      dataIndex: "tax_invoice_hsn_code",
-      key: "tax_invoice_hsn_code",
-      render: (text) => <span>{text || "-"}</span>,
-    },
-    {
-      title: "Payment Terms",
-      dataIndex: "tax_invoice_payment_terms",
-      key: "tax_invoice_payment_terms",
-      render: (text) => <span>{text || "-"}</span>,
-    },
-    {
       title: "Actions",
       key: "actions",
       width: 120,
@@ -135,17 +123,7 @@ const TaxInvoiceList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <Tabs
-          activeKey={activeTab}
-          onChange={(key) => {
-            setActiveTab(key);
-            setPage(1);
-          }}
-          items={[
-            { key: "Open", label: "Open Tax-Invoice List" },
-            { key: "Close", label: "Closed Tax-Invoice List" },
-          ]}
-        />
+        <h2 className="text-2xl font-semibold">Tax-Invoice List</h2>
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"

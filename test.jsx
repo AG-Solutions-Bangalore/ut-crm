@@ -1,12 +1,10 @@
-tax_invoice_date
-tax_invoice_ref
-tax_invoice_mill_id
-tax_invoice_description
-tax_invoice_discount
-tax_invoice_sgst
-tax_invoice_cgst
-tax_invoice_igst
-tax_invoice_hsn_code
-tax_invoice_payment_terms
-// tax_invoice_type------>COM / COD
-subs[tax_invoice_sub_billing_ref,tax_invoice_sub_purchase_date,tax_invoice_sub_tones,tax_invoice_sub_bf,tax_invoice_sub_sale_rate,tax_invoice_sub_purchase_rate,tax_invoice_sub_rate_diff,tax_invoice_sub_commn,tax_invoice_sub_mill_id,tax_invoice_sub_party_id]
+billing_bf: "230/LWC/REEL";
+billing_commn: "-748";
+billing_mill_id: 6;
+billing_party_id: 3;
+billing_ref: "2025-26-6";
+billing_tones: "34.00";
+purchase_date: "2025-11-05";
+purchase_rate: "67.00";
+rate_diff: "-22.00";
+sale_rate: "45.00";
