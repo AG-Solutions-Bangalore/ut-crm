@@ -65,5 +65,6 @@ export const TRADE_INVOICE_LIST = `/trade-invoice`;
 export const TRADE_INVOICE_REF = `/trade-invoice-ref`;
 // ------------TAX_INVOICE-------------------
 export const TAX_INVOICE_LIST = "/tax-invoice";
+export const TAX_INVOICE_SUB_DELETE = "/tax-invoice-sub";
 export const TAX_INVOICE_REF = "/tax-invoice-ref";
 export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
