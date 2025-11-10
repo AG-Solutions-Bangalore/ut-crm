@@ -57,7 +57,24 @@ const BalancePayableReport = () => {
     enabled: !!token,
   });
 
+  const groupedReportData = reportData.reduce((acc, item) => {
+    const millName = item.mill_name;
+    if (!acc[millName]) {
+      acc[millName] = [];
+    }
+    acc[millName].push(item);
+    return acc;
+  }, {});
 
+  const calculateMillTotals = (balancePayableData) => {
+    return balancePayableData.reduce((acc, item) => {
+      acc.tones += parseFloat(item.billing_tones) || 0;
+      acc.amount += parseFloat(item.amount) || 0;
+      return acc;
+    }, { tones: 0, amount: 0 });
+  };
+
+ 
   const handleGenerateReport = async () => {
     if (!fromDate || !toDate) {
       message.error('Please select both From Date and To Date');
@@ -254,8 +271,81 @@ const BalancePayableReport = () => {
                 
 
                   <div ref={containerRef} className="md:overflow-x-auto">
-                {JSON.stringify(reportData?.map(item=>item.mill_name))}
+        
+ {Object.entries(groupedReportData).map(([millName, balancePayableData]) => {
+                        const totals = calculateMillTotals(balancePayableData);
+                        
+                        return (
+                          <div
+                            key={millName}
+                            className="mb-6 border-t border-l border-r border-black text-[13px]"
+                          >
+                            <h2 className="p-2 bg-gray-200 font-bold border-b border-black">{millName}</h2>
+                            
+                            <div
+                              className="grid bg-white"
+                              style={{
+                                gridTemplateColumns: "0.8fr 1.5fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+                              }}
+                            >
+                              {[
+                                "P Date",
+                                "Party Name",
+                                "S Date",
+                                "Bill No",
+                                "BF",
+                                "Tones",
+                                "Rate"
+                              ].map((header, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-2 font-bold border-b border-r border-t border-black text-gray-900 text-center"
+                                >
+                                  {header}
+                                </div>
+                              ))}
 
+                              {balancePayableData.map((item, index) => (
+                                <React.Fragment key={index}>
+                                  <div className="p-2 border-b border-r border-black text-center">
+                                    {dayjs(item.purchase_date).format('DD-MM-YYYY')}
+                                  </div>
+                                  <div className="p-2 border-b border-r border-black">
+                                    {item.party_name}
+                                  </div>
+                                  <div className="p-2 border-b border-r border-black text-center">
+                                    {dayjs(item.purchase_date).format('DD-MM-YYYY')}
+                                  </div>
+                                  <div className="p-2 border-b border-r border-black text-center">
+                                    {item.billing_no}
+                                  </div>
+                                  <div className="p-2 border-b border-r border-black text-center">
+                                    {item.billing_bf}
+                                  </div>
+                                  <div className="p-2 border-b border-r border-black text-right">
+                                    {parseFloat(item.billing_tones).toFixed(2)}
+                                  </div>
+                                  <div className="p-2 border-b border-black text-right">
+                                    ₹{parseFloat(item.purchase_rate).toFixed(2)}
+                                  </div>
+                                </React.Fragment>
+                              ))}
+
+                              <div className="p-2 border-b border-r border-black font-bold"></div>
+                              <div className="p-2 border-b border-r border-black"></div>
+                              <div className="p-2 border-b border-r border-black"></div>
+                              <div className="p-2 border-b border-r border-black"></div>
+                              <div className="p-2 border-b border-r border-black font-bold text-center">
+                                Total
+                              </div>
+                              <div className="p-2 border-b border-r border-black font-bold text-right">
+                                {totals.tones.toFixed(2)}
+                              </div>
+                              <div className="p-2 border-b border-black"></div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     {/* first group by mill than group by month inside month table will be there and each month has own total and grandtotal */}
 
 
