@@ -1,13 +1,12 @@
-import { EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { useQueryClient } from "@tanstack/react-query";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   App,
   Button,
   Card,
   Input,
+  Popconfirm,
   Space,
   Spin,
-  Tabs,
   Tag,
   Tooltip,
 } from "antd";
@@ -17,34 +16,53 @@ import { useNavigate } from "react-router-dom";
 import { TAX_INVOICE_LIST } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
+import { useApiMutation } from "../../hooks/useApiMutation";
 
 const { Search } = Input;
 
 const TaxInvoiceList = () => {
+  const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("Open");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const { trigger: UpdateStatus } = useApiMutation();
-  const { message } = App.useApp();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const {
     data: taxinvoicedata,
     isLoading,
     refetch,
   } = useGetApiMutation({
     url: TAX_INVOICE_LIST,
-    queryKey: ["taxinvoicedata", debouncedSearch, page, activeTab],
-    params: { search: debouncedSearch, page, type: activeTab },
+    queryKey: ["taxinvoicedata", debouncedSearch, page],
+    params: { search: debouncedSearch, page },
   });
+  const { trigger: deleteTrigger } = useApiMutation();
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
+  const handleDelete = async (id) => {
+    if (!id) {
+      message.error("Invalid sub-item ID.");
+      return;
+    }
 
+    try {
+      const res = await deleteTrigger({
+        url: `${TAX_INVOICE_LIST}/${id}`,
+        method: "delete",
+      });
+
+      if (res?.code === 201) {
+        message.success(res?.message || "Item deleted successfully!");
+        refetch();
+      } else {
+        message.error(res?.message || "Failed to delete Item.");
+      }
+    } catch (error) {
+      message.error(error?.message || "Error while deleting sub-item.");
+    }
+  };
   const columns = [
     {
       title: "Invoice No",
@@ -111,6 +129,16 @@ const TaxInvoiceList = () => {
               size="small"
               onClick={() => navigate(`/tax-invoice/edit/${record.id}`)}
             />
+          </Tooltip>
+          <Tooltip title="Delete Tax Invoice">
+            <Popconfirm
+              title="Are you sure to delete this bill?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button icon={<DeleteOutlined />} type="text" danger />
+            </Popconfirm>
           </Tooltip>
         </Space>
       ),
