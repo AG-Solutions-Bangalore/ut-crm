@@ -1,16 +1,25 @@
 import {
-  ArrowRightOutlined,
-  BookOutlined,
-  CloseOutlined,
-  FileOutlined,
   HomeOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
-
-import {
-  ApartmentOutlined,
+  FileTextOutlined,
+  AppstoreOutlined,
   TeamOutlined,
   UserSwitchOutlined,
+  BookOutlined,
+  ApartmentOutlined,
+  ShoppingCartOutlined,
+  FileDoneOutlined,
+  DollarCircleOutlined,
+  SolutionOutlined,
+  FileProtectOutlined,
+  ReconciliationOutlined,
+  BankOutlined,
+  AuditOutlined,
+  WalletOutlined,
+  BarChartOutlined,
+  FileSearchOutlined,
+  BookFilled,
+  CloseOutlined,
+  ArrowRightOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -21,11 +30,157 @@ import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
 
-const getMenuItems = (collapsed, userTypeRaw) => {
+// const getMenuItems = (collapsed) => {
+//   const dashboardItems = [
+//     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
+
+//     { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
+//   ];
+
+//   const managementChildren = [
+//     {
+//       key: "/master/mill",
+//       icon: <ApartmentOutlined />,
+//       label: "Mill",
+//     },
+//     {
+//       key: "/master/party",
+//       icon: <TeamOutlined />,
+//       label: "Party",
+//     },
+//     {
+//       key: "/master/item",
+//       icon: <UserSwitchOutlined />,
+//       label: "Item",
+//     },
+//     {
+//       key: "/master/shade",
+//       icon: <BookOutlined />,
+//       label: "Shade",
+//     },
+//   ];
+//   const reportChildren = [
+//     { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
+//     {
+//       key: "/report/balance-order",
+//       icon: <ApartmentOutlined />,
+//       label: "Balance Order",
+//     },
+//     {
+//       key: "/report/balance-close-order",
+//       icon: <ApartmentOutlined />,
+//       label: "Balance Close Order",
+//     },
+//     {
+//       key: "/report/price-rate",
+//       icon: <ApartmentOutlined />,
+//       label: "Price Rate",
+//     },
+//     {
+//       key: "/report/sales",
+//       icon: <ApartmentOutlined />,
+//       label: "Sales",
+//     },
+//     {
+//       key: "/report/mill-wise",
+//       icon: <ApartmentOutlined />,
+//       label: "Mill Wise",
+//     },
+//     {
+//       key: "/report/party-wise",
+//       icon: <TeamOutlined />,
+//       label: "Party Wise",
+//     },
+//     {
+//       key: "/report/balance-payable",
+//       icon: <TeamOutlined />,
+//       label: "Balance  Payable",
+//     },
+//     {
+//       key: "/report/balance-receivable",
+//       icon: <TeamOutlined />,
+//       label: "Balance  Receivable",
+//     },
+//     {
+//       key: "/report/party",
+//       icon: <TeamOutlined />,
+//       label: "Party",
+//     },
+//     {
+//       key: "/report/mill",
+//       icon: <TeamOutlined />,
+//       label: "Mill",
+//     },
+
+//   ];
+
+//   if (collapsed) {
+//     return [
+//       ...dashboardItems,
+//       {
+//         key: "sub",
+//         icon: <MailOutlined />,
+//         label: "Management",
+//         children: managementChildren,
+//       },
+//       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+//       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+//       { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+//       { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
+//       { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+//       { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
+//       {
+//         key: "sub1",
+//         icon: <MailOutlined />,
+//         label: "Report",
+//         children: reportChildren,
+//       },
+//     ];
+//   }
+
+//   return [
+//     { type: "group", label: "Dashboard", children: dashboardItems },
+//     {
+//       type: "group",
+//       label: "Master",
+//       children: [
+//         {
+//           key: "sub",
+//           icon: <MailOutlined />,
+//           label: "Master",
+//           children: managementChildren,
+//         },
+//       ],
+//     },
+//     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
+//     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
+//     { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+//     { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
+//     { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+//     { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
+
+//     {
+//       type: "group",
+//       label: "Report",
+//       children: [
+//         {
+//           key: "sub1",
+//           icon: <MailOutlined />,
+//           label: "Report",
+//           children: reportChildren,
+//         },
+//       ],
+//     },
+//   ];
+// };
+const getMenuItems = (collapsed) => {
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
-    { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
+    {
+      key: "/report-format",
+      icon: <FileTextOutlined />,
+      label: "Report Format",
+    },
   ];
 
   const managementChildren = [
@@ -41,7 +196,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
     {
       key: "/master/item",
-      icon: <UserSwitchOutlined />,
+      icon: <AppstoreOutlined />,
       label: "Item",
     },
     {
@@ -50,41 +205,62 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       label: "Shade",
     },
   ];
+
   const reportChildren = [
     {
+      key: "/auth-report",
+      icon: <FileProtectOutlined />,
+      label: "Auth Letter",
+    },
+    {
       key: "/report/balance-order",
-      icon: <ApartmentOutlined />,
+      icon: <ReconciliationOutlined />,
       label: "Balance Order",
     },
     {
       key: "/report/balance-close-order",
-      icon: <ApartmentOutlined />,
+      icon: <FileDoneOutlined />,
       label: "Balance Close Order",
     },
     {
       key: "/report/price-rate",
-      icon: <ApartmentOutlined />,
+      icon: <BarChartOutlined />,
       label: "Price Rate",
     },
     {
       key: "/report/sales",
-      icon: <ApartmentOutlined />,
+      icon: <ShoppingCartOutlined />,
       label: "Sales",
     },
     {
       key: "/report/mill-wise",
-      icon: <ApartmentOutlined />,
+      icon: <BankOutlined />,
       label: "Mill Wise",
     },
     {
       key: "/report/party-wise",
-      icon: <TeamOutlined />,
+      icon: <SolutionOutlined />,
       label: "Party Wise",
     },
     {
       key: "/report/balance-payable",
+      icon: <WalletOutlined />,
+      label: "Balance Payable",
+    },
+    {
+      key: "/report/balance-receivable",
+      icon: <DollarCircleOutlined />,
+      label: "Balance Receivable",
+    },
+    {
+      key: "/report/party",
       icon: <TeamOutlined />,
-      label: "Balance  Payable",
+      label: "Party",
+    },
+    {
+      key: "/report/mill",
+      icon: <BankOutlined />,
+      label: "Mill",
     },
   ];
 
@@ -93,19 +269,27 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       ...dashboardItems,
       {
         key: "sub",
-        icon: <MailOutlined />,
+        icon: <AppstoreOutlined />,
         label: "Management",
         children: managementChildren,
       },
-      { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
-      { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
-      { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
-      { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
-      { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
-      { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
+      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+      { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+      { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
+      {
+        key: "/trade-invoice",
+        icon: <AuditOutlined />,
+        label: "Trade Invoice",
+      },
+      {
+        key: "/tax-invoice",
+        icon: <ReconciliationOutlined />,
+        label: "Tax Invoice",
+      },
+      { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
       {
         key: "sub1",
-        icon: <MailOutlined />,
+        icon: <BookFilled />,
         label: "Report",
         children: reportChildren,
       },
@@ -120,18 +304,22 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       children: [
         {
           key: "sub",
-          icon: <MailOutlined />,
+          icon: <AppstoreOutlined />,
           label: "Master",
           children: managementChildren,
         },
       ],
     },
-    { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
-    { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
-    { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
-    { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
-    { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
-    { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
+    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
+    { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
+    {
+      key: "/tax-invoice",
+      icon: <ReconciliationOutlined />,
+      label: "Tax Invoice",
+    },
+    { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
 
     {
       type: "group",
@@ -139,7 +327,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       children: [
         {
           key: "sub1",
-          icon: <MailOutlined />,
+          icon: <BookFilled />,
           label: "Report",
           children: reportChildren,
         },
@@ -147,7 +335,6 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     },
   ];
 };
-
 export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const location = useLocation();
   const selectedKeys = [location.pathname];
@@ -240,11 +427,14 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
         )}
         {isMobile && (
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="text-white hover:text-red-300 transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-full 
+               bg-[var(--primary)] hover:bg-[var(--primary-light)] text-white shadow-md 
+               hover:shadow-lg transition-all duration-300 cursor-pointer"
           >
-            <CloseOutlined className="text-xl" />
+            <CloseOutlined className="text-lg" />
           </motion.button>
         )}
       </div>
@@ -316,7 +506,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 08-11-2025
+                    Updated on: 11-11-2025
                   </div>
                 </div>
               }

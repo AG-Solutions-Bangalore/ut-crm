@@ -37,6 +37,11 @@ import PriceRateReport from "./pages/report/price-rate/PriceRateReport";
 import SalesReport from "./pages/report/sales/SalesReport";
 import PaymentList from "./pages/payment/payment-list";
 import PaymentForm from "./pages/payment/payment-form";
+import BalanceReceivableReport from "./pages/report/balance/BalanceReceivableReport";
+import PartyReport from "./pages/report/party/PartyReport";
+import MillReport from "./pages/report/mill/MillReport";
+import TradeInvoiceForm from "./pages/trade-invoice/trade-invoice-form";
+import TradeInvoiceList from "./pages/trade-invoice/trade-invoice-list";
 
 function App() {
   return (
@@ -83,21 +88,42 @@ function App() {
           <Route path="/tax-invoice/create" element={<TaxInvoiceForm />} />
           <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
 
-
           <Route path="/payment" element={<PaymentList />} />
           <Route path="/payment/create" element={<PaymentForm />} />
           <Route path="/payment/edit/:id" element={<PaymentForm />} />
 
+          <Route path="/trade-invoice" element={<TradeInvoiceList />} />
+          <Route path="/trade-invoice/create" element={<TradeInvoiceForm />} />
+          <Route
+            path="/trade-invoice/edit/:id"
+            element={<TradeInvoiceForm />}
+          />
+
           <Route path="/report-format" element={<ReportFormat />} />
 
           {/* report  */}
-          <Route path="/report/balance-order" element={<BalanceOrderReport />} />
-          <Route path="/report/balance-close-order" element={<BalanceCloseOrderReport />} />
+          <Route
+            path="/report/balance-order"
+            element={<BalanceOrderReport />}
+          />
+          <Route
+            path="/report/balance-close-order"
+            element={<BalanceCloseOrderReport />}
+          />
           <Route path="/report/price-rate" element={<PriceRateReport />} />
           <Route path="/report/sales" element={<SalesReport />} />
           <Route path="/report/mill-wise" element={<MillWiseReport />} />
           <Route path="/report/party-wise" element={<PartyWiseReport />} />
-          <Route path="/report/balance-payable" element={<BalancePayableReport />} />
+          <Route
+            path="/report/balance-payable"
+            element={<BalancePayableReport />}
+          />
+          <Route
+            path="/report/balance-receivable"
+            element={<BalanceReceivableReport />}
+          />
+          <Route path="/report/party" element={<PartyReport />} />
+          <Route path="/report/mill" element={<MillReport />} />
         </Route>
 
         {/* Fallback route */}

@@ -10,6 +10,7 @@ import {
   QUOTATION_REF,
   TAX_INVOICE_REF,
   PAYMENT_MODE,
+  TRADE_INVOICE_REF,
 } from "../api/index";
 
 export const useMasterData = ({
@@ -22,6 +23,7 @@ export const useMasterData = ({
   item = false,
   taxinvoice = false,
   payment = false,
+  tradeinvoiceRef = false,
 } = {}) => {
   const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
@@ -67,11 +69,20 @@ export const useMasterData = ({
     formattedDateTime,
   ]);
   const {
+    data: TradeInvoiceRef,
+    isLoading: TradeInvoiceRefLoading,
+    refetch: refetchTradeInvoiceRefNo,
+    error: TradeInvoiceError,
+  } = createApi(tradeinvoiceRef, TAX_INVOICE_REF, [
+    "tradeinvoicerefdata",
+    formattedDateTime,
+  ]);
+  const {
     data: TaxInvoiceRef,
     isLoading: TaxInvoiceRefLoading,
     refetch: refetchTaxInvoiceRefNo,
     error: TaxInvoiceError,
-  } = createApi(taxinvoice, TAX_INVOICE_REF, [
+  } = createApi(tradeinvoiceRef, TRADE_INVOICE_REF, [
     "taxinvoicerefdata",
     formattedDateTime,
   ]);
@@ -152,6 +163,12 @@ export const useMasterData = ({
       loading: TaxInvoiceRefLoading,
       refetch: refetchTaxInvoiceRefNo,
       error: TaxInvoiceError,
+    },
+    tradeinvoice: {
+      data: TradeInvoiceRef,
+      loading: TradeInvoiceRefLoading,
+      refetch: refetchTradeInvoiceRefNo,
+      error: TradeInvoiceError,
     },
     payment: {
       data: PaymentData,

@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+
 import React, { useState, useRef } from 'react';
 import { Select, DatePicker, Button, Form, message, Card } from 'antd';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +13,7 @@ import * as ExcelJS from 'exceljs';
 
 const { Option } = Select;
 
-const BalancePayableReport = () => {
+const BalanceReceivableReport = () => {
   const [form] = Form.useForm();
   const [fromDate, setFromDate] = useState(dayjs().month(3).date(1)); 
   const [toDate, setToDate] = useState(dayjs()); 
@@ -78,7 +79,7 @@ const BalancePayableReport = () => {
     
     return grouped;
   };
-
+console.log(reportData.length)
   const calculateMonthTotals = (monthData) => {
     return monthData.reduce((acc, item) => {
       acc.amount += parseFloat(item.purchase_amount) || 0;
@@ -130,7 +131,7 @@ const BalancePayableReport = () => {
       };
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}balancePayableReport`,
+        `https://theunitedtraders.co.in/crmapi/public/api/balanceReceivablesReport`,
         payload,
         {
           headers: {
@@ -190,7 +191,7 @@ const BalancePayableReport = () => {
 
     const options = {
       margin: [10, 10, 10, 10],
-      filename: `Balance-Payable-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+      filename: `Balance-Receivable-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
@@ -222,7 +223,7 @@ const BalancePayableReport = () => {
 
   const handlePrint = useReactToPrint({
     content: () => containerRef.current,
-    documentTitle: `Balance-Payable-Report-${dayjs().format('DD-MM-YYYY')}`,
+    documentTitle: `Balance-Receivable-Report-${dayjs().format('DD-MM-YYYY')}`,
     removeAfterPrint: true,
     pageStyle: `
       @page {
@@ -256,7 +257,7 @@ const BalancePayableReport = () => {
 
     try {
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Balance Payable Report');
+      const worksheet = workbook.addWorksheet('Balance Receivable Report');
 
       worksheet.columns = [
         { header: 'Mill Name', key: 'mill_name', width: 25 },
@@ -350,7 +351,7 @@ const BalancePayableReport = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Balance-Payable-Report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
+      link.download = `Balance-Receivable-Report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
@@ -378,7 +379,7 @@ const BalancePayableReport = () => {
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full lg:w-2/6">
             <Card 
-              title="Balance Payable Report Criteria" 
+              title="Balance Receivable Report Criteria" 
               className="shadow-lg sticky"
               extra={
                 <Button 
@@ -495,7 +496,7 @@ const BalancePayableReport = () => {
 
           <div className="w-full lg:w-4/6">
             <Card 
-              title="Balance Payable Report" 
+              title="Balance Receivable Report" 
               className="shadow-lg min-h-[800px]"
               extra={
                 <>
@@ -529,11 +530,11 @@ const BalancePayableReport = () => {
             >
               {reportData.length > 0 ? (
                 <div>
-                
+                  
 
                   <div ref={containerRef} className="md:overflow-x-auto">
-                    <div className="p-4">
-                      <h1 className="text-2xl font-bold text-center">Balance Payable Report</h1>
+                    <div className="">
+                      <h1 className="text-2xl font-bold text-center">Balance Receivable Report</h1>
                       <div className="text-center text-lg mt-2">
                         Period: {dayjs(fromDate).format("DD-MMM-YYYY")} to {dayjs(toDate).format("DD-MMM-YYYY")}
                       </div>
@@ -611,7 +612,7 @@ const BalancePayableReport = () => {
                                       <div className="p-2 border-b border-r border-black font-bold"></div>
                                       <div className="p-2 border-b border-r border-black font-bold"></div>
                                       <div className="p-2 border-b border-r border-black font-bold text-center">
-                                      Total
+                                        Total
                                       </div>
                                       <div className="p-2 border-b border-r border-black font-bold"></div>
                                       <div className="p-2 border-b border-r border-black font-bold"></div>
@@ -656,13 +657,13 @@ const BalancePayableReport = () => {
                       <div
                         className="grid bg-gray-200 border-t border-l border-r border-black font-bold text-[13px]"
                         style={{
-                          gridTemplateColumns: "0.5fr 0.8fr 1fr 0.8fr 0.8fr 0.8fr 0.1fr 0.8fr",
+                          gridTemplateColumns: "0.5fr 0.8fr 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
                         }}
                       >
                         <div className="p-2 border-b border-black"></div>
                         <div className="p-2 border-b border-black"></div>
                         <div className="p-2 border-b border-r border-black font-bold text-center">
-                           GRAND TOTAL
+                          GRAND TOTAL
                         </div>
                         <div className="p-2 border-b border-black"></div>
                         <div className="p-2 border-b border-black"></div>
@@ -692,4 +693,4 @@ const BalancePayableReport = () => {
   );
 };
 
-export default BalancePayableReport;
+export default BalanceReceivableReport;
