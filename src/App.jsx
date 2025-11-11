@@ -35,6 +35,9 @@ import BalanceCloseOrderReport from "./pages/report/balance/BalanceCloseOrderRep
 import PriceRateReport from "./pages/report/price-rate/PriceRateReport";
 import SalesReport from "./pages/report/sales/SalesReport";
 import BalancePayableReport from "./pages/report/balance/BalancePayableReport";
+import BalanceReceivableReport from "./pages/report/balance/BalanceReceivableReport";
+import PartyReport from "./pages/report/party/PartyReport";
+import MillReport from "./pages/report/mill/MillReport";
 
 function App() {
   return (
@@ -91,6 +94,9 @@ function App() {
           <Route path="/report/mill-wise" element={<MillWiseReport />} />
           <Route path="/report/party-wise" element={<PartyWiseReport />} />
           <Route path="/report/balance-payable" element={<BalancePayableReport />} />
+          <Route path="/report/balance-receivable" element={<BalanceReceivableReport />} />
+          <Route path="/report/party" element={<PartyReport />} />
+          <Route path="/report/mill" element={<MillReport />} />
         </Route>
 
         {/* Fallback route */}

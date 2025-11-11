@@ -62,7 +62,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
 
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
+  
     { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
   ];
 
@@ -99,6 +99,7 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     // },
   ];
   const reportChildren = [
+    { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
     {
       key: "/report/balance-order",
       icon: <ApartmentOutlined />,
@@ -133,6 +134,21 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       key: "/report/balance-payable",
       icon: <TeamOutlined />,
       label: "Balance  Payable",
+    },
+    {
+      key: "/report/balance-receivable",
+      icon: <TeamOutlined />,
+      label: "Balance  Receivable",
+    },
+    {
+      key: "/report/party",
+      icon: <TeamOutlined />,
+      label: "Party",
+    },
+    {
+      key: "/report/mill",
+      icon: <TeamOutlined />,
+      label: "Mill",
     },
     
    
