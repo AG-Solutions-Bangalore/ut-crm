@@ -266,22 +266,22 @@ const MillReport = () => {
           }
         }
 
-        // Set row heights for better visibility
+   
         worksheet.getRow(currentRow).height = 20;
         worksheet.getRow(currentRow + 1).height = 20;
         worksheet.getRow(currentRow + 2).height = 40;
         worksheet.getRow(currentRow + 3).height = 20;
         worksheet.getRow(currentRow + 4).height = 20;
 
-        currentRow += 6; // Add space between mill entries
+        currentRow += 6;
       });
 
-      // Set column widths
+
       worksheet.columns = [
-        { width: 35 }, // Mill Name & Billing Address
-        { width: 25 }, // Contact Details
-        { width: 25 }, // Bank Details
-        { width: 15 }  // State & Status
+        { width: 35 }, 
+        { width: 25 }, 
+        { width: 25 }, 
+        { width: 15 } 
       ];
 
       const buffer = await workbook.xlsx.writeBuffer();
@@ -372,7 +372,7 @@ const MillReport = () => {
                             </div>
                             
                             <div className="flex flex-col md:flex-row">
-                              {/* Billing Address Column */}
+                       
                               <div className="flex-1 border-r border-black min-h-[150px]">
                                 <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
                                   Billing Address
@@ -384,7 +384,7 @@ const MillReport = () => {
                                 </div>
                               </div>
 
-                              {/* Contact Details Column */}
+                      
                               <div className="flex-1 border-r border-black min-h-[150px]">
                                 <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
                                   Contact Details
@@ -409,7 +409,7 @@ const MillReport = () => {
                                 </div>
                               </div>
 
-                              {/* Bank Details Column */}
+                      
                               <div className="flex-1 min-h-[150px]">
                                 <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
                                   Bank Details
