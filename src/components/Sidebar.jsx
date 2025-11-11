@@ -1,22 +1,14 @@
 import {
   ArrowRightOutlined,
   BookOutlined,
-  BorderOutlined,
-  CarOutlined,
   CloseOutlined,
   FileOutlined,
   HomeOutlined,
-  LineChartOutlined,
   MailOutlined,
-  ProfileOutlined,
-  SolutionOutlined,
-  TagsOutlined,
 } from "@ant-design/icons";
 
 import {
   ApartmentOutlined,
-  AppstoreOutlined,
-  BgColorsOutlined,
   TeamOutlined,
   UserSwitchOutlined,
 } from "@ant-design/icons";
@@ -30,36 +22,6 @@ import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
 
 const getMenuItems = (collapsed, userTypeRaw) => {
-  const uType = Number(userTypeRaw);
-  // const isOnlyEventMode = uType == 2;
-  const isOnlyEventMode = false;
-  // console.log(isOnlyEventMode,"isOnlyEventMode")
-  // --- Common building blocks ---
-  const eventChildren = [
-    { key: "/event", icon: <SolutionOutlined />, label: "Event" },
-    { key: "/event-register", icon: <TagsOutlined />, label: "Event Register" },
-    { key: "/event-track", icon: <CarOutlined />, label: "Event Track" },
-  ];
-
-  const eventReportChildren = [
-    { key: "/report-event", icon: <CarOutlined />, label: "Event" },
-    {
-      key: "/report-event-details",
-      icon: <CarOutlined />,
-      label: "Event Details",
-    },
-    {
-      key: "/report-register-notscanned",
-      icon: <CarOutlined />,
-      label: "Registered Not Scanned",
-    },
-    {
-      key: "/report-notregister-notscanned",
-      icon: <CarOutlined />,
-      label: "Not Registered Not Scanned",
-    },
-  ];
-
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
     { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
@@ -87,16 +49,6 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       icon: <BookOutlined />,
       label: "Shade",
     },
-    // {
-    //   key: "/master/delivery",
-    //   icon: <CarOutlined />,
-    //   label: "Delivery",
-    // },
-    // {
-    //   key: "/master/unit",
-    //   icon: <AppstoreOutlined />,
-    //   label: "Unit",
-    // },
   ];
   const reportChildren = [
     {
@@ -134,10 +86,8 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       icon: <TeamOutlined />,
       label: "Balance  Payable",
     },
-    
-   
   ];
-  
+
   if (collapsed) {
     return [
       ...dashboardItems,
@@ -150,26 +100,15 @@ const getMenuItems = (collapsed, userTypeRaw) => {
       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
       { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+      { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
       { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+      { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
       {
         key: "sub1",
         icon: <MailOutlined />,
         label: "Report",
         children: reportChildren,
       },
-
-      // {
-      //   key: "sub1",
-      //   icon: <MailOutlined />,
-      //   label: "Event",
-      //   children: eventChildren,
-      // },
-      // {
-      //   key: "sub2",
-      //   icon: <BarChartOutlined />,
-      //   label: <span id="report-scroll-anchor">Report</span>,
-      //   children: fullReportChildren,
-      // },
     ];
   }
 
@@ -190,7 +129,10 @@ const getMenuItems = (collapsed, userTypeRaw) => {
     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
     { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
+    { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
     { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
+    { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
+
     {
       type: "group",
       label: "Report",
@@ -203,31 +145,6 @@ const getMenuItems = (collapsed, userTypeRaw) => {
         },
       ],
     },
-
-    // {
-    //   type: "group",
-    //   label: "Event",
-    //   children: [
-    //     {
-    //       key: "sub1",
-    //       icon: <MailOutlined />,
-    //       label: "Event",
-    //       children: eventChildren,
-    //     },
-    //   ],
-    // },
-    // {
-    //   type: "group",
-    //   label: "Report",
-    //   children: [
-    //     {
-    //       key: "sub2",
-    //       icon: <BarChartOutlined />,
-    //       label: "Report",
-    //       children: fullReportChildren,
-    //     },
-    //   ],
-    // },
   ];
 };
 

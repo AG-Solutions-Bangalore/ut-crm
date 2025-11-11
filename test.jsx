@@ -1,10 +1,9 @@
-billing_bf: "230/LWC/REEL";
-billing_commn: "-748";
-billing_mill_id: 6;
-billing_party_id: 3;
-billing_ref: "2025-26-6";
-billing_tones: "34.00";
-purchase_date: "2025-11-05";
-purchase_rate: "67.00";
-rate_diff: "-22.00";
-sale_rate: "45.00";
+  "id": 1,
+                "mill_name": "kasrthicjss",
+                "billing_no": "12",
+                "sale_date": "2025-11-29",
+                "purchase_amount": "30.00",
+                "payment_date": "2025-11-11",
+                "payment_type": "Phone Pay",
+                "payment_amount": "30",
+                "balance": "0.00"

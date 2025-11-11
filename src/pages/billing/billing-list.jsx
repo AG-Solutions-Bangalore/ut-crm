@@ -65,7 +65,7 @@ const BillingList = () => {
           res.message ||
             `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
         );
-        console.log(newStatus,"newStatus")
+        console.log(newStatus, "newStatus");
         setActiveTab(newStatus);
         // refetch();
         queryClient.invalidateQueries([

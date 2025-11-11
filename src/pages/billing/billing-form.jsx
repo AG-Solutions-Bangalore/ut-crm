@@ -40,7 +40,7 @@ const BillingForm = () => {
     purchaseRef: true,
   });
   const [initialData, setInitialData] = useState({
-    purchase_date: null,
+    purchase_date: dayjs(),
     billing_no: "",
     billing_mill_id: null,
     billing_tones: "",
@@ -172,10 +172,11 @@ const BillingForm = () => {
       message.error(error?.message || "Error while saving billing.");
     }
   };
-
+  const loadingdata =
+    item?.loading || fetchLoading || mill.loading || party.loading;
   return (
     <>
-      {fetchLoading ? (
+      {loadingdata ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
@@ -238,6 +239,7 @@ const BillingForm = () => {
                   rules={[{ required: true, message: "Select Purchase Date" }]}
                 >
                   <DatePicker
+                    autoFocus
                     className="w-full"
                     format="DD-MM-YYYY"
                     onChange={handleChange}

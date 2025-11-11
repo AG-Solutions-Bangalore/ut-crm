@@ -6,80 +6,27 @@ import {
 } from "@ant-design/icons";
 import { Button, Card, Empty, message, Modal, Popconfirm, Spin } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { TAX_INVOICE_PENDING_BILLING } from "../../api";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
 const PendingBillsModal = ({
   open,
   onClose,
-  millId,
   setBills,
   bills,
-  selectedBills,
   setSelectedBills,
-  isEditMode,
   handleDelete,
+  fetchedBills,
+  tempSelectedBills,
+  setTempSelectedBills,
+  loading,
 }) => {
-  const { trigger: fetchTrigger, loading } = useApiMutation();
-  const [fetchedBills, setFetchedBills] = useState([]);
-  const [tempSelectedBills, setTempSelectedBills] = useState([]);
-  console.log(tempSelectedBills, "tempSelectedBills");
-  useEffect(() => {
-    if (open && millId) {
-      fetchBills();
-    }
-  }, [open, millId]);
-
-  const fetchBills = async () => {
-    try {
-      const res = await fetchTrigger({
-        url: `${TAX_INVOICE_PENDING_BILLING}/${millId}`,
-      });
-
-      const data = res?.data || [];
-      const filtered = data.filter(
-        (bill) =>
-          !selectedBills.some((sel) => {
-            const selectedRef =
-              sel.billing_ref || sel.tax_invoice_sub_billing_ref;
-            return selectedRef === bill.billing_ref;
-          })
-      );
-
-      setFetchedBills(data);
-      setBills(filtered);
-
-      if (selectedBills?.length) {
-        const normalized = selectedBills.map((b) => ({
-          id: b.id || b.id,
-          billing_ref: b.tax_invoice_sub_billing_ref || b.billing_ref,
-          purchase_date:
-            b.tax_invoice_sub_purchase_date || b.purchase_date || null,
-          billing_tones: b.tax_invoice_sub_tones || b.billing_tones || "",
-          billing_bf: b.tax_invoice_sub_bf || b.billing_bf || "",
-          purchase_rate:
-            b.tax_invoice_sub_purchase_rate || b.purchase_rate || "",
-          sale_rate: b.tax_invoice_sub_sale_rate || b.sale_rate || "",
-          rate_diff: b.tax_invoice_sub_rate_diff || b.rate_diff || "",
-          billing_commn: b.tax_invoice_sub_commn || b.billing_commn || "",
-          billing_mill_id: b.tax_invoice_sub_mill_id || b.billing_mill_id || "",
-          billing_party_id:
-            b.tax_invoice_sub_party_id || b.billing_party_id || null,
-        }));
-
-        setTempSelectedBills(normalized);
-      } else {
-        setTempSelectedBills([]);
-      }
-    } catch (err) {
-      console.error("Failed to fetch bills", err);
-    }
-  };
+  // console.log(tempSelectedBills, "RightSideData");
+  // console.log(fetchedBills, "RealData");
+  // console.log(bills, "LeftSideData");
 
   const handleAdd = (bill) => {
     setTempSelectedBills((prev) => {
-      const exists = prev.some((b) => b.billing_ref === bill.billing_ref);
+      const exists = prev.some((b) => b.billing_ref == bill.billing_ref);
       return exists ? prev : [...prev, bill];
     });
     setBills((prev) => prev.filter((b) => b.billing_ref !== bill.billing_ref));
@@ -108,7 +55,7 @@ const PendingBillsModal = ({
       return;
     }
 
-    message.success("Bills saved successfully!");
+    // message.success("Bills saved successfully!");
 
     // Update parent state only on save
     setSelectedBills(tempSelectedBills);
@@ -158,7 +105,7 @@ const PendingBillsModal = ({
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium text-gray-800">
-                          {bill.billing_bf}
+                          {bill.billing_ref}
                         </p>
                         <p className="text-xs text-gray-500">
                           {bill.purchase_date
@@ -252,8 +199,7 @@ const PendingBillsModal = ({
                                 icon={<DeleteOutlined />}
                                 type="text"
                                 danger
-                                                              disabled={tempSelectedBills.length <= 1}
-
+                                disabled={tempSelectedBills.length <= 1}
                               />
                             </Popconfirm>
                           ) : (

@@ -6,35 +6,37 @@ import ProtectedLayout from "./components/ProtectedLayout";
 import VersionCheck from "./components/VersionCheck";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import SignIn from "./pages/auth/SignIn";
+import Dashboard from "./pages/home/Dashboard";
+import ItemList from "./pages/master/item/item-list";
 import MillList from "./pages/master/mill/mill-list";
 import PartyForm from "./pages/master/party/party-form";
 import PartyList from "./pages/master/party/party-list";
-import Dashboard from "./pages/home/Dashboard";
-import ItemList from "./pages/master/item/item-list";
 // import DeliveryList from "./pages/master/delivery/delivery-list";
-import UnitList from "./pages/master/unit/unit-list";
-import ShadeList from "./pages/master/shade/shade-list";
-import MillForm from "./pages/master/mill/mill-form";
-import PurchaseList from "./pages/purchase/purchase-list";
-import PurchaseForm from "./pages/purchase/purchase-form";
-import QuotationList from "./pages/quotation/quotation-list";
-import QuotationForm from "./pages/quotation/quotation-form";
-import BillingList from "./pages/billing/billing-list";
-import BillingForm from "./pages/billing/billing-form";
-import ReportFormat from "./pages/reportformats/ReportFormat";
-import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
-import BillingView from "./pages/billing/billing-view";
-import TaxInvoiceList from "./pages/tax-invoice/tax-invoice-list";
-import TaxInvoiceForm from "./pages/tax-invoice/tax-invoice-form";
 import AuthReport from "./pages/auth-report/AuthReport";
+import BillingForm from "./pages/billing/billing-form";
+import BillingList from "./pages/billing/billing-list";
+import BillingView from "./pages/billing/billing-view";
+import MillForm from "./pages/master/mill/mill-form";
+import ShadeList from "./pages/master/shade/shade-list";
+import UnitList from "./pages/master/unit/unit-list";
+import PurchaseForm from "./pages/purchase/purchase-form";
+import PurchaseList from "./pages/purchase/purchase-list";
+import QuotationForm from "./pages/quotation/quotation-form";
+import QuotationList from "./pages/quotation/quotation-list";
+import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
+import ReportFormat from "./pages/reportformats/ReportFormat";
+import TaxInvoiceForm from "./pages/tax-invoice/tax-invoice-form";
+import TaxInvoiceList from "./pages/tax-invoice/tax-invoice-list";
 
-import PartyWiseReport from "./pages/report/party/PartyWiseReport";
-import MillWiseReport from "./pages/report/mill/MillWiseReport";
-import BalanceOrderReport from "./pages/report/balance/BalanceOrderReport";
 import BalanceCloseOrderReport from "./pages/report/balance/BalanceCloseOrderReport";
+import BalanceOrderReport from "./pages/report/balance/BalanceOrderReport";
+import BalancePayableReport from "./pages/report/balance/BalancePayableReport";
+import MillWiseReport from "./pages/report/mill/MillWiseReport";
+import PartyWiseReport from "./pages/report/party/PartyWiseReport";
 import PriceRateReport from "./pages/report/price-rate/PriceRateReport";
 import SalesReport from "./pages/report/sales/SalesReport";
-import BalancePayableReport from "./pages/report/balance/BalancePayableReport";
+import PaymentList from "./pages/payment/payment-list";
+import PaymentForm from "./pages/payment/payment-form";
 
 function App() {
   return (
@@ -80,6 +82,11 @@ function App() {
           <Route path="/tax-invoice" element={<TaxInvoiceList />} />
           <Route path="/tax-invoice/create" element={<TaxInvoiceForm />} />
           <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
+
+
+          <Route path="/payment" element={<PaymentList />} />
+          <Route path="/payment/create" element={<PaymentForm />} />
+          <Route path="/payment/edit/:id" element={<PaymentForm />} />
 
           <Route path="/report-format" element={<ReportFormat />} />
 

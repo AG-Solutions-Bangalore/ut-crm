@@ -68,3 +68,7 @@ export const TAX_INVOICE_LIST = "/tax-invoice";
 export const TAX_INVOICE_SUB_DELETE = "/tax-invoice-sub";
 export const TAX_INVOICE_REF = "/tax-invoice-ref";
 export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
+// -------------------PAYMENT----------------------
+export const PAYMENT_LIST = "/payment";
+export const PAYMENT_BILLING_REF = "/getpendingbillingamount";
+export const PAYMENT_MODE = "/panel-fetch-payment-mode";

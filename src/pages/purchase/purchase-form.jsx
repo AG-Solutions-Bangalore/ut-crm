@@ -253,6 +253,7 @@ const PurchaseForm = () => {
                         .toLowerCase()
                         .includes(input.toLowerCase())
                     }
+                    autoFocus
                     showSearch
                     allowClear
                   />
