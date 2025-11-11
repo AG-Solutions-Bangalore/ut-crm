@@ -160,7 +160,7 @@ const PurchaseList = () => {
       key: "purchase_orders_status",
       render: (_, order) => {
         const isOpen = order.purchase_orders_status == "Open";
-        console.log(order, "order");
+     
         return (
           <div className="flex justify-start">
             <Popconfirm
@@ -194,6 +194,7 @@ const PurchaseList = () => {
               onClick={() => navigate(`/purchase/edit/${record.id}`)}
             />
           </Tooltip>
+         
           <Tooltip title="View Purchase">
             <Button
               type="primary"

@@ -79,7 +79,7 @@ const BalanceReceivableReport = () => {
     
     return grouped;
   };
-console.log(reportData.length)
+
   const calculateMonthTotals = (monthData) => {
     return monthData.reduce((acc, item) => {
       acc.amount += parseFloat(item.purchase_amount) || 0;
@@ -131,7 +131,7 @@ console.log(reportData.length)
       };
 
       const response = await axios.post(
-        `https://theunitedtraders.co.in/crmapi/public/api/balanceReceivablesReport`,
+        `${import.meta.env.VITE_API_BASE_URL}balanceReceivablesReport`,
         payload,
         {
           headers: {
