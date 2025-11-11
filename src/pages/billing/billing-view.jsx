@@ -125,7 +125,7 @@ const BillingView = () => {
       title: "Note",
       dataIndex: "purchase_orders_note",
       key: "purchase_orders_note",
-      width: 200, 
+      width: 200,
       render: (val) => (
         <div
           style={{
@@ -180,11 +180,11 @@ const BillingView = () => {
             </p>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold text-white">
-                {billing.billing_no}
+                Bill No : {billing.billing_no}
               </h1>
               <span className="text-blue-400">•</span>
               <span className="text-xs font-semibold text-white/90 bg-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                {billing.billing_type}
+              Type: {billing.billing_type}
               </span>
             </div>
           </div>
@@ -282,16 +282,6 @@ const BillingView = () => {
                   : "-"
               }
             />
-            <div className="col-span-2">
-              <Stat
-                label="Amount"
-                value={
-                  billing.purchase_amount
-                    ? `₹${Number(billing.purchase_amount).toLocaleString()}`
-                    : "-"
-                }
-              />
-            </div>
           </div>
         </div>
 
@@ -327,16 +317,23 @@ const BillingView = () => {
                   : "-"
               }
             />
-            <div className="col-span-2">
-              <Stat
-                label="Rate"
-                value={
-                  billing.sale_rate
-                    ? `₹${Number(billing.sale_rate).toFixed(2)}`
-                    : "-"
-                }
-              />
-            </div>
+
+            <Stat
+              label="Rate"
+              value={
+                billing.sale_rate
+                  ? `₹${Number(billing.sale_rate).toFixed(2)}`
+                  : "-"
+              }
+            />
+            <Stat
+              label="Amount"
+              value={
+                billing.purchase_amount
+                  ? `₹${Number(billing.purchase_amount).toLocaleString()}`
+                  : "-"
+              }
+            />
           </div>
         </div>
       </div>
