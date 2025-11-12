@@ -89,6 +89,14 @@ const BillingForm = () => {
           sale_date: res.data.sale_date ? dayjs(res.data.sale_date) : null,
           billing_status: res.data.billing_status == "Open" ? true : false,
         };
+        const diff = dayjs()
+          .startOf("day")
+          .diff(dayjs(formattedData?.sale_date).startOf("day"), "day");
+        const total =
+          Number(formattedData?.sale_rate) -
+          Number(formattedData?.purchase_rate);
+        setTotalRate(total ? parseFloat(total.toFixed(2)) : null);
+        setDaysDifference(diff);
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
       }
@@ -136,6 +144,7 @@ const BillingForm = () => {
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
+      billing_due_days: daysDifference ? daysDifference : 0,
       billing_tones: values.billing_tones ? Number(values.billing_tones) : 0,
       purchase_rate: values.purchase_rate ? Number(values.purchase_rate) : 0,
       purchase_amount: values.purchase_amount
@@ -227,6 +236,40 @@ const BillingForm = () => {
               size="small"
               title={<span className="font-semibold">Purchase Info</span>}
               className="!mt-2 !bg-gray-50"
+              extra={
+                <div className="flex">
+                  {daysDifference && (
+                    <div className="flex">
+                      <span
+                        className={`mt-1 w-40 text-center px-3 py-1.5  ${
+                          daysDifference !== null
+                            ? daysDifference < 0
+                              ? "  text-red-600 font-semibold"
+                              : "  text-gray-800"
+                            : "  text-gray-500"
+                        }`}
+                      >
+                        Due Days :{" "}
+                        {daysDifference !== null ? `${daysDifference}` : "-"}
+                      </span>
+                    </div>
+                  )}
+                  {/* PR - SR */}
+                  {totalRate !== null && (
+                    <div className="flex flex-col">
+                      <span
+                        className={`mt-1 w-full text-center px-3 py-1.5 ${
+                          totalRate < 0
+                            ? " text-red-600 font-semibold"
+                            : " text-gray-800"
+                        }`}
+                      >
+                        PR - SR : {totalRate}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              }
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Form.Item
@@ -352,19 +395,6 @@ const BillingForm = () => {
                   />
                 </Form.Item>
 
-                <div>
-                  <label>PR-SR</label>
-                  <div
-                    className={`border border-gray-400 rounded-md px-3 py-1  mt-[8px]  bg-gray-100 outline-none cursor-default ${
-                      totalRate < 0
-                        ? "text-red-500 font-semibold"
-                        : "text-gray-800"
-                    }`}
-                  >
-                    {totalRate !== null ? `${totalRate}` : "-"}
-                  </div>
-                </div>
-
                 <Form.Item name="sale_date" label="Sale Date">
                   <DatePicker className="w-full" format="DD-MM-YYYY" />
                 </Form.Item>
@@ -410,20 +440,6 @@ const BillingForm = () => {
                     }
                     showSearch
                     allowClear
-                  />
-                </Form.Item>
-
-                <Form.Item name="billing_due_days" label="Due Days">
-                  <Input
-                    readOnly
-                    value={
-                      daysDifference !== null ? `${daysDifference} Days` : "-"
-                    }
-                    className={`!w-32 !bg-gray-100 !border !border-gray-400 !rounded-md !px-3 !outline-none !cursor-default ${
-                      daysDifference < 0
-                        ? "!text-red-500 !font-semibold"
-                        : "!text-gray-800"
-                    }`}
                   />
                 </Form.Item>
               </div>

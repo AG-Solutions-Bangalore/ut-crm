@@ -87,10 +87,9 @@ const ShadeForm = ({ id, onSuccess }) => {
         }
         rules={[{ required: true, message: "Shade name is required" }]}
       >
-        <Input
+        <Input.TextArea
           maxLength={10}
           placeholder="Enter Shade Details"
-          autoSize={{ minRows: 2, maxRows: 4 }}
           autoFocus
         />
       </Form.Item>

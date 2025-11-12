@@ -28,13 +28,13 @@ const VersionCheck = () => {
     );
   };
 
-  const handleLogout = async () => {
+  const handleUpdateNow = async () => {
     setLoading(true);
     try {
       await new Promise((res) => setTimeout(res, 1000));
       await logout();
-    } catch (error) {
-      console.error("Logout error", error);
+    } catch (err) {
+      console.error("Update failed:", err);
     } finally {
       setLoading(false);
     }
@@ -60,47 +60,60 @@ const VersionCheck = () => {
   return (
     <Modal
       open={isDialogOpen}
-      closable={false}
       footer={null}
+      closable={false}
       centered
       maskClosable={false}
       onCancel={handleCloseDialog}
+      className="!rounded-2xl !overflow-hidden !p-0"
+      styles={{ body: { padding: 0 } }}
     >
-      <div className="text-center py-4">
-        <Space
-          direction="vertical"
-          align="center"
-          size="middle"
-          className="w-full"
+      <div className="!flex !flex-col !items-center !py-6 !px-4 !text-center">
+        {/* Icon */}
+        <div className="!flex !items-center !justify-center !w-16 !h-16 !rounded-full !bg-gradient-to-tr !from-blue-500/10 !to-blue-200/30 !text-blue-600 !mb-4">
+          <ReloadOutlined spin className="!text-2xl" />
+        </div>
+
+        {/* Title */}
+        <Title
+          level={4}
+          className="!font-semibold !tracking-tight !mb-1 !text-gray-900"
         >
-          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 text-blue-600">
-            <ReloadOutlined spin className="text-xl" />
-          </div>
-          <Title level={4}>Update Available</Title>
-          <Text type="secondary">
-            A new version of the panel is ready. Update now to version{" "}
-            <Text strong type="success">
-              {serverVersion}
-            </Text>
-            .
+          Update Available
+        </Title>
+
+        {/* Description */}
+        <Text type="secondary" className="!text-base !text-gray-600">
+          A new version of the panel is ready. Update now to version{" "}
+          <Text strong className="!text-green-600">
+            {serverVersion}
           </Text>
-          <div className="flex justify-center gap-4 mt-4">
-            <Button
-              onClick={() => {
-                handleCloseDialog();
-                setRetryPopup(true);
-              }}
-            >
-              Do It Later
-            </Button>
-            <Button
-              type="primary"
-              loading={loading}
-              onClick={handleLogout}
-            >
-              {loading ? "Updating" : "Update Now"}
-            </Button>
-          </div>
+          .
+        </Text>
+
+        {/* Buttons */}
+        <Space size="middle" className="!mt-6 !flex !justify-center">
+          <Button
+            onClick={() => {
+              handleCloseDialog();
+              setRetryPopup(true);
+            }}
+            disabled={loading}
+            className="!rounded-lg !px-5 !py-1.5 !text-gray-700 !border-gray-300 hover:!border-gray-400"
+          >
+            Do It Later
+          </Button>
+
+          <Button
+            type="primary"
+            shape="round"
+            size="middle"
+            loading={loading}
+            onClick={handleUpdateNow}
+            className="!px-5 !py-1.5 !rounded-full !shadow-md !shadow-blue-100 !bg-blue-600 hover:!bg-blue-700"
+          >
+            {loading ? "Updating..." : "Update Now"}
+          </Button>
         </Space>
       </div>
     </Modal>

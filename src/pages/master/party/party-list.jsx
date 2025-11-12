@@ -8,6 +8,7 @@ import {
   App,
   Button,
   Card,
+  Empty,
   Input,
   Popconfirm,
   Space,
@@ -229,9 +230,13 @@ const PartyList = () => {
             }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Party data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">No party data available</span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>

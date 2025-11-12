@@ -24,7 +24,7 @@ if (!secretKey) {
 }
 
 const persistConfig = {
-  key: "root-UT",
+  key: "root-ut",
   storage,
   whitelist: ["auth", "company"],
   transforms,
