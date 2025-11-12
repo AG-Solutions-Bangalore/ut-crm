@@ -42,11 +42,13 @@ import PartyReport from "./pages/report/party/PartyReport";
 import MillReport from "./pages/report/mill/MillReport";
 import TradeInvoiceForm from "./pages/trade-invoice/trade-invoice-form";
 import TradeInvoiceList from "./pages/trade-invoice/trade-invoice-list";
+import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
 
 function App() {
   return (
     <AppInitializer>
       <VersionCheck />
+      <ErrorBoundry>
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<SignIn />} />
@@ -129,6 +131,7 @@ function App() {
         {/* Fallback route */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </ErrorBoundry>
     </AppInitializer>
   );
 }

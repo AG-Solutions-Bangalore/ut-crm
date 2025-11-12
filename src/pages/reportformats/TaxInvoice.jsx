@@ -12,7 +12,6 @@ const TaxInvoice = () => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
 
-
   const commissionData = [
     { date: '07-Dec-24', billRef: '1237', bf: '22-100', quantity: '12352', rate: '35.45', discRate: '36.95', diff: '1.50', commn: '18228' },
     { date: '07-Dec-24', billRef: '1239', bf: '22-100', quantity: '5261', rate: '35.45', discRate: '36.95', diff: '1.50', commn: '7892' },
@@ -110,32 +109,33 @@ const TaxInvoice = () => {
     </div>
       <div className="min-h-screen bg-white p-8">
         <div className="max-w-4xl mx-auto bg-white border-2 border-blue-900" ref={componentRef}>
-          {/* Header */}    <div className="border-b-2 border-blue-900 p-6">
-            <div className="text-center text-sm font-bold text-gray-700 mb-2">TAX INVOICE</div>
+          {/* Header */}    
+          <div className="border-b-2  border-blue-900 p-6">
+            <div className="text-center text-sm  font-bold text-gray-700 mb-2">TAX INVOICE</div>
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-blue-900 instrument-font">THE UNITED TRADERS (Regd.)</h1>
+              <div className="flex-1 ">
+                <h1 className="text-4xl font-bold text-blue-900 instrument-font">THE UNITED TRADERS (Regd.)</h1>
                 <p className="text-sm text-gray-700 mt-2">Dealers in : KRAFT PAPER & DUPLEX BOARD</p>
                 <p className="text-xs text-gray-600">010, A-2 BLOCK, 7TH MAIN, 8TH CROSS, 2ND BLOCK JAYNAGAR, BANGALORE 560011</p>
-              </div>
-              <div className="text-right">
-                <div className="text-white text-center">
-                 <img
-                                               src={reportlogo}
-                                               alt="Company Logo"
-                                               className="w-[120px] h-[5rem] object-contain"
-                                             />
-                              </div>
-             
-              </div>
-            </div>
-            <div className="mt-4 flex justify-between text-xs">
+                <div className="mt-4 flex  justify-start gap-5 text-xs">
               <div>GSTIN : 29AAXPA4078KZ20</div>
               <div>Pan No : AAXPA407BK</div>
             </div>
+              </div>
+              <div className="text-right ">
+                <div className="text-white  text-center">
+                 <img
+                   src={reportlogo}
+                   alt="Company Logo"
+                   className="w-[120px] h-[8rem]  object-contain"
+                 />
+                </div>
+              </div>
+            </div>
+            
           </div>
 
-        
+          {/* Customer & Invoice Details */}
           <div className="flex gap-8 p-6 border-b border-gray-300">
             <div className="flex-1">
               <p className="text-xs font-bold text-gray-700 mb-2">To</p>
@@ -165,62 +165,111 @@ const TaxInvoice = () => {
             </div>
           </div>
 
-         
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr className="border-b-2 border-blue-900 bg-gray-50">
-                <th className="border-r border-gray-300 p-3 text-left font-bold">Sl. No.</th>
-                <th className="border-r border-gray-300 p-3 text-left font-bold">Description of goods or Services</th>
-                <th className="border-r border-gray-300 p-3 text-left font-bold">HSN Code</th>
-                <th className="p-3 text-right font-bold">Total value of Goods / Services ( in INR )</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-gray-300">
-                <td className="border-r border-gray-300 p-3">1.</td>
-                <td className="border-r border-gray-300 p-3">Sales Commission for the Month of FEB 2025</td>
-                <td className="border-r border-gray-300 p-3">996111</td>
-                <td className="p-3 text-right">36168.00</td>
-              </tr>
-            </tbody>
-          </table>
+          {/* Main Table - 60% width */}
+          <div className=" border-collapse text-xs">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-blue-900 bg-gray-50">
+                  <th className="border-r border-gray-300 p-2 text-left font-bold">Sl. No.</th>
+                  <th className="border-r border-gray-300 p-2 text-left font-bold">Description of goods or Services</th>
+                  <th className="border-r border-gray-300 p-2 text-left font-bold">HSN Code</th>
+                  <th className="p-2 text-right font-bold">Total value of Goods / Services ( in INR )</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-300">
+                  <td className="border-r border-gray-300 p-2">1.</td>
+                  <td className="border-r border-gray-300 p-2">Sales Commission for the Month of FEB 2025</td>
+                  <td className="border-r border-gray-300 p-2">996111</td>
+                  <td className="p-2 text-right">36168.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        
-          <div className="flex p-6 border-b border-gray-300">
-            <div className="flex-1">
-              <p className="text-xs font-bold text-gray-700 mb-2">Total Amount (INR IN WORDS) :</p>
-              <p className="text-sm font-semibold">Forty Two Thousand Six Hundred Seventy Eight Only .....</p>
-              <p className="text-xs text-gray-600 mt-4">Note : Any dispute is Subject to Bangalore Jurisdiction.</p>
+          {/* Tax Summary - Compact layout */}
+          <div className="flex gap-4 p-4">
+            {/* Commission Data Table - 60% width */}
+            <div className="w-[60%]">
+              <div className="text-left border-b border-gray-800 pb-2 mb-2">
+                <h2 className="text-md font-bold text-gray-800">Tax Summary</h2>
+              </div>
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr className="border-b-2 border-gray-800">
+                    <th className="border-r border-gray-800 p-1 text-left font-bold">Date</th>
+                    <th className="border-r border-gray-800 p-1 text-left font-bold">Bill Ref.</th>
+                    <th className="border-r border-gray-800 p-1 text-left font-bold">BF</th>
+                    <th className="border-r border-gray-800 p-1 text-right font-bold">Quantity</th>
+                    <th className="border-r border-gray-800 p-1 text-right font-bold">Rate</th>
+                    <th className="border-r border-gray-800 p-1 text-right font-bold">Disc. Rate</th>
+                    <th className="border-r border-gray-800 p-1 text-right font-bold">Diff.</th>
+                    <th className="p-1 text-right font-bold">Commn</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {commissionData.map((row, idx) => (
+                    <tr key={idx} className={idx === commissionData.length - 1 ? 'border-b-2 border-gray-800' : 'border-b border-gray-300'}>
+                      <td className="border-r border-gray-300 p-1">{row.date}</td>
+                      <td className="border-r border-gray-300 p-1">{row.billRef}</td>
+                      <td className="border-r border-gray-300 p-1">{row.bf}</td>
+                      <td className="border-r border-gray-300 p-1 text-right">{row.quantity}</td>
+                      <td className="border-r border-gray-300 p-1 text-right">{row.rate}</td>
+                      <td className="border-r border-gray-300 p-1 text-right">{row.discRate}</td>
+                      <td className="border-r border-gray-300 p-1 text-right">{row.diff}</td>
+                      <td className="p-1 text-right">{row.commn}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-end mt-2">
+                <div className="w-48">
+                  <div className="flex justify-between text-xs font-bold border-t-2 border-gray-800 pt-1">
+                    <span>Total =</span>
+                    <span className="text-red-600">Rs. 36,168</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 text-right text-xs">
-              <div className="flex justify-between mb-2">
-                <span>Discount (if any)</span>
-                <span className="font-semibold">0.00</span>
+
+            {/* Tax Breakdown - 40% width - Compact version */}
+            <div className="w-[40%] text-xs">
+              <div className="mb-2">
+                <p className="font-bold text-gray-700 mb-1">Total Amount (INR IN WORDS) :</p>
+                <p className="font-semibold text-xs">Forty Two Thousand Six Hundred Seventy Eight Only .....</p>
+                <p className="text-gray-600 mt-2 text-xs">Note : Any dispute is Subject to Bangalore Jurisdiction.</p>
               </div>
-              <div className="flex justify-between mb-2 font-bold border-b border-gray-300 pb-2">
-                <span>Gross Total :</span>
-                <span>Rs. 36,168.00</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>ADD - CGST 0% :</span>
-                <span>-</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>ADD - SGST 0% :</span>
-                <span>-</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>ADD - IGST 18% :</span>
-                <span className="font-semibold">Rs. 6,510.00</span>
-              </div>
-              <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-2">
-                <span>Total Amount :</span>
-                <span>Rs. 42,678.00</span>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span>Discount (if any)</span>
+                  <span className="font-semibold">0.00</span>
+                </div>
+                <div className="flex justify-between font-bold border-b border-gray-300 pb-1">
+                  <span>Gross Total :</span>
+                  <span>Rs. 36,168.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>ADD - CGST 0% :</span>
+                  <span>-</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>ADD - SGST 0% :</span>
+                  <span>-</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>ADD - IGST 18% :</span>
+                  <span className="font-semibold">Rs. 6,510.00</span>
+                </div>
+                <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-1">
+                  <span>Total Amount :</span>
+                  <span>Rs. 42,678.00</span>
+                </div>
               </div>
             </div>
           </div>
 
-       
+          {/* Bank & Signature */}
           <div className="flex gap-8 p-6 border-b border-gray-300">
             <div className="flex-1 text-xs">
               <p className="font-bold mb-2">Acc Name : The United Trades (R)</p>
@@ -236,7 +285,7 @@ const TaxInvoice = () => {
                   <img
                     src={devUrl}
                     alt="Signature"
-                    className="w-28 h-auto object-contain absolute right-0 -top-17  "
+                    className="w-28 h-auto object-contain absolute right-0 -top-17"
                   />
                 )}
                 <p className="text-xs mt-16">Authorised Signatory</p>
@@ -244,72 +293,35 @@ const TaxInvoice = () => {
             </div>
           </div>
 
-
-          
-       <div className="mb-8 p-4">
-        <div className="text-center mt-4 border-b border-gray-800 pb-2">
-            <h2 className="text-lg font-bold text-gray-800">Commission Details for Tax Invoice No. - 87</h2>
-          </div>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-gray-800">
-                <th className="border-r border-gray-800 p-3 text-left text-xs font-bold">Date</th>
-                <th className="border-r border-gray-800 p-3 text-left text-xs font-bold">Bill Ref.</th>
-                <th className="border-r border-gray-800 p-3 text-left text-xs font-bold">BF</th>
-                <th className="border-r border-gray-800 p-3 text-right text-xs font-bold">Quantity</th>
-                <th className="border-r border-gray-800 p-3 text-right text-xs font-bold">Rate</th>
-                <th className="border-r border-gray-800 p-3 text-right text-xs font-bold">Disc. Rate</th>
-                <th className="border-r border-gray-800 p-3 text-right text-xs font-bold">Diff.</th>
-                <th className="p-3 text-right text-xs font-bold">Commn</th>
-              </tr>
-            </thead>
-            <tbody>
-              {commissionData.map((row, idx) => (
-                <tr key={idx} className={idx === commissionData.length - 1 ? 'border-b-2 border-gray-800' : 'border-b border-gray-300'}>
-                  <td className="border-r border-gray-300 p-3 text-xs">{row.date}</td>
-                  <td className="border-r border-gray-300 p-3 text-xs">{row.billRef}</td>
-                  <td className="border-r border-gray-300 p-3 text-xs">{row.bf}</td>
-                  <td className="border-r border-gray-300 p-3 text-right text-xs">{row.quantity}</td>
-                  <td className="border-r border-gray-300 p-3 text-right text-xs">{row.rate}</td>
-                  <td className="border-r border-gray-300 p-3 text-right text-xs">{row.discRate}</td>
-                  <td className="border-r border-gray-300 p-3 text-right text-xs">{row.diff}</td>
-                  <td className="p-3 text-right text-xs">{row.commn}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-     
-          <div className="flex justify-end mt-4">
-            <div className="w-64">
-              <div className="flex justify-between text-sm font-bold border-t-2 border-gray-800 pt-2">
-                <span>Total =</span>
-                <span className="text-red-600">Rs. 36,168</span>
-              </div>
-            </div>
-          </div>
+          {/* Footer */}
+          <div className="border-t-2 border-blue-900 p-4">
+  <div className="flex justify-between items-center">
+    <p className="text-xs text-gray-700 flex-1">
+      Corr. Address : #1141, 2nd Main, 1st Cross, Hoskerethalli, BSK 3rd Stage, Bangalore 560085
+    </p>
+    <div className="flex gap-4 items-center mx-4">
+      <div className="flex items-center gap-1">
+        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+          <Phone className='w-3 h-3 text-white'/>
         </div>
-
-        
-          <div className="border-t-2 border-blue-900 p-6">
-            <p className="text-xs text-center text-gray-700 mb-3">
-              Corr. Address : #1141, 2nd Main, 1st Cross, Hoskerethalli, BSK 3rd Stage, Bangalore 560085 Email : united1141@email.com
-            </p>
-            <div className="flex justify-center gap-6 items-center">
-              <div className="text-center">
-                <div className="w-6 h-6 rounded-full bg-blue-900 mx-auto mb-1"><Phone className='w-5 h-5 text-white'/></div>
-                <p className="text-xs">8626728620</p>
-              </div>
-              <div className="text-center">
-                <div className="w-6 h-6 rounded-full bg-blue-900 mx-auto mb-1"><PhoneCall className='w-5 h-5 text-white'/></div>
-                <p className="text-xs">9854420122</p>
-              </div>
-              <div className="text-center">
-                <div className="w-6 h-6 rounded-full bg-blue-900 mx-auto mb-1"><Mail className='w-5 h-5 text-white'/></div>
-                <p className="text-xs">united1141@email.com</p>
-              </div>
-            </div>
-          </div>
+        <span className="text-xs">8626728620</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+          <PhoneCall className='w-3 h-3 text-white'/>
+        </div>
+        <span className="text-xs">9854420122</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+          <Mail className='w-3 h-3 text-white'/>
+        </div>
+        <span className="text-xs">united1141@email.com</span>
+      </div>
+    </div>
+   
+  </div>
+</div>
         </div>
       </div>
     </>
