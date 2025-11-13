@@ -2,8 +2,12 @@ import {
   EditOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  MinusCircleOutlined,
+  MinusOutlined,
+  PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   App,
   Button,
@@ -25,23 +29,20 @@ import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import { useQueryClient } from "@tanstack/react-query";
 
 const { Search } = Input;
 
 const BillingList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [activeTab, setActiveTab] = useState("Open");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const {
-    data: billingdata,
-    isLoading,
-  } = useGetApiMutation({
+  const { data: billingdata, isLoading } = useGetApiMutation({
     url: BILLING_LIST,
     queryKey: ["billingdata", debouncedSearch, page, activeTab],
     params: { search: debouncedSearch, page, type: activeTab },
@@ -90,13 +91,30 @@ const BillingList = () => {
   const columns = [
     {
       title: "Purchase Ref No",
-      dataIndex: "purchase_orders_ref",
       key: "purchase_orders_ref",
       fixed: "left",
-      render: (text, record) => (
-        <span className="font-medium text-blue-600">
-          {record.purchase_orders_ref}
-        </span>
+      render: (_, record) => (
+        <div className="flex flex-col">
+          <span className="text-black font-bold">
+            {record.purchase_orders_ref ? record.purchase_orders_ref : "-"}
+          </span>
+          <span className="text-gray-800">
+            {record.billing_payment_type ? (
+              <span
+                className={`inline-flex items-center justify-center w-6 h-6 mr-1 rounded-full text-white font-semibold uppercase ${
+                  record.billing_payment_type[0].toLowerCase() === "p"
+                    ? "bg-green-400"
+                    : "bg-blue-400"
+                }`}
+              >
+                {record.billing_payment_type.charAt(0)}
+              </span>
+            ) : (
+              ""
+            )}
+            B No : {record.billing_no ? record.billing_no : ""}{" "}
+          </span>
+        </div>
       ),
     },
     {
@@ -133,11 +151,10 @@ const BillingList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Purchase Amount",
-      dataIndex: "purchase_amount",
-      key: "purchase_amount",
-      align: "right",
-      render: (text) => <span>{Number(text).toFixed(2)}</span>,
+      title: "Billing BF",
+      dataIndex: "billing_bf",
+      key: "billing_bf",
+      render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
       title: "Billing Tones",
@@ -156,10 +173,17 @@ const BillingList = () => {
             Sale: {Number(record.sale_rate).toFixed(2)}
           </span>
           <span className="text-blue-600">
-            Purchase: {Number(record.purchase_rate).toFixed(2)}
+            POR: {Number(record.purchase_rate).toFixed(2)}
           </span>
         </div>
       ),
+    },
+    {
+      title: "Sale Amount",
+      dataIndex: "purchase_amount",
+      key: "purchase_amount",
+      align: "right",
+      render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
 
     {
@@ -169,12 +193,6 @@ const BillingList = () => {
       render: (text) => <span className="capitalize">{text}</span>,
     },
 
-    {
-      title: "Billing BF",
-      dataIndex: "billing_bf",
-      key: "billing_bf",
-      render: (text) => <span className="text-gray-800">{text}</span>,
-    },
     {
       title: "Status",
       dataIndex: "billing_status",
@@ -206,7 +224,7 @@ const BillingList = () => {
       title: "Actions",
       key: "actions",
       fixed: "right",
-      width: 120,
+      width: 80,
       render: (_, record) => (
         <Space>
           <Tooltip title="Edit Billing">
@@ -236,7 +254,6 @@ const BillingList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        {/* <h2 className="text-2xl font-bold heading">Billing List</h2> */}
         <Tabs
           activeKey={activeTab}
           onChange={(key) => {
@@ -282,8 +299,158 @@ const BillingList = () => {
               pageSize: apiData.per_page,
               onChange: handlePageChange,
             }}
+            expandable={{
+              expandedRowKeys,
+              onExpand: (expanded, record) =>
+                setExpandedRowKeys(expanded ? [record.id] : []),
+              expandIcon: ({ expanded, onExpand, record }) => {
+                const hasInvoice = !!record.tax_invoice;
+                const hasPayments = record.payments?.length > 0;
+                const isEmpty = !hasInvoice && !hasPayments;
+
+                const iconStyle = {
+                  color: isEmpty ? "#dc2626" : "#16a34a", // red if both empty else green
+                  fontSize: 16,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                };
+
+                return expanded ? (
+                  <MinusCircleOutlined
+                    onClick={(e) => onExpand(record, e)}
+                    style={iconStyle}
+                  />
+                ) : (
+                  <PlusCircleOutlined
+                    onClick={(e) => onExpand(record, e)}
+                    style={iconStyle}
+                  />
+                );
+              },
+              expandedRowRender: (record) => {
+                const invoice = record.tax_invoice;
+                const payments = record.payments || [];
+
+                // If both are empty
+                if (!invoice && payments.length === 0) {
+                  return (
+                    <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
+                      No Tax Invoice or Payments Available
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 space-y-4 transition-all duration-300 ease-in-out">
+                    {/* ✅ Tax Invoice Section */}
+                    {invoice && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">
+                          Tax Invoice Details
+                        </h4>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center">
+                          {[
+                            {
+                              label: "Date",
+                              value: dayjs(invoice.tax_invoice_date).format(
+                                "DD-MM-YYYY"
+                              ),
+                            },
+                            {
+                              label: "Invoice No",
+                              value: invoice.tax_invoice_no,
+                            },
+                            { label: "Ref No", value: invoice.tax_invoice_ref },
+                            { label: "Mill Name", value: invoice.mill_name },
+                            { label: "Type", value: invoice.tax_invoice_type },
+                            {
+                              label: "Discount",
+                              value: `${invoice.tax_invoice_discount}%`,
+                            },
+                            {
+                              label: "Total Comm",
+                              value: `₹${invoice.total_comm}`,
+                            },
+                          ].map((item) => (
+                            <div key={item.label}>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                {item.label}
+                              </p>
+                              <p className="text-sm text-gray-800 font-semibold">
+                                {item.value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ✅ Payments Section */}
+                    {payments.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">
+                          Payments
+                        </h4>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full text-sm  ">
+                            <thead className="bg-gray-100 text-gray-700 font-medium">
+                              <tr>
+                                <th className="p-2 ">Date</th>
+                                <th className="p-2 ">Amount</th>
+                                <th className="p-2 ">Type</th>
+                                <th className="p-2 ">Transaction</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {payments?.map((p) => (
+                                <tr
+                                  key={p.id}
+                                  className="text-center hover:bg-gray-50"
+                                >
+                                  <td className="p-2 ">
+                                    {dayjs(p.payment_date).format("DD-MM-YYYY")}
+                                  </td>
+                                  <td className="p-2 boder  font-semibold">
+                                    ₹{p.payment_amount}
+                                  </td>
+                                  <td className="p-2 ">{p.payment_type}</td>
+                                  <td className="p-2 ">
+                                    {p.payment_transaction || "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot>
+                              <tr className="bg-gray-50 text-center font-semibold">
+                                <td
+                                  colSpan={1}
+                                  className="p-2 text-right"
+                                >
+                                  Total :
+                                </td>
+                                <td className="p-2 ">
+                                  ₹
+                                  {payments
+                                    .reduce(
+                                      (total, p) =>
+                                        total + Number(p.payment_amount || 0),
+                                      0
+                                    )
+                                    .toLocaleString()}
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              },
+            }}
+            rowKey="id" // ✅ Important
             className="custom-purchase-table"
-           
           />
         ) : (
           <Empty

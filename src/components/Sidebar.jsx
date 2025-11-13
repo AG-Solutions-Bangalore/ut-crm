@@ -12,13 +12,12 @@ import {
   FileDoneOutlined,
   FileProtectOutlined,
   FileSearchOutlined,
-  FileTextOutlined,
   HomeOutlined,
   ReconciliationOutlined,
   ShoppingCartOutlined,
   SolutionOutlined,
   TeamOutlined,
-  WalletOutlined,
+  WalletOutlined
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";

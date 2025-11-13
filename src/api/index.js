@@ -41,7 +41,7 @@ export const UPDATE_STATUS_SHADE = `/shades`;
 // export const UPDATE_STATUS_SUBJECT = `/subjects`;
 // // ----------DECKLE--------------
 // export const DECKLE_LIST = `/deckle`;
-// export const ACTIVE_DECKLE = `/activeDeckles`;
+export const ACTIVE_DECKLE = `/activeDeckles`;
 // export const UPDATE_STATUS_DECKLE = `/deckle`;
 // // ----------GSM--------------
 // export const GSM_LIST = `/gsm`;
@@ -52,6 +52,8 @@ export const PURCHASE_ORDER_LIST = `/purchase-order`;
 export const PURCHASE_ORDER_REF = `/purchase-order-ref`;
 export const UPDATE_STATUS_PURCHASE_ORDER = `/purchase-orders`;
 export const DELETE_ORDER_SUB = `/purchase-order-sub`;
+export const PURCHASE_LATEST_DATA = "/getlastpurchase";
+
 // ------------QUOTATION-------------------
 export const QUOTATION_LIST = `/quotation`;
 export const QUOTATION_REF = `/quotation-ref`;

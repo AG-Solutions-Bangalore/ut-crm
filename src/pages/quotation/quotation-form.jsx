@@ -48,7 +48,7 @@ const QuotationForm = () => {
     quotation_payment: "WITH IN 15 DAYS",
     quotation_delivery: "",
     quotation_furnish: "INDIAN + IMPORTED waste",
-    quotation_samples: "",
+    quotation_samples: null,
     quotation_footer:
       "We assure of our prompt and efficient services and look forward",
   });
