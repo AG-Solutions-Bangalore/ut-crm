@@ -105,103 +105,103 @@ const TaxInvoice = () => {
   const totalAmount = grossTotal + cgstAmount + sgstAmount + igstAmount;
 
 
-const handleDownload = async () => {
-  const element = componentRef?.current;
-
-  if (!element) {
-    message.error('Failed to generate PDF');
-    return;
-  }
-
-  const elementForPdf = element.cloneNode(true);
-  const printHideElements = elementForPdf.querySelectorAll('.print-hide');
-  printHideElements.forEach(el => el.remove());
-
-  // Add style to override all colors with compatible formats
-  const style = document.createElement('style');
-  style.textContent = `
-    * {
-      color: #000000 !important;
-      background-color: transparent !important;
+  const handleDownload = async () => {
+    const element = componentRef?.current;
+  
+    if (!element) {
+      message.error('Failed to generate PDF');
+      return;
     }
-    .bg-gray-200, .bg-gray-100, .bg-white {
-      background-color: #ffffff !important;
-    }
-    .bg-gray-50 {
-      background-color: #f9fafb !important;
-    }
-    .text-blue-900 {
-      color: #1e3a8a !important;
-    }
-    .text-gray-700 {
-      color: #374151 !important;
-    }
-    .text-gray-600 {
-      color: #4b5563 !important;
-    }
-    .text-gray-800 {
-      color: #1f2937 !important;
-    }
-    .text-red-600 {
-      color: #dc2626 !important;
-    }
-    .border-blue-900 {
-      border-color: #1e3a8a !important;
-    }
-    .border-gray-300 {
-      border-color: #d1d5db !important;
-    }
-    .border-gray-800 {
-      border-color: #1f2937 !important;
-    }
-    .border-black {
-      border-color: #000000 !important;
-    }
-    /* Remove fixed positioning for PDF */
-    .fixed-header, .fixed-footer {
-      position: relative !important;
-    }
-    .page-content {
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
-    }
-  `;
-  elementForPdf.appendChild(style);
-
-  const options = {
-    margin: [10, 10, 10, 10],
-    filename: `Tax-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      scrollY: 0,
-      windowHeight: elementForPdf.scrollHeight,
-      backgroundColor: '#FFFFFF'
-    },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    },
-    pagebreak: { 
-      mode: ['avoid-all', 'css', 'legacy'],
-      before: '.fixed-footer'
-    },
+  
+    const elementForPdf = element.cloneNode(true);
+    const printHideElements = elementForPdf.querySelectorAll('.print-hide');
+    printHideElements.forEach(el => el.remove());
+  
+    // Remove fixed positioning styles for PDF
+    const style = document.createElement('style');
+    style.textContent = `
+      * {
+        color: #000000 !important;
+        background-color: transparent !important;
+      }
+      .bg-gray-200, .bg-gray-100, .bg-white {
+        background-color: #ffffff !important;
+      }
+      .bg-gray-50 {
+        background-color: #f9fafb !important;
+      }
+      .text-blue-900 {
+        color: #1e3a8a !important;
+      }
+      .text-gray-700 {
+        color: #374151 !important;
+      }
+      .text-gray-600 {
+        color: #4b5563 !important;
+      }
+      .text-gray-800 {
+        color: #1f2937 !important;
+      }
+      .text-red-600 {
+        color: #dc2626 !important;
+      }
+      .border-blue-900 {
+        border-color: #1e3a8a !important;
+      }
+      .border-gray-300 {
+        border-color: #d1d5db !important;
+      }
+      .border-gray-800 {
+        border-color: #1f2937 !important;
+      }
+      .border-black {
+        border-color: #000000 !important;
+      }
+      /* Remove fixed positioning for PDF */
+      .fixed-header, .fixed-footer {
+        position: relative !important;
+      }
+      .page-content {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+    `;
+    elementForPdf.appendChild(style);
+  
+    const options = {
+      margin: [10, 10, 10, 10],
+      filename: `Tax-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: elementForPdf.scrollHeight,
+        backgroundColor: '#FFFFFF'
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+      },
+      pagebreak: { 
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.fixed-footer'
+      },
+    };
+  
+    html2pdf()
+      .from(elementForPdf)
+      .set(options)
+      .save()
+      .then(() => {
+        message.success('PDF downloaded successfully');
+      })
+      .catch((error) => {
+        console.error('PDF download error:', error);
+        message.error('Failed to download PDF');
+      });
   };
-
-  html2pdf()
-    .from(elementForPdf)
-    .set(options)
-    .save()
-    .then(() => {
-      message.success('PDF downloaded successfully');
-    })
-    .catch((error) => {
-      console.error('PDF download error:', error);
-      message.error('Failed to download PDF');
-    });
-};
  
 
   const handlePrint = useReactToPrint({
@@ -221,11 +221,7 @@ const handleDownload = async () => {
         border:2px solid black
       }
       @media print {
-        html, body {
-          height: 100%;
-          margin: 0;
-          padding: 0;
-        }
+       
         .print-hide {
           display: none !important;
         }
@@ -259,30 +255,7 @@ const handleDownload = async () => {
 
   return (
     <>
-      <style>{`
-        @media print {
-          .fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            z-index: 1000;
-          }
-          .fixed-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            z-index: 1000;
-          }
-          .page-content {
-            margin-top: 200px;
-            margin-bottom: 180px;
-          }
-        }
-      `}</style>
+     
       
       <div className="print-hide flex gap-2 mb-4">
         <button 

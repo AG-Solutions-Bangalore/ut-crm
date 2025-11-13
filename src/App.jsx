@@ -44,6 +44,8 @@ import TradeInvoiceForm from "./pages/trade-invoice/trade-invoice-form";
 import TradeInvoiceList from "./pages/trade-invoice/trade-invoice-list";
 import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
 import TaxInvoice from "./pages/reportformats/TaxInvoice";
+import { DashboardNew } from "./features/dashboard";
+import LedgerReport from "./pages/report/ledger/ledger-report";
 
 function App() {
   return (
@@ -59,6 +61,7 @@ function App() {
         {/* Protected routes inside layout */}
         <Route element={<ProtectedLayout />}>
           <Route path="/home" element={<Dashboard />} />
+          <Route path="/home1" element={<DashboardNew />} />
           <Route path="/auth-report" element={<AuthReport />} />
           <Route path="/master/mill" element={<MillList />} />
           <Route path="/master/mill/create" element={<MillForm />} />
@@ -128,6 +131,7 @@ function App() {
           />
           <Route path="/report/party" element={<PartyReport />} />
           <Route path="/report/mill" element={<MillReport />} />
+          <Route path="/report/ledger-report" element={<LedgerReport />} />
         </Route>
 
         {/* Fallback route */}

@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+
 import {
   DeleteOutlined,
   MinusCircleOutlined,
@@ -14,29 +17,32 @@ import {
   Popconfirm,
   Select,
   Spin,
-  Switch,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DELETE_QUOTATION_SUB, PURCHASE_ORDER_LIST } from "../../api";
+import { DELETE_QUOTATION_SUB, PURCHASE_ORDER_LIST, TRADE_INVOICE_LIST } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useSelector } from "react-redux";
+import useToken from "../../api/usetoken";
+
 
 const TradeInvoiceForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const { id } = useParams();
-  const isEditMode = Boolean(id);
+  const company = useSelector(state => state.company.companyDetails);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const token = useToken();
   const [initialData, setInitialData] = useState({
     trade_invoice_date: "",
     trade_invoice_ref: "",
     trade_invoice_party_id: null,
-    trade_invoice_sgst: "",
-    trade_invoice_cgst: "",
-    trade_invoice_igst: "",
+    trade_invoice_sgst: 0,
+    trade_invoice_cgst: 0,
+    trade_invoice_igst: 0,
     trade_invoice_discount: 0,
     trade_invoice_freight: 0,
     trade_invoice_insurance: 0,
@@ -45,39 +51,43 @@ const TradeInvoiceForm = () => {
     trade_invoice_payment_terms: "",
     trade_invoice_remarks: "",
   });
+  // const [invoiceRef, setInvoiceRef] = useState("");
+
 
   const { party, tradeinvoice, item } = useMasterData({
     party: true,
     tradeinvoice: true,
     item: true,
   });
+console.log(tradeinvoice,'invoiceRef')
+  const partyOptions = party?.data?.data?.map((item) => ({
+    label: item.party_name,
+    value: item.id,
+    party_delivery_address: item.party_delivery_address,
+    party_state: item.party_state,
+  })) || [];
 
-  const partyOptions =
-    party?.data?.data?.map((item) => ({
-      label: item.party_name,
-      value: item.id,
-      party_delivery_address: item.party_delivery_address,
-    })) || [];
-
-  // const handleChange = () => {
-  //   if (quotationRef?.data?.data) {
-  //     form.setFieldValue("trade_invoice_ref", quotationRef.data?.data);
-  //   }
-  // };
-  const handleChange = (id) => {
-    // taxinvoice.refetch();
+ 
+  const handlePartyChange = (id) => {
     const selectedParty = partyOptions.find((m) => m.value == id);
+
     if (!selectedParty) {
       form.setFieldsValue({
         trade_invoice_sgst: 0,
         trade_invoice_cgst: 0,
         trade_invoice_igst: 0,
       });
+     
       return;
     }
-    const partyState = selectedParty.mill_state?.toLowerCase() || "";
+    tradeinvoice.refetch()
+form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
+ 
 
-    if (partyState == companystate) {
+    const partyState = selectedParty.party_state?.toLowerCase() || "";
+    const companyState = company?.company_state?.toLowerCase() || "";
+
+    if (partyState === companyState) {
       form.setFieldsValue({
         trade_invoice_sgst: 9,
         trade_invoice_cgst: 9,
@@ -90,81 +100,102 @@ const TradeInvoiceForm = () => {
         trade_invoice_igst: 18,
       });
     }
-    if (tradeinvoice?.data?.data) {
-      form.setFieldValue("trade_invoice_ref", tradeinvoice.data?.data);
-    }
   };
-  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
-  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
-  const { trigger: deleteTrigger } = useApiMutation();
-  const fetchQuotation = async () => {
-    try {
-      const res = await fetchTrigger({
-        url: `${PURCHASE_ORDER_LIST}/${id}`,
-      });
-      if (res?.data) {
-        const formattedData = {
-          ...res.data,
-          quotation_status: res.data.quotation_status == "Open" ? true : false,
-          quotation_date: res.data.quotation_date
-            ? dayjs(res.data.quotation_date)
-            : null,
-        };
-        setInitialData(formattedData);
-        form.setFieldsValue(formattedData);
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      message.error("Failed to load tradeinvoice details.");
-    }
+
+  const [gsmOptions, setGsmOptions] = useState([]);
+  const [bfOptions, setBfOptions] = useState([]);
+  const [shadeOptions, setShadeOptions] = useState([]);
+  const [unitOptions, setUnitOptions] = useState([]);
+
+  const fetchWithToken = async (url) => {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.json();
   };
 
   useEffect(() => {
-    if (id) fetchQuotation();
-    else form.resetFields();
-  }, [id]);
+    const fetchMasterData = async () => {
+      try {
+        const [gsmRes, bfRes, shadeRes, unitRes] = await Promise.all([
+          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activegsms'),
+          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeBFs'),
+          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeShades'),
+          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeUnits')
+        ]);
 
+        setGsmOptions(gsmRes.data?.map(item => ({ label: item.gsm, value: item.gsm })) || []);
+        setBfOptions(bfRes.data?.map(item => ({ label: item.bf, value: item.bf })) || []);
+        setShadeOptions(shadeRes.data?.map(item => ({ label: item.shade, value: item.shade })) || []);
+     
+
+        setUnitOptions(unitRes.data?.map(item => ({ label: item.unit, value: item.unit })) || []);
+      } catch (error) {
+        console.error("Error fetching master data:", error);
+      }
+    };
+
+    fetchMasterData();
+
+
+  }, [token]);
+
+  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
+  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
+  const { trigger: deleteTrigger } = useApiMutation();
+  
+  
+
+ 
   const handleSubmit = async (values) => {
+    try {
+    
+      const refetchResult = await tradeinvoice.refetch();
+      const latestRef = refetchResult?.data?.data || tradeinvoice?.data?.data || initialData.trade_invoice_ref || "";
+  
     const payload = {
       ...values,
-      trade_invoice_ref: initialData.trade_invoice_ref || "",
-      quotation_date: values.quotation_date
-        ? dayjs(values.quotation_date).format("YYYY-MM-DD")
+      trade_invoice_ref: latestRef,
+      trade_invoice_date: values.trade_invoice_date
+        ? dayjs(values.trade_invoice_date).format("YYYY-MM-DD")
         : null,
       subs: (values.subs || []).map((sub) => ({
         id: sub?.id || "",
-        quotation_quality: sub?.quotation_quality || "",
-        quotation_basic_price: sub?.quotation_basic_price || "",
-        quotation_gst: sub?.quotation_gst || "",
-        quotation_insurance: sub?.quotation_insurance || "",
-        quotation_tmill: sub?.quotation_tmill || "",
-        quotation_net_gst: sub?.quotation_net_gst || "",
+        trade_invoice_sub_description: sub?.trade_invoice_sub_description || "",
+        trade_invoice_sub_gsm: sub?.trade_invoice_sub_gsm || "",
+        trade_invoice_sub_bf: sub?.trade_invoice_sub_bf || "",
+        trade_invoice_sub_size: sub?.trade_invoice_sub_size || "",
+        trade_invoice_sub_shade: sub?.trade_invoice_sub_shade || "",
+        trade_invoice_sub_unit: sub?.trade_invoice_sub_unit || "",
+        trade_invoice_sub_reel: sub?.trade_invoice_sub_reel || "",
+        trade_invoice_sub_qnty: sub?.trade_invoice_sub_qnty || "",
+        trade_invoice_sub_rate: sub?.trade_invoice_sub_rate || "",
       })),
     };
 
-    if (isEditMode) {
-      payload.quotation_status = values?.quotation_status ? "Open" : "Close";
-    }
-
-    try {
+  
       const res = await submitTrigger({
-        url: isEditMode ? `${TRADE_INVOICE_LIST}/${id}` : TRADE_INVOICE_LIST,
-        method: isEditMode ? "put" : "post",
+        url: TRADE_INVOICE_LIST,
+        method: "post",
         data: payload,
       });
 
       if (res.code === 201) {
-        message.success(res.message || "Quotation order saved successfully!");
+        message.success(res.message || "Trade invoice saved successfully!");
         await queryClient.invalidateQueries({ queryKey: ["tradeinvoicedata"] });
-        navigate("/quotation");
+        navigate("/trade-invoice");
       } else {
-        message.error(res.message || "Failed to save quotation order.");
+        message.error(res.message || "Failed to save trade invoice.");
       }
     } catch (error) {
       console.error(error);
-      message.error(error?.message || "Error while saving quotation order.");
+      message.error(error?.message || "Error while saving trade invoice.");
     }
   };
+
   const handleDelete = async (subId) => {
     if (!subId) {
       message.error("Invalid sub-item ID.");
@@ -179,7 +210,7 @@ const TradeInvoiceForm = () => {
 
       if (res?.code === 201) {
         message.success(res?.message || "Sub-item deleted successfully!");
-        fetchQuotation();
+     
       } else {
         message.error(res?.message || "Failed to delete sub-item.");
       }
@@ -189,7 +220,8 @@ const TradeInvoiceForm = () => {
     }
   };
 
-  const loading = fetchLoading  || party?.loading;
+  const loading = fetchLoading || party?.loading;
+  
   return (
     <>
       {loading ? (
@@ -206,55 +238,37 @@ const TradeInvoiceForm = () => {
           requiredMark={false}
         >
           <Card
-            title={
-              <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Trade Invoice" : "Create  Trade Invoice"}
-              </h2>
-            }
+            title={<h2 className="text-2xl font-bold">Create Trade Invoice</h2>}
             extra={
-              <>
-                <Form.Item className="text-center !mt-4">
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={submitLoading}
-                  >
-                    {isEditMode ? "Update" : "Create"}
-                  </Button>
-                </Form.Item>
-              </>
+              <div className="flex items-center">
+                <Button type="primary" htmlType="submit" loading={submitLoading}>
+                  Create
+                </Button>
+              </div>
             }
             variant="borderless"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* First Row - Basic Info */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 ">
               <Form.Item
-                label={
-                  <span>
-                    Party <span className="text-red-500">*</span>
-                  </span>
-                }
+                label={<span>Party <span className="text-red-500">*</span></span>}
                 name="trade_invoice_party_id"
                 rules={[{ required: true, message: "Select party" }]}
               >
                 <Select
                   placeholder="Select Party"
                   options={partyOptions}
-                  onChange={handleChange}
+                  onChange={handlePartyChange}
                   filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
+                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                   }
                   showSearch
                   allowClear
                 />
               </Form.Item>
+
               <Form.Item
-                label={
-                  <span>
-                    Invoice Date <span className="text-red-500">*</span>
-                  </span>
-                }
+                label={<span>Invoice Date <span className="text-red-500">*</span></span>}
                 name="trade_invoice_date"
                 rules={[{ required: true, message: "Please select date" }]}
               >
@@ -262,154 +276,67 @@ const TradeInvoiceForm = () => {
               </Form.Item>
 
               <Form.Item
-                label={
-                  <span>
-                    Quotation Ref No <span className="text-red-500">*</span>
-                  </span>
-                }
+                label={<span>Invoice Ref No <span className="text-red-500">*</span></span>}
                 name="trade_invoice_ref"
                 rules={[{ required: true, message: "Enter reference number" }]}
               >
-                <Input disabled value={tradeinvoice?.data?.data} />
+                <Input placeholder="Auto-generated" readOnly />
               </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Deckle <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_deckle"
-                rules={[{ required: true, message: "Select Deckle" }]}
-              >
-                <Select
-                  placeholder="Select Deckle"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
+              <div className="grid grid-cols-3 gap-0 ">
+              <Form.Item label="SGST(%)" name="trade_invoice_sgst">
+                <Input type="number" placeholder="SGST" />
               </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    GSM <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_gsm_range"
-                rules={[{ required: true, message: "Select GSM" }]}
-              >
-                <Select
-                  placeholder="Select GSM"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
+
+              <Form.Item label="CGST(%)" name="trade_invoice_cgst">
+                <Input type="number" placeholder="CGST" />
               </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Freight <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_freight"
-                rules={[{ required: true, message: "Select Freight" }]}
-              >
-                <Select
-                  placeholder="Select Freight"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Samples <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_samples"
-                rules={[{ required: true, message: "Select Samples" }]}
-              >
-                <Select
-                  placeholder="Select Samples"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item name="quotation_payment" label="Payment">
-                <Input placeholder="Enter Payment" />
-              </Form.Item>
-              <Form.Item name="quotation_furnish" label="Furnish">
-                <Input placeholder="Enter Furnish" />
-              </Form.Item>
-              <Form.Item name="quotation_extra_charge" label="Extra Charge">
-                <Input placeholder="Enter Extra Charge" />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Delivery <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_delivery"
-                rules={[{ required: true, message: "Select Delivery" }]}
-              >
-                <Select
-                  placeholder="Select Delivery"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Subject <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_subject"
-                rules={[{ required: true, message: "Select Subject" }]}
-              >
-                <Select
-                  placeholder="Select Subject"
-                  options={partyOptions}
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                name="quotation_footer"
-                label="Footer"
-                className="md:col-span-2"
-              >
-                <Input placeholder="Enter Footer" value="" />
+
+              <Form.Item label="IGST(%)" name="trade_invoice_igst">
+                <Input type="number" placeholder="IGST" />
               </Form.Item>
             </div>
+            </div>
+
+            {/* Second Row - GST */}
+          
+
+            {/* Third Row - Discount, Freight, Insurance, HSN, E-Way Bill */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <Form.Item label="Discount" name="trade_invoice_discount">
+                <Input type="number" placeholder="0" />
+              </Form.Item>
+
+              <Form.Item label="Freight" name="trade_invoice_freight">
+                <Input type="number" placeholder="0" />
+              </Form.Item>
+
+              <Form.Item label="Insurance" name="trade_invoice_insurance">
+                <Input type="number" placeholder="0" />
+              </Form.Item>
+
+              <Form.Item label="HSN Code" name="trade_invoice_hsn_code">
+                <Input placeholder="48043900" readOnly />
+              </Form.Item>
+
+              <Form.Item label="E-Way Bill" name="trade_invoice_ewaybill">
+                <Input placeholder="E-Way Bill" />
+              </Form.Item>
+            </div>
+
+            {/* Fourth Row - Payment Terms and Remarks */}
+            <div className="flex flex-col md:flex-row gap-2 ">
+              <div className="flex-1">
+                <Form.Item label="Payment Terms" name="trade_invoice_payment_terms">
+                  <Input.TextArea placeholder="Payment Terms" rows={2} />
+                </Form.Item>
+              </div>
+              <div className="flex-1">
+                <Form.Item label="Remarks" name="trade_invoice_remarks">
+                  <Input.TextArea placeholder="Remarks" rows={2} />
+                </Form.Item>
+              </div>
+            </div>
+
             <Card size="small" className="bg-gray-50 my-4">
               <Form.List
                 name="subs"
@@ -418,9 +345,7 @@ const TradeInvoiceForm = () => {
                   {
                     validator: async (_, subs) => {
                       if (!subs || subs.length < 1)
-                        return Promise.reject(
-                          new Error("Please add at least one sub item.")
-                        );
+                        return Promise.reject(new Error("Please add at least one sub item."));
 
                       const hasAnyFilledRow = subs.some((row) =>
                         Object.values(row || {}).some(
@@ -430,9 +355,7 @@ const TradeInvoiceForm = () => {
 
                       if (!hasAnyFilledRow)
                         return Promise.reject(
-                          new Error(
-                            "Please fill at least one sub item before submitting."
-                          )
+                          new Error("Please fill at least one sub item before submitting.")
                         );
 
                       return Promise.resolve();
@@ -443,14 +366,8 @@ const TradeInvoiceForm = () => {
                 {(fields, { add, remove }, { errors }) => (
                   <>
                     <div className="flex justify-between mb-2">
-                      <div className="font-semibold text-lg mb-2">
-                        Sub Details
-                      </div>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        icon={<PlusOutlined />}
-                      >
+                      <div className="font-semibold text-lg mb-2">Item Details</div>
+                      <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
                         Add Item
                       </Button>
                     </div>
@@ -458,107 +375,133 @@ const TradeInvoiceForm = () => {
                       const subItem = form.getFieldValue(["subs", name]);
                       const hasId = subItem?.id;
                       return (
-                        <Card
+                        <div
                           key={key}
                           size="small"
-                          className="!mb-3 bg-white border relative"
+                          className="!mb-3 bg-white  relative"
                         >
                           {fields.length > 1 &&
-                            (hasId ? (
-                              <Popconfirm
-                                title="Are you sure you want to delete this sub-item?"
-                                onConfirm={() => handleDelete(subItem?.id)}
-                                okText="Yes"
-                                cancelText="No"
-                              >
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<DeleteOutlined />}
-                                  className="!absolute top-2 right-2 text-red-500"
-                                />
-                              </Popconfirm>
-                            ) : (
-                              <Button
-                                type="text"
-                                danger
-                                icon={<MinusCircleOutlined />}
-                                className="!absolute top-2 right-2"
+                            (
+                              <button
+                                type="button"
+                               
+                                className="absolute z-10 right-2  p-1 rounded-md hover:cursor-pointer bg-red-100"
                                 onClick={() => remove(name)}
-                              />
-                            ))}
+                              >
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
+                                <MinusCircleOutlined className="!text-red-400 "/>
+                              </button>
+                            )}
+
+                          {/* All 9 sub-table fields in one compact row using grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-9 gap-2 mt-2">
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_quality"]}
-                              label="Item"
+                              name={[name, "trade_invoice_sub_description"]}
+                              label="Desc"
+                              className="mb-0"
+                            >
+                              <Input placeholder="Description" size="medium" />
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, "trade_invoice_sub_gsm"]}
+                              label="GSM"
+                              className="mb-0"
                             >
                               <Select
-                                placeholder="Select Item"
-                                options={item?.data?.data?.map((item) => ({
-                                  label: item.bf,
-                                  value: item.bf,
-                                }))}
-                                loading={item?.loading}
+                                placeholder="GSM"
+                                options={gsmOptions}
+                                size="medium"
                                 showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
                               />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_basic_price"]}
-                              label="Basic Price"
+                              name={[name, "trade_invoice_sub_bf"]}
+                              label="BF"
+                              className="mb-0"
                             >
-                              <Input placeholder="Basic Price" />
+                              <Select
+                                placeholder="BF"
+                                options={bfOptions}
+                                size="medium"
+                                showSearch
+                              />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_gst"]}
-                              label="Gst"
+                              name={[name, "trade_invoice_sub_size"]}
+                              label="Size"
+                              className="mb-0"
                             >
-                              <Input placeholder="Gst" />
+                              <Input placeholder="Size" size="medium" />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_insurance"]}
-                              label="Insurance"
+                              name={[name, "trade_invoice_sub_shade"]}
+                              label="Shade"
+                              className="mb-0"
                             >
-                              <Input type="number" placeholder="Insurance" />
+                              <Select
+                                placeholder="Shade"
+                                options={shadeOptions}
+                                size="medium"
+                                showSearch
+                              />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_tmill"]}
-                              label="T Mill"
+                              name={[name, "trade_invoice_sub_unit"]}
+                              label="Unit"
+                              className="mb-0"
                             >
-                              <Input type="number" placeholder="T Mill" />
+                              <Select
+                                placeholder="Unit"
+                                options={unitOptions}
+                                size="medium"
+                                showSearch
+                              />
                             </Form.Item>
 
                             <Form.Item
                               {...restField}
-                              name={[name, "quotation_net_gst"]}
-                              label="Net Gst"
+                              name={[name, "trade_invoice_sub_reel"]}
+                              label="Reel"
+                              className="mb-0"
                             >
-                              <Input type="number" placeholder="Net Gst" />
+                              <Input type="number" placeholder="Reel" size="medium" />
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, "trade_invoice_sub_qnty"]}
+                              label="Qty"
+                              className="mb-0"
+                            >
+                              <Input type="number" placeholder="Qty" size="medium" />
+                            </Form.Item>
+
+                            <Form.Item
+                              {...restField}
+                              name={[name, "trade_invoice_sub_rate"]}
+                              label="Rate"
+                              className="mb-0"
+                            >
+                              <Input type="number" placeholder="Rate" size="medium" />
                             </Form.Item>
                           </div>
-                        </Card>
+                        </div>
                       );
                     })}
                     {errors.length > 0 && (
-                      <div className="text-red-500 text-sm mt-2">
-                        {errors[0]}
-                      </div>
-                    )}{" "}
+                      <div className="text-red-500 text-sm mt-2">{errors[0]}</div>
+                    )}
                   </>
                 )}
               </Form.List>
