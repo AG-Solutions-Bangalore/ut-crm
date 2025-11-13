@@ -76,7 +76,6 @@ const TaxInvoiceForm = () => {
     tax_invoice_type: null,
   });
   const handleMillChange = (millId) => {
-    taxinvoice.refetch();
     setSelectedBills([]);
     const selectedMill = millOptions.find((m) => m.value == millId);
     if (!selectedMill) {
@@ -102,6 +101,8 @@ const TaxInvoiceForm = () => {
         tax_invoice_igst: 18,
       });
     }
+    taxinvoice.refetch();
+
     if (taxinvoice?.data?.data) {
       form.setFieldValue("tax_invoice_ref", taxinvoice?.data?.data);
     }

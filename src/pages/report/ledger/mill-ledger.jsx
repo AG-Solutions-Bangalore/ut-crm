@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Select, DatePicker, Button, Form, message, Row, Col, Card } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -12,21 +12,57 @@ import * as ExcelJS from 'exceljs';
 
 const { Option } = Select;
 
-const MillLedger = () => {
+const UnifiedLedger = () => {
   const [form] = Form.useForm();
   const [fromDate, setFromDate] = useState(dayjs().month(3).date(1)); 
   const [toDate, setToDate] = useState(dayjs()); 
-  const [selectedMill, setSelectedMill] = useState(null);
+  const [selectedLedgerType, setSelectedLedgerType] = useState(null);
+  const [selectedEntity, setSelectedEntity] = useState(null);
   const [searchParams, setSearchParams] = useState(null);
   const tableRef = useRef(null);
 
   const token = useToken();
 
-  const { data: millsData, isLoading: millsLoading } = useQuery({
-    queryKey: ['activeMills'],
+  // Reset entity when ledger type changes
+  useEffect(() => {
+    setSelectedEntity(null);
+    setSearchParams(null);
+  }, [selectedLedgerType]);
+
+  // Configuration based on ledger type
+  const config = {
+    Paybles: {
+      title: 'Payables Ledger',
+      entityName: 'Mill',
+      apiEndpoint: 'activeMills',
+      entityKey: 'mill_id',
+      fileNamePrefix: 'Payables-Ledger',
+      pdfTitle: 'Payables Ledger',
+      placeholder: 'Select mill',
+      label: 'Mill Name'
+    },
+    Receivables: {
+      title: 'Receivables Ledger',
+      entityName: 'Party',
+      apiEndpoint: 'activePartys',
+      entityKey: 'party_id',
+      fileNamePrefix: 'Receivables-Ledger',
+      pdfTitle: 'Receivables Ledger',
+      placeholder: 'Select party',
+      label: 'Party Name'
+    }
+  };
+
+  const currentConfig = selectedLedgerType ? config[selectedLedgerType] : null;
+
+  // Fetch entities (mills or parties) based on selected type
+  const { data: entitiesData, isLoading: entitiesLoading } = useQuery({
+    queryKey: [currentConfig?.apiEndpoint],
     queryFn: async () => {
+      if (!currentConfig) return { data: [] };
+      
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activeMills`,
+        `${import.meta.env.VITE_API_BASE_URL}${currentConfig.apiEndpoint}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -36,14 +72,14 @@ const MillLedger = () => {
       );
       return response.data;
     },
-    enabled: !!token,
+    enabled: !!token && !!currentConfig,
   });
 
   // Fetch ledger data
   const { data: ledgerData, isLoading } = useQuery({
     queryKey: ["ledgerReport", searchParams],
     queryFn: async () => {
-      if (!searchParams) return {
+      if (!searchParams || !currentConfig) return {
         payment: [],
         received: [],
         opening_balance: 0,
@@ -51,10 +87,10 @@ const MillLedger = () => {
       };
 
       const payload = {
-        from_id: searchParams.mill_id,
+        from_id: searchParams[currentConfig.entityKey],
         from_date: searchParams.from_date,
         to_date: searchParams.to_date,
-        type: 'Paybles'
+        type: selectedLedgerType
       };
 
       const response = await axios.post(
@@ -69,7 +105,7 @@ const MillLedger = () => {
       );
       return response.data.data;
     },
-    enabled: !!searchParams && !!token,
+    enabled: !!searchParams && !!token && !!currentConfig,
   });
 
   const calculateTotalPayment = () => {
@@ -89,16 +125,16 @@ const MillLedger = () => {
   };
 
   const handleGenerateReport = async () => {
-    if (!fromDate || !toDate || !selectedMill) {
-      message.error('Please select From Date, To Date and Mill');
+    if (!fromDate || !toDate || !selectedEntity || !selectedLedgerType || !currentConfig) {
+      message.error('Please select all required fields');
       return;
     }
 
     const data = {
-      mill_id: selectedMill,
+      [currentConfig.entityKey]: selectedEntity,
       from_date: fromDate.format('YYYY-MM-DD'),
       to_date: toDate.format('YYYY-MM-DD'),
-      type: 'Paybles'
+      type: selectedLedgerType
     };
 
     if (searchParams && JSON.stringify(searchParams) === JSON.stringify(data)) {
@@ -109,8 +145,12 @@ const MillLedger = () => {
     setSearchParams(data);
   };
 
+  const handleDownloadPDF = () => {
+    if (!currentConfig) {
+      message.error('No ledger type selected');
+      return;
+    }
 
-const handleDownloadPDF = () => {
     const element = tableRef?.current; 
 
     if (!element) {
@@ -136,7 +176,7 @@ const handleDownloadPDF = () => {
 
     const options = {
       margin: [10, 10, 10, 10],
-      filename: `Payables-Ledger-${dayjs().format('DD-MM-YYYY')}.pdf`,
+      filename: `${currentConfig.fileNamePrefix}-${dayjs().format('DD-MM-YYYY')}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
@@ -165,9 +205,10 @@ const handleDownloadPDF = () => {
         message.error('Failed to download PDF');
       });
   };
+
   const handlePrint = useReactToPrint({
     content: () => tableRef.current,
-    documentTitle: `Payables-Ledger-${searchParams?.mill_id}`,
+    documentTitle: currentConfig ? `${currentConfig.pdfTitle}-${searchParams?.[currentConfig.entityKey]}` : 'Ledger-Report',
     pageStyle: `
       @page {
         size: auto;
@@ -222,19 +263,19 @@ const handleDownloadPDF = () => {
   });
 
   const handleExcelExport = async () => {
-    if (!ledgerData) {
+    if (!ledgerData || !currentConfig) {
       message.error('No data to export');
       return;
     }
 
     try {
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Mill Ledger Report');
+      const worksheet = workbook.addWorksheet(`${currentConfig.entityName} Ledger Report`);
 
       // Add header
       worksheet.mergeCells('A1:D1');
       const titleCell = worksheet.getCell('A1');
-      titleCell.value = `Mill Ledger Report - ${millsData?.data?.find(mill => mill.id === searchParams.mill_id)?.mill_name || 'Unknown Mill'}`;
+      titleCell.value = `${currentConfig.entityName} Ledger Report - ${getEntityName()}`;
       titleCell.font = { bold: true, size: 14 };
       titleCell.alignment = { horizontal: 'center' };
 
@@ -335,7 +376,7 @@ const handleDownloadPDF = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `mill-ledger-report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
+      link.download = `${currentConfig.entityName.toLowerCase()}-ledger-report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
@@ -346,10 +387,17 @@ const handleDownloadPDF = () => {
     }
   };
 
-  const getMillName = () => {
-    if (!searchParams?.mill_id || !millsData?.data) return 'Unknown Mill';
-    const mill = millsData.data.find(mill => mill.id === searchParams.mill_id);
-    return mill?.mill_name || 'Unknown Mill';
+  const getEntityName = () => {
+    if (!searchParams || !currentConfig || !searchParams?.[currentConfig.entityKey] || !entitiesData?.data) {
+      return `Unknown ${currentConfig?.entityName || 'Entity'}`;
+    }
+    const entity = entitiesData.data.find(entity => entity.id === searchParams[currentConfig.entityKey]);
+    return entity?.[`${currentConfig.entityName.toLowerCase()}_name`] || `Unknown ${currentConfig.entityName}`;
+  };
+
+  const getTitle = () => {
+    if (!selectedLedgerType) return 'Ledger Report';
+    return currentConfig?.title || 'Ledger Report';
   };
 
   return (
@@ -360,10 +408,10 @@ const handleDownloadPDF = () => {
           <div className="sticky top-0 z-10 border border-gray-200 rounded-lg bg-blue-50 shadow-sm p-3 mb-2">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div className="w-[30%] shrink-0">
-                <h1 className="text-xl font-bold text-gray-800 truncate">Paybles Ledger </h1>
-                {searchParams && (
+                <h1 className="text-xl font-bold text-gray-800 truncate">{getTitle()}</h1>
+                {searchParams && currentConfig && (
                   <p className="text-md text-gray-500 truncate">
-                    {getMillName()}
+                    {getEntityName()}
                   </p>
                 )}
               </div>
@@ -373,82 +421,111 @@ const handleDownloadPDF = () => {
                   <Form 
                     form={form}
                     onFinish={handleGenerateReport}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full"
+                    className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full"
                   >
+                    {/* Ledger Type Selection */}
                     <div className="space-y-1">
-                      <label htmlFor="mill_id" className="text-xs text-gray-700 block mb-1">
-                        Mill Name
+                      <label htmlFor="ledger_type" className="text-xs text-gray-700 block mb-1">
+                        Ledger Type
                       </label>
                       <Select
-                        id="mill_id"
-                        placeholder="Select mill"
-                        loading={millsLoading}
-                        value={selectedMill}
-                        onChange={setSelectedMill}
-                        showSearch
-                        filterOption={(input, option) =>
-                          option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
+                        id="ledger_type"
+                        placeholder="Select ledger type"
+                        value={selectedLedgerType}
+                        onChange={setSelectedLedgerType}
                         style={{ width: '100%', height: '32px' }}
                         className="text-xs"
                       >
-                        {millsData?.data?.map((mill) => (
-                          <Option key={mill.id} value={mill.id}>
-                            {mill.mill_name}
-                          </Option>
-                        ))}
+                        <Option value="Paybles">Payables (Mills)</Option>
+                        <Option value="Receivables">Receivables (Parties)</Option>
                       </Select>
                     </div>
 
-                    <div className="space-y-1">
-                      <label htmlFor="from_date" className="text-xs text-gray-700 block mb-1">
-                        From Date
-                      </label>
-                      <DatePicker
-                        id="from_date"
-                        style={{ width: '100%', height: '32px' }}
-                        value={fromDate}
-                        onChange={setFromDate}
-                        format="YYYY-MM-DD"
-                        className="text-xs"
-                      />
-                    </div>
+                    {/* Dynamic Entity Selection */}
+                    {selectedLedgerType && currentConfig && (
+                      <div className="space-y-1">
+                        <label htmlFor="entity_id" className="text-xs text-gray-700 block mb-1">
+                          {currentConfig.label}
+                        </label>
+                        <Select
+                          id="entity_id"
+                          placeholder={currentConfig.placeholder}
+                          loading={entitiesLoading}
+                          value={selectedEntity}
+                          onChange={setSelectedEntity}
+                          showSearch
+                          filterOption={(input, option) =>
+                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                          }
+                          style={{ width: '100%', height: '32px' }}
+                          className="text-xs"
+                        >
+                          {entitiesData?.data?.map((entity) => (
+                            <Option key={entity.id} value={entity.id}>
+                              {entity[`${currentConfig.entityName.toLowerCase()}_name`]}
+                            </Option>
+                          ))}
+                        </Select>
+                      </div>
+                    )}
 
-                    <div className="space-y-1">
-                      <label htmlFor="to_date" className="text-xs text-gray-700 block mb-1">
-                        To Date
-                      </label>
-                      <DatePicker
-                        id="to_date"
-                        style={{ width: '100%', height: '32px' }}
-                        value={toDate}
-                        onChange={setToDate}
-                        format="YYYY-MM-DD"
-                        className="text-xs"
-                      />
-                    </div>
+                    {/* Date Pickers */}
+                    {selectedLedgerType && (
+                      <>
+                        <div className="space-y-1">
+                          <label htmlFor="from_date" className="text-xs text-gray-700 block mb-1">
+                            From Date
+                          </label>
+                          <DatePicker
+                            id="from_date"
+                            style={{ width: '100%', height: '32px' }}
+                            value={fromDate}
+                            onChange={setFromDate}
+                            format="YYYY-MM-DD"
+                            className="text-xs"
+                          />
+                        </div>
 
-                    <div className="md:col-span-3 flex justify-end">
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={isLoading}
-                        className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                        disabled={!selectedMill || !fromDate || !toDate}
-                      >
-                         {isLoading ? (
-                                                 <>
-                                    <div className='flex flex-row items-center gap-1'>               <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                    <span>Generating...</span></div>
-                                                 </>
-                                               ) : (
-                                                 <>
-                                                   <div className='flex flex-row items-center gap-1'><Search className="h-3 w-3 mr-1" />
-                                                   <span>Generate</span></div>
-                                                 </>
-                                               )}
-                      </Button>
-                    </div>
+                        <div className="space-y-1">
+                          <label htmlFor="to_date" className="text-xs text-gray-700 block mb-1">
+                            To Date
+                          </label>
+                          <DatePicker
+                            id="to_date"
+                            style={{ width: '100%', height: '32px' }}
+                            value={toDate}
+                            onChange={setToDate}
+                            format="YYYY-MM-DD"
+                            className="text-xs"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Generate Button */}
+                    {selectedLedgerType && (
+                      <div className="md:col-span-4 flex justify-end">
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          loading={isLoading}
+                          className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                          disabled={!selectedEntity || !fromDate || !toDate}
+                        >
+                          {isLoading ? (
+                            <div className='flex flex-row items-center gap-1'>
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                              <span>Generating...</span>
+                            </div>
+                          ) : (
+                            <div className='flex flex-row items-center gap-1'>
+                              <Search className="h-3 w-3 mr-1" />
+                              <span>Generate</span>
+                            </div>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </Form>
                 </div>
               </div>
@@ -456,7 +533,7 @@ const handleDownloadPDF = () => {
           </div>
 
           {/* Report Results */}
-          {searchParams && ledgerData && (
+          {searchParams && ledgerData && currentConfig && (
             <>
               <div className="border-t pt-4">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between sm:gap-2 mb-4">
@@ -498,7 +575,7 @@ const handleDownloadPDF = () => {
 
                 <div ref={tableRef} className="overflow-x-auto print:p-4">
                   <div className="text-center mb-4 font-semibold text-lg">
-              {getMillName()}
+                    {getEntityName()}
                   </div>
                   <div className="text-center text-sm mb-2">
                     From {dayjs(searchParams.from_date).format("DD-MMM-YYYY")} to {dayjs(searchParams.to_date).format("DD-MMM-YYYY")}
@@ -614,4 +691,4 @@ const handleDownloadPDF = () => {
   );
 };
 
-export default MillLedger;
+export default UnifiedLedger;

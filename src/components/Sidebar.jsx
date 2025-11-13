@@ -2,6 +2,7 @@ import {
   ApartmentOutlined,
   AppstoreOutlined,
   ArrowRightOutlined,
+  AuditOutlined,
   BankOutlined,
   BarChartOutlined,
   BookFilled,
@@ -27,149 +28,6 @@ import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
 
-// const getMenuItems = (collapsed) => {
-//   const dashboardItems = [
-//     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-
-//     { key: "/report-format", icon: <FileOutlined />, label: "Report Format" },
-//   ];
-
-//   const managementChildren = [
-//     {
-//       key: "/master/mill",
-//       icon: <ApartmentOutlined />,
-//       label: "Mill",
-//     },
-//     {
-//       key: "/master/party",
-//       icon: <TeamOutlined />,
-//       label: "Party",
-//     },
-//     {
-//       key: "/master/item",
-//       icon: <UserSwitchOutlined />,
-//       label: "Item",
-//     },
-//     {
-//       key: "/master/shade",
-//       icon: <BookOutlined />,
-//       label: "Shade",
-//     },
-//   ];
-//   const reportChildren = [
-//     { key: "/auth-report", icon: <HomeOutlined />, label: "Auth Letter" },
-//     {
-//       key: "/report/balance-order",
-//       icon: <ApartmentOutlined />,
-//       label: "Balance Order",
-//     },
-//     {
-//       key: "/report/balance-close-order",
-//       icon: <ApartmentOutlined />,
-//       label: "Balance Close Order",
-//     },
-//     {
-//       key: "/report/price-rate",
-//       icon: <ApartmentOutlined />,
-//       label: "Price Rate",
-//     },
-//     {
-//       key: "/report/sales",
-//       icon: <ApartmentOutlined />,
-//       label: "Sales",
-//     },
-//     {
-//       key: "/report/mill-wise",
-//       icon: <ApartmentOutlined />,
-//       label: "Mill Wise",
-//     },
-//     {
-//       key: "/report/party-wise",
-//       icon: <TeamOutlined />,
-//       label: "Party Wise",
-//     },
-//     {
-//       key: "/report/balance-payable",
-//       icon: <TeamOutlined />,
-//       label: "Balance  Payable",
-//     },
-//     {
-//       key: "/report/balance-receivable",
-//       icon: <TeamOutlined />,
-//       label: "Balance  Receivable",
-//     },
-//     {
-//       key: "/report/party",
-//       icon: <TeamOutlined />,
-//       label: "Party",
-//     },
-//     {
-//       key: "/report/mill",
-//       icon: <TeamOutlined />,
-//       label: "Mill",
-//     },
-
-//   ];
-
-//   if (collapsed) {
-//     return [
-//       ...dashboardItems,
-//       {
-//         key: "sub",
-//         icon: <MailOutlined />,
-//         label: "Management",
-//         children: managementChildren,
-//       },
-//       { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
-//       { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
-//       { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
-//       { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
-//       { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
-//       { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
-//       {
-//         key: "sub1",
-//         icon: <MailOutlined />,
-//         label: "Report",
-//         children: reportChildren,
-//       },
-//     ];
-//   }
-
-//   return [
-//     { type: "group", label: "Dashboard", children: dashboardItems },
-//     {
-//       type: "group",
-//       label: "Master",
-//       children: [
-//         {
-//           key: "sub",
-//           icon: <MailOutlined />,
-//           label: "Master",
-//           children: managementChildren,
-//         },
-//       ],
-//     },
-//     { key: "/purchase", icon: <HomeOutlined />, label: "Purchase" },
-//     { key: "/quotation", icon: <HomeOutlined />, label: "Quotation" },
-//     { key: "/billing", icon: <HomeOutlined />, label: "Billing" },
-//     { key: "/trade-invoice", icon: <HomeOutlined />, label: "Trade-Invoice" },
-//     { key: "/tax-invoice", icon: <HomeOutlined />, label: "Tax-Invoice" },
-//     { key: "/payment", icon: <HomeOutlined />, label: "Payment" },
-
-//     {
-//       type: "group",
-//       label: "Report",
-//       children: [
-//         {
-//           key: "sub1",
-//           icon: <MailOutlined />,
-//           label: "Report",
-//           children: reportChildren,
-//         },
-//       ],
-//     },
-//   ];
-// };
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
@@ -259,6 +117,11 @@ const getMenuItems = (collapsed) => {
       icon: <BankOutlined />,
       label: "Mill",
     },
+    {
+      key: "/report/ledger-report",
+      icon: <BankOutlined />,
+      label: "Ledger Report",
+    },
   ];
 
   if (collapsed) {
@@ -271,13 +134,13 @@ const getMenuItems = (collapsed) => {
         children: managementChildren,
       },
       { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-      { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+      // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-      // {
-      //   key: "/trade-invoice",
-      //   icon: <AuditOutlined />,
-      //   label: "Trade Invoice",
-      // },
+      {
+        key: "/trade-invoice",
+        icon: <AuditOutlined />,
+        label: "Trade Invoice",
+      },
       {
         key: "/tax-invoice",
         icon: <ReconciliationOutlined />,
@@ -309,9 +172,9 @@ const getMenuItems = (collapsed) => {
       ],
     },
     { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-    // { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
+    { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
     {
       key: "/tax-invoice",
       icon: <ReconciliationOutlined />,

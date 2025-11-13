@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
-import { Select, DatePicker, Button, Form, message, Row, Col, Card } from 'antd';
+import { Select, DatePicker, Button, Form, message, Card } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -12,21 +11,21 @@ import * as ExcelJS from 'exceljs';
 
 const { Option } = Select;
 
-const MillLedger = () => {
+const PartyLedger = () => {
   const [form] = Form.useForm();
   const [fromDate, setFromDate] = useState(dayjs().month(3).date(1)); 
   const [toDate, setToDate] = useState(dayjs()); 
-  const [selectedMill, setSelectedMill] = useState(null);
+  const [selectedParty, setSelectedParty] = useState(null);
   const [searchParams, setSearchParams] = useState(null);
   const tableRef = useRef(null);
 
   const token = useToken();
 
-  const { data: millsData, isLoading: millsLoading } = useQuery({
-    queryKey: ['activeMills'],
+  const { data: partiesData, isLoading: partiesLoading } = useQuery({
+    queryKey: ['activeParties'],
     queryFn: async () => {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activeMills`,
+        `${import.meta.env.VITE_API_BASE_URL}activePartys`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -51,10 +50,10 @@ const MillLedger = () => {
       };
 
       const payload = {
-        from_id: searchParams.mill_id,
+        from_id: searchParams.party_id,
         from_date: searchParams.from_date,
         to_date: searchParams.to_date,
-        type: 'Paybles'
+        type: 'Receivables'
       };
 
       const response = await axios.post(
@@ -89,16 +88,16 @@ const MillLedger = () => {
   };
 
   const handleGenerateReport = async () => {
-    if (!fromDate || !toDate || !selectedMill) {
-      message.error('Please select From Date, To Date and Mill');
+    if (!fromDate || !toDate || !selectedParty) {
+      message.error('Please select From Date, To Date and Party');
       return;
     }
 
     const data = {
-      mill_id: selectedMill,
+      party_id: selectedParty,
       from_date: fromDate.format('YYYY-MM-DD'),
       to_date: toDate.format('YYYY-MM-DD'),
-      type: 'Paybles'
+      type: 'Receivables'
     };
 
     if (searchParams && JSON.stringify(searchParams) === JSON.stringify(data)) {
@@ -109,65 +108,66 @@ const MillLedger = () => {
     setSearchParams(data);
   };
 
-
-const handleDownloadPDF = () => {
-    const element = tableRef?.current; 
-
-    if (!element) {
-      message.error('Failed to generate PDF');
-      return;
-    }
-
-    const elementForPdf = element.cloneNode(true);
-    const printHideElements = elementForPdf.querySelectorAll('.print-hide');
-    printHideElements.forEach(el => el.remove());
-
-    const style = document.createElement('style');
-    style.textContent = `
-      * {
-        color: #000000 !important;
-        background-color: transparent !important;
+ 
+  const handleDownloadPDF = () => {
+      const element = tableRef?.current; 
+  
+      if (!element) {
+        message.error('Failed to generate PDF');
+        return;
       }
-      .bg-gray-200, .bg-gray-100, .bg-white {
-        background-color: #ffffff !important;
-      }
-    `;
-    elementForPdf.appendChild(style);
-
-    const options = {
-      margin: [10, 10, 10, 10],
-      filename: `Payables-Ledger-${dayjs().format('DD-MM-YYYY')}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0,
-        windowHeight: elementForPdf.scrollHeight,
-        backgroundColor: '#FFFFFF'
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
-      },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+  
+      const elementForPdf = element.cloneNode(true);
+      const printHideElements = elementForPdf.querySelectorAll('.print-hide');
+      printHideElements.forEach(el => el.remove());
+  
+      const style = document.createElement('style');
+      style.textContent = `
+        * {
+          color: #000000 !important;
+          background-color: transparent !important;
+        }
+        .bg-gray-200, .bg-gray-100, .bg-white {
+          background-color: #ffffff !important;
+        }
+      `;
+      elementForPdf.appendChild(style);
+  
+      const options = {
+        margin: [10, 10, 10, 10],
+        filename: `Receivables-Ledger-${dayjs().format('DD-MM-YYYY')}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+          windowHeight: elementForPdf.scrollHeight,
+          backgroundColor: '#FFFFFF'
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+  
+      html2pdf()
+        .from(elementForPdf)
+        .set(options)
+        .save()
+        .then(() => {
+          message.success('PDF downloaded successfully');
+        })
+        .catch((error) => {
+          console.error('PDF download error:', error);
+          message.error('Failed to download PDF');
+        });
     };
 
-    html2pdf()
-      .from(elementForPdf)
-      .set(options)
-      .save()
-      .then(() => {
-        message.success('PDF downloaded successfully');
-      })
-      .catch((error) => {
-        console.error('PDF download error:', error);
-        message.error('Failed to download PDF');
-      });
-  };
   const handlePrint = useReactToPrint({
     content: () => tableRef.current,
-    documentTitle: `Payables-Ledger-${searchParams?.mill_id}`,
+    documentTitle: `Party-Ledger-Report-${searchParams?.party_id}`,
     pageStyle: `
       @page {
         size: auto;
@@ -229,12 +229,12 @@ const handleDownloadPDF = () => {
 
     try {
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Mill Ledger Report');
+      const worksheet = workbook.addWorksheet('Party Ledger Report');
 
       // Add header
       worksheet.mergeCells('A1:D1');
       const titleCell = worksheet.getCell('A1');
-      titleCell.value = `Mill Ledger Report - ${millsData?.data?.find(mill => mill.id === searchParams.mill_id)?.mill_name || 'Unknown Mill'}`;
+      titleCell.value = `Party Ledger Report - ${getPartyName()}`;
       titleCell.font = { bold: true, size: 14 };
       titleCell.alignment = { horizontal: 'center' };
 
@@ -335,7 +335,7 @@ const handleDownloadPDF = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `mill-ledger-report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
+      link.download = `party-ledger-report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
@@ -346,24 +346,24 @@ const handleDownloadPDF = () => {
     }
   };
 
-  const getMillName = () => {
-    if (!searchParams?.mill_id || !millsData?.data) return 'Unknown Mill';
-    const mill = millsData.data.find(mill => mill.id === searchParams.mill_id);
-    return mill?.mill_name || 'Unknown Mill';
+  const getPartyName = () => {
+    if (!searchParams?.party_id || !partiesData?.data) return 'Unknown Party';
+    const party = partiesData.data.find(party => party.id === searchParams.party_id);
+    return party?.party_name || 'Unknown Party';
   };
 
   return (
     <div className="min-h-screen bg-gray-50/30">
-      <div className="max-w-full mx-auto">
+      <div className="max-w-full mx-auto ">
         <div className="shadow-sm border-0">
           {/* Header Section */}
           <div className="sticky top-0 z-10 border border-gray-200 rounded-lg bg-blue-50 shadow-sm p-3 mb-2">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div className="w-[30%] shrink-0">
-                <h1 className="text-xl font-bold text-gray-800 truncate">Paybles Ledger </h1>
+                <h1 className="text-xl font-bold text-gray-800 truncate">Receivables Ledger </h1>
                 {searchParams && (
                   <p className="text-md text-gray-500 truncate">
-                    {getMillName()}
+                    {getPartyName()}
                   </p>
                 )}
               </div>
@@ -376,15 +376,15 @@ const handleDownloadPDF = () => {
                     className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full"
                   >
                     <div className="space-y-1">
-                      <label htmlFor="mill_id" className="text-xs text-gray-700 block mb-1">
-                        Mill Name
+                      <label htmlFor="party_id" className="text-xs text-gray-700 block mb-1">
+                        Party Name
                       </label>
                       <Select
-                        id="mill_id"
-                        placeholder="Select mill"
-                        loading={millsLoading}
-                        value={selectedMill}
-                        onChange={setSelectedMill}
+                        id="party_id"
+                        placeholder="Select party"
+                        loading={partiesLoading}
+                        value={selectedParty}
+                        onChange={setSelectedParty}
                         showSearch
                         filterOption={(input, option) =>
                           option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
@@ -392,9 +392,9 @@ const handleDownloadPDF = () => {
                         style={{ width: '100%', height: '32px' }}
                         className="text-xs"
                       >
-                        {millsData?.data?.map((mill) => (
-                          <Option key={mill.id} value={mill.id}>
-                            {mill.mill_name}
+                        {partiesData?.data?.map((party) => (
+                          <Option key={party.id} value={party.id}>
+                            {party.party_name}
                           </Option>
                         ))}
                       </Select>
@@ -434,19 +434,19 @@ const handleDownloadPDF = () => {
                         htmlType="submit"
                         loading={isLoading}
                         className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                        disabled={!selectedMill || !fromDate || !toDate}
+                        disabled={!selectedParty || !fromDate || !toDate}
                       >
-                         {isLoading ? (
-                                                 <>
-                                    <div className='flex flex-row items-center gap-1'>               <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                    <span>Generating...</span></div>
-                                                 </>
-                                               ) : (
-                                                 <>
-                                                   <div className='flex flex-row items-center gap-1'><Search className="h-3 w-3 mr-1" />
-                                                   <span>Generate</span></div>
-                                                 </>
-                                               )}
+                        {isLoading ? (
+                          <>
+             <div className='flex flex-row items-center gap-1'>               <Loader2 className="h-3 w-3 animate-spin mr-1" />
+             <span>Generating...</span></div>
+                          </>
+                        ) : (
+                          <>
+                            <div className='flex flex-row items-center gap-1'><Search className="h-3 w-3 mr-1" />
+                            <span>Generate</span></div>
+                          </>
+                        )}
                       </Button>
                     </div>
                   </Form>
@@ -498,7 +498,7 @@ const handleDownloadPDF = () => {
 
                 <div ref={tableRef} className="overflow-x-auto print:p-4">
                   <div className="text-center mb-4 font-semibold text-lg">
-              {getMillName()}
+    {getPartyName()}
                   </div>
                   <div className="text-center text-sm mb-2">
                     From {dayjs(searchParams.from_date).format("DD-MMM-YYYY")} to {dayjs(searchParams.to_date).format("DD-MMM-YYYY")}
@@ -614,4 +614,8 @@ const handleDownloadPDF = () => {
   );
 };
 
-export default MillLedger;
+export default PartyLedger;
+
+
+
+

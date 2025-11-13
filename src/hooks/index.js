@@ -23,9 +23,9 @@ export const useMasterData = ({
   item = false,
   taxinvoice = false,
   payment = false,
-  tradeinvoiceRef = false,
+  tradeinvoice = false,
 } = {}) => {
-  const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
+  // const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
   const createApi = (condition, url, queryKey) =>
     condition
@@ -56,7 +56,7 @@ export const useMasterData = ({
     error: poRefError,
   } = createApi(purchaseRef, PURCHASE_ORDER_REF, [
     "purchaseorderrefdata",
-    formattedDateTime,
+    // formattedDateTime,
   ]);
 
   const {
@@ -66,25 +66,25 @@ export const useMasterData = ({
     error: quotationError,
   } = createApi(quotationRef, QUOTATION_REF, [
     "quotationrefdata",
-    formattedDateTime,
+    // formattedDateTime,
   ]);
   const {
     data: TradeInvoiceRef,
     isLoading: TradeInvoiceRefLoading,
     refetch: refetchTradeInvoiceRefNo,
     error: TradeInvoiceError,
-  } = createApi(tradeinvoiceRef, TAX_INVOICE_REF, [
+  } = createApi(tradeinvoice,TRADE_INVOICE_REF, [
     "tradeinvoicerefdata",
-    formattedDateTime,
+    // formattedDateTime,
   ]);
   const {
     data: TaxInvoiceRef,
     isLoading: TaxInvoiceRefLoading,
     refetch: refetchTaxInvoiceRefNo,
     error: TaxInvoiceError,
-  } = createApi(tradeinvoiceRef, TRADE_INVOICE_REF, [
+  } = createApi(taxinvoice, TAX_INVOICE_REF, [
     "taxinvoicerefdata",
-    formattedDateTime,
+    // formattedDateTime,
   ]);
 
   const {

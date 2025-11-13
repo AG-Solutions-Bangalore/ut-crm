@@ -21,48 +21,67 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={styles.container}>
-          <div style={styles.errorCard}>
+        <div style={styles.fullContainer}>
+          <div style={styles.leftPanel}>
             <div style={styles.iconContainer}>
-              <svg style={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg
+                style={styles.icon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
-            
+
             <h2 style={styles.title}>Something Went Wrong</h2>
-            
+
             <p style={styles.message}>
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
-            
+
             <div style={styles.actions}>
-              <button 
+              <button
                 onClick={this.handleRetry}
                 style={styles.primaryButton}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = '#0056b3')
+                }
+                onMouseOut={(e) =>
+                  (e.target.style.backgroundColor = '#007bff')
+                }
               >
                 Try Again
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => window.location.reload()}
                 style={styles.secondaryButton}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#545b62'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = '#545b62')
+                }
+                onMouseOut={(e) =>
+                  (e.target.style.backgroundColor = '#6c757d')
+                }
               >
                 Reload Page
               </button>
             </div>
-            
+          </div>
+
+          <div style={styles.rightPanel}>
             {import.meta.env.DEV && (
-              <details style={styles.details}>
-                <summary style={styles.summary}>Error Details (Development)</summary>
+              <div style={styles.stackContainer}>
+                <h3 style={styles.stackTitle}>Error Stack (Development)</h3>
                 <pre style={styles.errorStack}>
-                  {this.state.error?.stack}
+                  {this.state.error?.stack || 'No stack trace available.'}
                 </pre>
-              </details>
+              </div>
             )}
           </div>
         </div>
@@ -74,52 +93,60 @@ class ErrorBoundary extends React.Component {
 }
 
 const styles = {
-  container: {
+  fullContainer: {
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    padding: '20px',
+    flexDirection: 'row',
+    width: '100vw',
+    height: '100vh',
     backgroundColor: '#f8f9fa',
   },
-  errorCard: {
-    background: 'white',
+  leftPanel: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: '#fff',
+    borderRight: '1px solid #dee2e6',
     padding: '40px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    maxWidth: '500px',
-    width: '100%',
-    border: '1px solid #e9ecef',
+  },
+  rightPanel: {
+    flex: 1,
+    padding: '40px',
+    backgroundColor: '#f1f3f5',
+    overflowY: 'auto',
   },
   iconContainer: {
     marginBottom: '20px',
   },
   icon: {
-    width: '64px',
-    height: '64px',
+    width: '80px',
+    height: '80px',
     color: '#dc3545',
     margin: '0 auto',
   },
   title: {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: '600',
     color: '#212529',
-    margin: '0 0 16px 0',
+    marginBottom: '12px',
+    textAlign: 'center',
   },
   message: {
     fontSize: '16px',
     color: '#6c757d',
-    margin: '0 0 32px 0',
+    marginBottom: '32px',
     lineHeight: '1.5',
+    textAlign: 'center',
   },
   actions: {
     display: 'flex',
-    gap: '12px',
-    justifyContent: 'center',
+    gap: '16px',
     flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   primaryButton: {
-    padding: '12px 24px',
+    padding: '12px 28px',
     backgroundColor: '#007bff',
     color: 'white',
     border: 'none',
@@ -127,10 +154,9 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500',
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
   },
   secondaryButton: {
-    padding: '12px 24px',
+    padding: '12px 28px',
     backgroundColor: '#6c757d',
     color: 'white',
     border: 'none',
@@ -138,29 +164,25 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500',
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
   },
-  details: {
-    marginTop: '24px',
-    textAlign: 'left',
+  stackContainer: {
+    maxWidth: '100%',
   },
-  summary: {
-    cursor: 'pointer',
-    color: '#6c757d',
-    fontSize: '14px',
-    marginBottom: '8px',
+  stackTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#343a40',
+    marginBottom: '12px',
   },
   errorStack: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     padding: '16px',
-    borderRadius: '4px',
-    fontSize: '12px',
+    borderRadius: '6px',
+    fontSize: '13px',
     color: '#495057',
-    overflow: 'auto',
-    maxHeight: '200px',
-    border: '1px solid #e9ecef',
+    border: '1px solid #dee2e6',
     whiteSpace: 'pre-wrap',
-    wordBreak: 'break-all',
+    wordBreak: 'break-word',
   },
 };
 
