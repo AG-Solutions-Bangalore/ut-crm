@@ -2,7 +2,6 @@ import {
   ApartmentOutlined,
   AppstoreOutlined,
   ArrowRightOutlined,
-  AuditOutlined,
   BankOutlined,
   BarChartOutlined,
   BookFilled,
@@ -12,13 +11,12 @@ import {
   FileDoneOutlined,
   FileProtectOutlined,
   FileSearchOutlined,
-  FileTextOutlined,
   HomeOutlined,
   ReconciliationOutlined,
   ShoppingCartOutlined,
   SolutionOutlined,
   TeamOutlined,
-  WalletOutlined,
+  WalletOutlined
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -273,7 +271,7 @@ const getMenuItems = (collapsed) => {
         children: managementChildren,
       },
       { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-      // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+      { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
       // {
       //   key: "/trade-invoice",
@@ -311,7 +309,7 @@ const getMenuItems = (collapsed) => {
       ],
     },
     { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-    // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
     // { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
     {

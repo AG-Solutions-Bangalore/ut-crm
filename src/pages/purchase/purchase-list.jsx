@@ -3,6 +3,8 @@ import {
   EditOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  MinusCircleOutlined,
+  PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,6 +33,7 @@ const { Search } = Input;
 
 const PurchaseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState("Open");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -160,7 +163,7 @@ const PurchaseList = () => {
       key: "purchase_orders_status",
       render: (_, order) => {
         const isOpen = order.purchase_orders_status == "Open";
-     
+
         return (
           <div className="flex justify-start">
             <Popconfirm
@@ -194,7 +197,7 @@ const PurchaseList = () => {
               onClick={() => navigate(`/purchase/edit/${record.id}`)}
             />
           </Tooltip>
-         
+
           <Tooltip title="View Purchase">
             <Button
               type="primary"
@@ -269,6 +272,105 @@ const PurchaseList = () => {
               total: apiData.total,
               pageSize: apiData.per_page,
               onChange: handlePageChange,
+            }}
+            expandable={{
+              expandedRowKeys,
+              onExpand: (expanded, record) =>
+                setExpandedRowKeys(expanded ? [record.id] : []),
+              expandIcon: ({ expanded, onExpand, record }) => {
+                const hasInvoice = !!record.billing;
+                const isEmpty = !hasInvoice;
+
+                const iconStyle = {
+                  color: isEmpty ? "#dc2626" : "#16a34a", 
+                  fontSize: 16,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                };
+
+                return expanded ? (
+                  <MinusCircleOutlined
+                    onClick={(e) => onExpand(record, e)}
+                    style={iconStyle}
+                  />
+                ) : (
+                  <PlusCircleOutlined
+                    onClick={(e) => onExpand(record, e)}
+                    style={iconStyle}
+                  />
+                );
+              },
+              expandedRowRender: (record) => {
+                const invoice = record.billing;
+
+                // If both are empty
+                if (!invoice) {
+                  return (
+                    <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
+                      No Purchase details Available
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 space-y-4 transition-all duration-300 ease-in-out">
+                    {/* ✅ Tax Invoice Section */}
+                    {invoice && (
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">
+                          Billing Details
+                        </h4>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center">
+                          {[
+                            {
+                              label: "Bill No",
+                              value: invoice.billing_no,
+                            },
+
+                            { label: "Tones", value: invoice.billing_tones },
+                            {
+                              label: "Pur Date",
+                              value: dayjs(invoice.purchase_date).format(
+                                "DD-MM-YYYY"
+                              ),
+                            },
+                            {
+                              label: "Pur Rate",
+                              value: invoice.purchase_rate,
+                            },
+                            { label: "Item", value: invoice.billing_bf },
+
+                            {
+                              label: "Sale Date",
+                              value: dayjs(invoice.sale_date).format(
+                                "DD-MM-YYYY"
+                              ),
+                            },
+                            {
+                              label: "Sale Rate",
+                              value: invoice.sale_rate,
+                            },
+                            {
+                              label: "Sale Amount",
+                              value: `₹${invoice.purchase_amount}`,
+                            },
+                          ].map((item) => (
+                            <div key={item.label}>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                {item.label}
+                              </p>
+                              <p className="text-sm text-gray-800 font-semibold">
+                                {item.value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              },
             }}
           />
         ) : (

@@ -9,8 +9,7 @@ import {
   InputNumber,
   Select,
   Spin,
-  Switch,
-  Tooltip,
+  Switch
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -39,6 +38,7 @@ const BillingForm = () => {
     item: true,
     purchaseRef: true,
   });
+
   const [initialData, setInitialData] = useState({
     purchase_date: dayjs(),
     billing_no: "",
@@ -52,10 +52,10 @@ const BillingForm = () => {
     billing_party_id: null,
     purchase_orders_ref: "",
     billing_type: null,
+    billing_payment_type: null,
     billing_due_days: "",
     billing_status: false,
   });
-
   const [totalRate, setTotalRate] = useState(null);
   const [daysDifference, setDaysDifference] = useState(null);
 
@@ -95,7 +95,7 @@ const BillingForm = () => {
         const total =
           Number(formattedData?.sale_rate) -
           Number(formattedData?.purchase_rate);
-        setTotalRate(total ? parseFloat(total.toFixed(2)) : null);
+        setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
         setDaysDifference(diff);
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
@@ -122,7 +122,7 @@ const BillingForm = () => {
     const pRate = parseFloat(purchase_rate) || 0;
     const sRate = parseFloat(sale_rate) || 0;
     const total = sRate - pRate;
-    setTotalRate(total ? parseFloat(total.toFixed(2)) : null);
+    setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
 
     if (sale_date) {
       const diff = dayjs()
@@ -238,33 +238,29 @@ const BillingForm = () => {
               className="!mt-2 !bg-gray-50"
               extra={
                 <div className="flex">
-                  {daysDifference && (
+                  {daysDifference !== null && (
                     <div className="flex">
                       <span
-                        className={`mt-1 w-40 text-center px-3 py-1.5  ${
-                          daysDifference !== null
-                            ? daysDifference < 0
-                              ? "  text-red-600 font-semibold"
-                              : "  text-gray-800"
-                            : "  text-gray-500"
+                        className={`mt-1 w-40 text-center px-1 py-1.5 ${
+                          daysDifference < 0
+                            ? "text-red-600 font-semibold"
+                            : "text-gray-800"
                         }`}
                       >
-                        Due Days :{" "}
-                        {daysDifference !== null ? `${daysDifference}` : "-"}
+                        Due Days: {daysDifference || 0}
                       </span>
                     </div>
                   )}
+
                   {/* PR - SR */}
                   {totalRate !== null && (
-                    <div className="flex flex-col">
+                    <div className="flex items-center justify-center">
                       <span
-                        className={`mt-1 w-full text-center px-3 py-1.5 ${
-                          totalRate < 0
-                            ? " text-red-600 font-semibold"
-                            : " text-gray-800"
+                        className={`px-1 py-1.5 rounded-md text-sm font-medium ${
+                          totalRate < 0 ? "text-red-600" : "text-gray-800"
                         }`}
                       >
-                        PR - SR : {totalRate}
+                        PR - SR: {totalRate || 0}
                       </span>
                     </div>
                   )}
@@ -386,7 +382,8 @@ const BillingForm = () => {
                     className="!w-full"
                   />
                 </Form.Item>
-
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <Form.Item name="sale_rate" label="Sale Rate">
                   <InputNumber
                     type="number"
@@ -439,6 +436,24 @@ const BillingForm = () => {
                         .includes(input.toLowerCase())
                     }
                     showSearch
+                    allowClear
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="billing_payment_type"
+                  label={
+                    <span>
+                      Payment Type <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true, message: "Select Payment Type" }]}
+                >
+                  <Select
+                    placeholder="Select Payment Type"
+                    options={[
+                      { label: "Payables", value: "Payables" },
+                      { label: "Receivables", value: "Receivables" },
+                    ]}
                     allowClear
                   />
                 </Form.Item>
