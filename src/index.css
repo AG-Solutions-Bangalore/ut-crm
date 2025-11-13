@@ -134,3 +134,26 @@ body {
 :where(.ant-form-item) {
   margin-bottom: 18px !important;
 }
+
+
+
+
+
+/* fix-table-hover.css */
+
+.custom-purchase-table .ant-table-tbody > tr:hover > td {
+  background: #f5f7fa !important; /* light solid background instead of transparent */
+}
+
+/* Ensures fixed columns use the same hover background */
+.custom-purchase-table .ant-table-cell-fix-left,
+.custom-purchase-table .ant-table-cell-fix-right {
+  background: #fff; /* base color for fixed cells */
+}
+
+.custom-purchase-table .ant-table-tbody > tr:hover
+  > .ant-table-cell-fix-left,
+.custom-purchase-table .ant-table-tbody > tr:hover
+  > .ant-table-cell-fix-right {
+  background: #f5f7fa !important;
+}

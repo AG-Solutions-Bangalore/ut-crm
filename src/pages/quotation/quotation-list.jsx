@@ -1,20 +1,21 @@
 import {
-    DeleteOutlined,
-    EditOutlined,
-    EyeInvisibleOutlined,
-    EyeOutlined,
-    PlusOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
-    App,
-    Button,
-    Card,
-    Input,
-    Popconfirm,
-    Space,
-    Spin,
-    Tag,
-    Tooltip,
+  App,
+  Button,
+  Card,
+  Empty,
+  Input,
+  Popconfirm,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -50,8 +51,7 @@ const QuotationList = () => {
   };
   const handleToggleStatus = async (order) => {
     try {
-      const newStatus =
-        order.quotation_status === "Open" ? "Close" : "Open";
+      const newStatus = order.quotation_status === "Open" ? "Close" : "Open";
 
       const res = await UpdateStatus({
         url: `${UPDATE_STATUS_QUOTATION_ORDER}/${order.id}/status`,
@@ -243,9 +243,13 @@ const QuotationList = () => {
             }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Quotation data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">No Quotation data available</span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>

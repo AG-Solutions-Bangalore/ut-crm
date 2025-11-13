@@ -3,6 +3,7 @@ import {
   App,
   Button,
   Card,
+  Empty,
   Input,
   Popconfirm,
   Space,
@@ -188,9 +189,15 @@ const TaxInvoiceList = () => {
             }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Tax-Invoice data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">
+                No Tax-Invoice data available
+              </span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>

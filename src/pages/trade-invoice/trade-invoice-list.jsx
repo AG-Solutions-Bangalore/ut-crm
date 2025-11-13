@@ -1,25 +1,19 @@
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
-    DeleteOutlined,
-    EditOutlined,
-    PlusOutlined
-} from "@ant-design/icons";
-import {
-    App,
-    Button,
-    Card,
-    Input,
-    Popconfirm,
-    Space,
-    Spin,
-    Tooltip
+  App,
+  Button,
+  Card,
+  Empty,
+  Input,
+  Popconfirm,
+  Space,
+  Spin,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    QUOTATION_LIST,
-    TRADE_INVOICE_LIST
-} from "../../api";
+import { QUOTATION_LIST, TRADE_INVOICE_LIST } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -188,9 +182,15 @@ const TradeInvoiceList = () => {
             }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Trade Invoice data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">
+                No Trade-Invoice data available
+              </span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>

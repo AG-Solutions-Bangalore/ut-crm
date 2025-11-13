@@ -1,25 +1,24 @@
 import {
-  HomeOutlined,
-  FileTextOutlined,
-  AppstoreOutlined,
-  TeamOutlined,
-  UserSwitchOutlined,
-  BookOutlined,
   ApartmentOutlined,
-  ShoppingCartOutlined,
-  FileDoneOutlined,
-  DollarCircleOutlined,
-  SolutionOutlined,
-  FileProtectOutlined,
-  ReconciliationOutlined,
-  BankOutlined,
-  AuditOutlined,
-  WalletOutlined,
-  BarChartOutlined,
-  FileSearchOutlined,
-  BookFilled,
-  CloseOutlined,
+  AppstoreOutlined,
   ArrowRightOutlined,
+  AuditOutlined,
+  BankOutlined,
+  BarChartOutlined,
+  BookFilled,
+  BookOutlined,
+  CloseOutlined,
+  DollarCircleOutlined,
+  FileDoneOutlined,
+  FileProtectOutlined,
+  FileSearchOutlined,
+  FileTextOutlined,
+  HomeOutlined,
+  ReconciliationOutlined,
+  ShoppingCartOutlined,
+  SolutionOutlined,
+  TeamOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -176,11 +175,11 @@ import useFinalUserImage from "./common/Logo";
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    {
-      key: "/report-format",
-      icon: <FileTextOutlined />,
-      label: "Report Format",
-    },
+    // {
+    //   key: "/report-format",
+    //   icon: <FileTextOutlined />,
+    //   label: "Report Format",
+    // },
   ];
 
   const managementChildren = [
@@ -274,13 +273,13 @@ const getMenuItems = (collapsed) => {
         children: managementChildren,
       },
       { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-      { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+      // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-      {
-        key: "/trade-invoice",
-        icon: <AuditOutlined />,
-        label: "Trade Invoice",
-      },
+      // {
+      //   key: "/trade-invoice",
+      //   icon: <AuditOutlined />,
+      //   label: "Trade Invoice",
+      // },
       {
         key: "/tax-invoice",
         icon: <ReconciliationOutlined />,
@@ -292,6 +291,7 @@ const getMenuItems = (collapsed) => {
         icon: <BookFilled />,
         label: "Report",
         children: reportChildren,
+        className: "report-section",
       },
     ];
   }
@@ -311,9 +311,9 @@ const getMenuItems = (collapsed) => {
       ],
     },
     { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
-    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-    { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
+    // { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
     {
       key: "/tax-invoice",
       icon: <ReconciliationOutlined />,
@@ -373,10 +373,9 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   };
   const rootSubmenuKeys = ["sub", "sub1", "sub2"];
   useEffect(() => {
-    if (openKeys.includes("sub2")) {
+    if (openKeys.includes("sub1")) {
       const anchor = document.getElementById("report-scroll-anchor");
       const scrollContainer = document.querySelector(".scrollbar-custom");
-
       if (anchor && scrollContainer) {
         let offset = 0;
         let el = anchor;
@@ -412,7 +411,6 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     >
       <div className="flex items-center justify-center h-14 px-4 bg-gray-100">
         <motion.img
-          // src={collapsed ? logo1 : finalUserImage}
           src={collapsed ? logo1 : logo1}
           alt="Header Logo"
           initial={{ opacity: 0 }}
@@ -506,7 +504,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 11-11-2025
+                    Updated on: 12-11-2025
                   </div>
                 </div>
               }

@@ -1,8 +1,9 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
-    App,
+  App,
   Button,
   Card,
+  Empty,
   Input,
   Popconfirm,
   Space,
@@ -178,10 +179,10 @@ const PaymentList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Paybles", label: "Paybles List" },
-            { key: "Receivables", label: "Receivables List" },
-            { key: "Payables Adjust", label: "Payables Adjust List" },
-            { key: "Receivables Adjust", label: "Receivables Adjust List" },
+            { key: "Paybles", label: "Paybles" },
+            { key: "Receivables", label: "Receivables" },
+            { key: "Payables Adjust", label: "Payables Adjust" },
+            { key: "Receivables Adjust", label: "Receivables Adjust" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -229,9 +230,13 @@ const PaymentList = () => {
             }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Payment data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">No Payment data available</span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>

@@ -9,32 +9,20 @@ import {
 } from "@ant-design/icons";
 import { Card, Empty, Spin, Tag, Typography } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DASHBOARD } from "../../api";
 import DataTable from "../../components/DataTable/DataTable";
-import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Title, Text } = Typography;
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const { trigger, loading: isMutating } = useApiMutation();
 
-  const fetchDashboard = async () => {
-    const res = await trigger({
-      url: DASHBOARD,
-    });
-    if (res) {
-      setData(res);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
+  const { data, isLoading: isMutating } = useGetApiMutation({
+    url: DASHBOARD,
+    queryKey: ["dashboarddata"],
+  });
   const handleCardClick = (path) => {
     if (path) {
       navigate(path);
@@ -45,7 +33,7 @@ const Dashboard = () => {
     {
       title: "Total Mills",
       count: data?.totalMill || 0,
-      icon: <ShopOutlined />, // Represents a business/mill
+      icon: <ShopOutlined />,
       gradient: "from-blue-500 to-blue-600",
       bgLight: "bg-blue-50",
       textColor: "text-blue-600",
@@ -54,7 +42,7 @@ const Dashboard = () => {
     {
       title: "Total Party",
       count: data?.totalParty || 0,
-      icon: <TeamOutlined />, // Represents group or clients
+      icon: <TeamOutlined />,
       gradient: "from-green-500 to-green-600",
       bgLight: "bg-green-50",
       textColor: "text-green-600",
@@ -63,7 +51,7 @@ const Dashboard = () => {
     {
       title: "Balance Order",
       count: data?.totalbalanceOrder || 0,
-      icon: <ReconciliationOutlined />, // Represents orders
+      icon: <ReconciliationOutlined />,
       gradient: "from-amber-500 to-amber-600",
       bgLight: "bg-amber-50",
       textColor: "text-amber-600",
@@ -72,7 +60,7 @@ const Dashboard = () => {
     {
       title: "Pending Payable",
       count: data?.totalbalancePayable || 0,
-      icon: <DollarCircleOutlined />, // Represents payments/outgoing
+      icon: <DollarCircleOutlined />,
       gradient: "from-pink-500 to-pink-600",
       bgLight: "bg-pink-50",
       textColor: "text-pink-600",
@@ -81,7 +69,7 @@ const Dashboard = () => {
     {
       title: "Receivables",
       count: data?.totalbalanceReceivables || 0,
-      icon: <WalletOutlined />, // Represents money coming in
+      icon: <WalletOutlined />,
       gradient: "from-cyan-500 to-cyan-600",
       bgLight: "bg-cyan-50",
       textColor: "text-cyan-600",
@@ -218,7 +206,7 @@ const Dashboard = () => {
     group cursor-pointer overflow-hidden rounded-xl border-0 
     shadow-md hover:shadow-2xl transition-all duration-300 bg-white
   "
-              bodyStyle={{ padding: 0 }}
+              styles={{ body: { padding: 0 } }}
             >
               <div className="relative p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -265,17 +253,19 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <a
-              href="#"
-              className="text-white hover:text-blue-100 font-semibold flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/30 transition-all group"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/purchase");
-              }}
-            >
-              View All
-              <ArrowRightOutlined className="text-sm group-hover:translate-x-1 transition-transform" />
-            </a>
+            <div className="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-lg">
+              <a
+                href="#"
+                className="!text-white hover:text-blue-100 font-semibold flex items-center gap-2  px-4 py-2  transition-all group"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/purchase");
+                }}
+              >
+                View All
+                <ArrowRightOutlined className="text-sm group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
           </div>
         </div>
         <>
@@ -292,11 +282,6 @@ const Dashboard = () => {
                     index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                   }`
                 }
-                onRow={(record) => ({
-                  onClick: () => {
-                    console.log("Order clicked:", record);
-                  },
-                })}
               />
             </div>
           ) : (

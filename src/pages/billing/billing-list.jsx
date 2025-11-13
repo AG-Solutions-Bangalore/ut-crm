@@ -8,6 +8,7 @@ import {
   App,
   Button,
   Card,
+  Empty,
   Input,
   Popconfirm,
   Space,
@@ -40,7 +41,6 @@ const BillingList = () => {
   const {
     data: billingdata,
     isLoading,
-    refetch,
   } = useGetApiMutation({
     url: BILLING_LIST,
     queryKey: ["billingdata", debouncedSearch, page, activeTab],
@@ -92,6 +92,7 @@ const BillingList = () => {
       title: "Purchase Ref No",
       dataIndex: "purchase_orders_ref",
       key: "purchase_orders_ref",
+      fixed: "left",
       render: (text, record) => (
         <span className="font-medium text-blue-600">
           {record.purchase_orders_ref}
@@ -177,6 +178,7 @@ const BillingList = () => {
     {
       title: "Status",
       dataIndex: "billing_status",
+      fixed: "right",
       key: "billing_status",
       render: (_, order) => {
         const isOpen = order.billing_status === "Open";
@@ -203,6 +205,7 @@ const BillingList = () => {
     {
       title: "Actions",
       key: "actions",
+      fixed: "right",
       width: 120,
       render: (_, record) => (
         <Space>
@@ -279,11 +282,17 @@ const BillingList = () => {
               pageSize: apiData.per_page,
               onChange: handlePageChange,
             }}
+            className="custom-purchase-table"
+           
           />
         ) : (
-          <div className="text-center text-gray-500 py-20">
-            No Billing data found.
-          </div>
+          <Empty
+            description={
+              <span className="text-gray-500">No billing available</span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="py-8"
+          />
         )}
       </div>
     </Card>
