@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EyeFilled, PlusOutlined } from "@ant-design/icons";
 import {
   App,
   Button,
@@ -129,6 +129,14 @@ const TaxInvoiceList = () => {
               type="primary"
               size="small"
               onClick={() => navigate(`/tax-invoice/edit/${record.id}`)}
+            />
+          </Tooltip>
+          <Tooltip title="View Tax Invoice">
+            <Button
+              icon={<EyeFilled />}
+              type="primary"
+              size="small"
+              onClick={() => navigate(`/tax-invoice/view/${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="Delete Tax Invoice">
