@@ -43,6 +43,7 @@ import MillReport from "./pages/report/mill/MillReport";
 import TradeInvoiceForm from "./pages/trade-invoice/trade-invoice-form";
 import TradeInvoiceList from "./pages/trade-invoice/trade-invoice-list";
 import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
+import TaxInvoice from "./pages/reportformats/TaxInvoice";
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
           <Route path="/tax-invoice" element={<TaxInvoiceList />} />
           <Route path="/tax-invoice/create" element={<TaxInvoiceForm />} />
           <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
+          <Route path="/tax-invoice/view/:id" element={<TaxInvoice />} />
 
           <Route path="/payment" element={<PaymentList />} />
           <Route path="/payment/create" element={<PaymentForm />} />
