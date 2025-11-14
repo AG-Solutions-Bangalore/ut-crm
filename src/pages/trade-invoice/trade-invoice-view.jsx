@@ -138,7 +138,7 @@ const TradeInvoiceView = () => {
           
               const options = {
                 margin: [10, 10, 10, 10],
-                filename: `Balance-Close-Order-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+                filename: `Trade-Invoice-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
                 image: { type: "jpeg", quality: 0.98 },
                 html2canvas: {
                   scale: 2,
@@ -170,7 +170,7 @@ const TradeInvoiceView = () => {
           
             const handlePrint = useReactToPrint({
               content: () => componentRef.current,
-              documentTitle: `Balance-Close-Order-Report-${dayjs().format('DD-MM-YYYY')}`,
+              documentTitle: `Trade-Invoice-Report-${dayjs().format('DD-MM-YYYY')}`,
               removeAfterPrint: true,
               pageStyle: `
                 @page {

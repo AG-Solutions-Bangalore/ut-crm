@@ -1,10 +1,14 @@
 import { useRef, useState, forwardRef } from "react";
 import reportlogo from "../../assets/report-logo.png";
-import ReportActions from "./ReportActions";
+
+import { useReactToPrint } from "react-to-print";
+import dayjs from "dayjs";
+import { Button, message } from "antd";
+import html2pdf from "html2pdf.js";
 
 const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
 
-const AuthInvoice = forwardRef(({ partyData, thirdPartyData, invoiceData, onClose }, ref) => {
+const AuthInvoice = forwardRef(({ partyData, thirdPartyData, invoiceData }, ref) => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
 
@@ -51,17 +55,106 @@ const AuthInvoice = forwardRef(({ partyData, thirdPartyData, invoiceData, onClos
     ));
   };
 
+      const handleDownload = () => {
+                const element = componentRef?.current; 
+            
+                if (!element) {
+                  message.error('Failed to generate PDF');
+                  return;
+                }
+            
+                const elementForPdf = element.cloneNode(true);
+                const printHideElements = elementForPdf.querySelectorAll('.print-hide');
+                printHideElements.forEach(el => el.remove());
+            
+                const style = document.createElement('style');
+                style.textContent = `
+                  * {
+                    color: #000000 !important;
+                    background-color: transparent !important;
+                  }
+                  .bg-gray-200, .bg-gray-100, .bg-white {
+                    background-color: #ffffff !important;
+                  }
+                `;
+                elementForPdf.appendChild(style);
+            
+                const options = {
+                  margin: [10, 10, 10, 10],
+                  filename: `Auth-Invoice-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+                  image: { type: "jpeg", quality: 0.98 },
+                  html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    scrollY: 0,
+                    windowHeight: elementForPdf.scrollHeight,
+                    backgroundColor: '#FFFFFF'
+                  },
+                  jsPDF: {
+                    unit: "mm",
+                    format: "a4",
+                    orientation: "portrait",
+                  },
+                  pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+                };
+            
+                html2pdf()
+                  .from(elementForPdf)
+                  .set(options)
+                  .save()
+                  .then(() => {
+                    message.success('PDF downloaded successfully');
+                  })
+                  .catch((error) => {
+                    console.error('PDF download error:', error);
+                    message.error('Failed to download PDF');
+                  });
+              };
+            
+              const handlePrint = useReactToPrint({
+                content: () => componentRef.current,
+                documentTitle: `Auth-Invoice-Report-${dayjs().format('DD-MM-YYYY')}`,
+                removeAfterPrint: true,
+                pageStyle: `
+                  @page {
+                    size: A4;
+                    margin: 10mm;
+                  }
+                  @media print {
+                    body {
+                      margin: 0;
+                      padding: 0;
+                    }
+                    .print-hide {
+                      display: none !important;
+                    }
+                    .ant-card {
+                      box-shadow: none !important;
+                      border: none !important;
+                    }
+                    .ant-card-body {
+                      padding: 0 !important;
+                    }
+                  }
+                `,
+              });
+
   return (
     <>
-      <ReportActions
-        componentRef={componentRef}
-        filename="Auth_Invoice.pdf"
-        documentTitle="Auth Invoice"
-        onToggleSignature={toggleSignature}
-        showSignature={showSignature}
-        includeSignatureToggle={true}
-        onClose={onClose}
-      />
+     <div className="flex flex-row items-center gap-2">
+<Button onClick={handlePrint}>Print</Button>
+
+
+<Button onClick={handleDownload}>PDF</Button>
+
+
+<Button
+  type={showSignature ? "primary" : "default"}
+  onClick={toggleSignature}
+>
+  {showSignature ? "With Signature" : "Without Signature"}
+</Button>
+</div>
 
       <div className="flex justify-center bg-gray-50 p-4">
         <div className="w-full max-w-[210mm] bg-white p-8 relative" ref={componentRef}>

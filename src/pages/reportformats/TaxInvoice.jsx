@@ -265,13 +265,13 @@ const TaxInvoice = () => {
         >
           Print
         </button>
-        <button 
+        {/* <button 
           onClick={handleDownload} 
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors cursor-pointer"
           style={{ cursor: 'pointer' }}
         >
           PDF
-        </button>
+        </button> */}
         <button 
           onClick={toggleSignature}
           className={`px-4 py-2 rounded transition-colors cursor-pointer ${

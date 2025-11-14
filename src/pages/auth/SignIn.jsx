@@ -18,7 +18,7 @@ const SignIn = () => {
   const dispatch = useDispatch();
   const { trigger, loading } = useApiMutation();
   const token = useSelector((state) => state.auth.token);
-  const finalUserImage = useFinalUserImage();
+
 
   if (token) {
     return <Navigate to="/home" replace />;
