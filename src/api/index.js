@@ -59,12 +59,14 @@ export const QUOTATION_LIST = `/quotation`;
 export const QUOTATION_REF = `/quotation-ref`;
 export const UPDATE_STATUS_QUOTATION_ORDER = `/quotations`;
 export const DELETE_QUOTATION_SUB = `/quotation-sub`;
+
 // ------------BILLING-------------------
 export const BILLING_LIST = `/billing`;
 export const UPDATE_STATUS_BILLING_ORDER = `/billings`;
 // ------------TRADE_INVOICE-------------------
-export const TRADE_INVOICE_LIST = `/trade-invoicse`;
+export const TRADE_INVOICE_LIST = `/trade-invoice`;
 export const TRADE_INVOICE_REF = `/trade-invoice-ref`;
+export const DELETE_TRADE_INVOICE_SUB = `/trade-invoice-sub`;
 // ------------TAX_INVOICE-------------------
 export const TAX_INVOICE_LIST = "/tax-invoice";
 export const TAX_INVOICE_SUB_DELETE = "/tax-invoice-sub";

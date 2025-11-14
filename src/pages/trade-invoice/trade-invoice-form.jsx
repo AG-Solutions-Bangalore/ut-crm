@@ -21,7 +21,7 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DELETE_QUOTATION_SUB, PURCHASE_ORDER_LIST, TRADE_INVOICE_LIST } from "../../api";
+import { DELETE_QUOTATION_SUB, DELETE_TRADE_INVOICE_SUB, PURCHASE_ORDER_LIST, TRADE_INVOICE_LIST } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useSelector } from "react-redux";
@@ -32,6 +32,7 @@ const TradeInvoiceForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const { id } = useParams();
+  const isEditMode = Boolean(id);
   const company = useSelector(state => state.company.companyDetails);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -51,7 +52,7 @@ const TradeInvoiceForm = () => {
     trade_invoice_payment_terms: "",
     trade_invoice_remarks: "",
   });
-  // const [invoiceRef, setInvoiceRef] = useState("");
+
 
 
   const { party, tradeinvoice, item } = useMasterData({
@@ -59,7 +60,7 @@ const TradeInvoiceForm = () => {
     tradeinvoice: true,
     item: true,
   });
-console.log(tradeinvoice,'invoiceRef')
+
   const partyOptions = party?.data?.data?.map((item) => ({
     label: item.party_name,
     value: item.id,
@@ -148,7 +149,32 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
   const { trigger: deleteTrigger } = useApiMutation();
   
   
+const fetchQuotation = async () => {
+    try {
+      const res = await fetchTrigger({
+        url: `${TRADE_INVOICE_LIST}/${id}`,
+      });
+      if (res?.data) {
+        const formattedData = {
+          ...res.data,
+        
+          trade_invoice_date: res.data.trade_invoice_date
+            ? dayjs(res.data.trade_invoice_date)
+            : null,
+        };
+        setInitialData(formattedData);
+        form.setFieldsValue(formattedData);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      message.error("Failed to load tradeinvoice details.");
+    }
+  };
 
+  useEffect(() => {
+    if (id) fetchQuotation();
+    else form.resetFields();
+  }, [id]);
  
   const handleSubmit = async (values) => {
     try {
@@ -162,6 +188,7 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
       trade_invoice_date: values.trade_invoice_date
         ? dayjs(values.trade_invoice_date).format("YYYY-MM-DD")
         : null,
+      
       subs: (values.subs || []).map((sub) => ({
         id: sub?.id || "",
         trade_invoice_sub_description: sub?.trade_invoice_sub_description || "",
@@ -176,10 +203,11 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
       })),
     };
 
-  
+ 
+
       const res = await submitTrigger({
-        url: TRADE_INVOICE_LIST,
-        method: "post",
+        url: isEditMode ? `${TRADE_INVOICE_LIST}/${id}` : TRADE_INVOICE_LIST,
+        method: isEditMode ? "put" : "post",
         data: payload,
       });
 
@@ -204,13 +232,13 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
 
     try {
       const res = await deleteTrigger({
-        url: `${DELETE_QUOTATION_SUB}/${subId}`,
+        url: `${DELETE_TRADE_INVOICE_SUB}/${subId}`,
         method: "delete",
       });
 
       if (res?.code === 201) {
         message.success(res?.message || "Sub-item deleted successfully!");
-     
+        if (id) fetchQuotation();
       } else {
         message.error(res?.message || "Failed to delete sub-item.");
       }
@@ -242,7 +270,7 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
             extra={
               <div className="flex items-center">
                 <Button type="primary" htmlType="submit" loading={submitLoading}>
-                  Create
+                {isEditMode ? "Update Trade Invoice" : "Create  Trade Invoice"}
                 </Button>
               </div>
             }
@@ -381,7 +409,26 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
                           className="!mb-3 bg-white  relative"
                         >
                           {fields.length > 1 &&
-                            (
+                            (hasId ? (
+                              <Popconfirm
+                                title="Are you sure you want to delete this sub-item?"
+                                onConfirm={() => handleDelete(subItem?.id)}
+                                okText="Yes"
+                                cancelText="No"
+                              >
+                               
+
+<button
+                                type="button"
+                               
+                                className="absolute z-10 right-2  p-1 rounded-md hover:cursor-pointer bg-red-100"
+                            
+                              >
+
+                                <DeleteOutlined className="!text-red-400 "/>
+                              </button>
+                              </Popconfirm>
+                            ) : (
                               <button
                                 type="button"
                                
@@ -391,7 +438,7 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
 
                                 <MinusCircleOutlined className="!text-red-400 "/>
                               </button>
-                            )}
+                     ) )}
 
                           {/* All 9 sub-table fields in one compact row using grid */}
                           <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-9 gap-2 mt-2">

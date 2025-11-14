@@ -46,6 +46,7 @@ import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
 import TaxInvoice from "./pages/reportformats/TaxInvoice";
 import { DashboardNew } from "./features/dashboard";
 import LedgerReport from "./pages/report/ledger/ledger-report";
+import TradeInvoiceView from "./pages/trade-invoice/trade-invoice-view";
 
 function App() {
   return (
@@ -104,6 +105,10 @@ function App() {
           <Route
             path="/trade-invoice/edit/:id"
             element={<TradeInvoiceForm />}
+          />
+          <Route
+            path="/trade-invoice/view/:id"
+            element={<TradeInvoiceView />}
           />
 
           <Route path="/report-format" element={<ReportFormat />} />
