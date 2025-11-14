@@ -18,12 +18,12 @@ import {
 } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PARTY_LIST, UPDATE_STATUS_PARTY } from "../../../api";
 import HighlightText from "../../../components/common/HighlightText";
 import { useDebounce } from "../../../components/common/useDebounce";
 import DataTable from "../../../components/DataTable/DataTable";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
-import { PARTY_LIST, UPDATE_STATUS_PARTY } from "../../../api";
 
 const { Search } = Input;
 
@@ -203,6 +203,12 @@ const PartyList = () => {
             </div>
           </div>
 
+          <Button
+            type="primary"
+            onClick={() => navigate("/master/party/report")}
+          >
+            View Report
+          </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}

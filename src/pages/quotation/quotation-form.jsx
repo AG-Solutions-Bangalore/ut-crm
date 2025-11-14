@@ -11,6 +11,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Popconfirm,
   Select,
   Spin,
@@ -19,15 +20,10 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  DELETE_ORDER_SUB,
-  DELETE_QUOTATION_SUB,
-  PURCHASE_ORDER_LIST,
-  QUOTATION_LIST,
-} from "../../api";
+import { DELETE_QUOTATION_SUB, QUOTATION_LIST } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
-
+import quotationOptions from "../../constants/quotationOptions.json";
 const QuotationForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -40,20 +36,51 @@ const QuotationForm = () => {
     quotation_ref: "",
     quotation_mill_id: null,
     quotation_party_id: null,
-    quotation_subject: "",
-    quotation_deckle: "",
-    quotation_gsm_range: "",
+    quotation_subject: null,
+    quotation_deckle: null,
+    quotation_gsm_range: null,
     quotation_extra_charge: "FOR GYT - Rs 1.00 KG",
     quotation_freight: null,
     quotation_payment: "WITH IN 15 DAYS",
-    quotation_delivery: "",
+    quotation_delivery: null,
     quotation_furnish: "INDIAN + IMPORTED waste",
     quotation_samples: null,
     quotation_footer:
       "We assure of our prompt and efficient services and look forward",
+    quotation_status: false,
   });
 
-  const { mill, party, quotationRef, item } = useMasterData();
+  const { mill, party, item, quotationRef, deckle, subject, gsm, delivery } =
+    useMasterData({
+      mill: true,
+      party: true,
+      item: true,
+      quotationRef: true,
+      deckle: true,
+      subject: true,
+      gsm: true,
+      delivery: true,
+    });
+  const deliveryOptions =
+    delivery?.data?.data?.map((item) => ({
+      label: item.delivery,
+      value: item.delivery,
+    })) || [];
+  const deckleOptions =
+    deckle?.data?.data?.map((item) => ({
+      label: item.deckle,
+      value: item.deckle,
+    })) || [];
+  const subjectOptions =
+    subject?.data?.data?.map((item) => ({
+      label: item.subject,
+      value: item.subject,
+    })) || [];
+  const gsmOptions =
+    gsm?.data?.data?.map((item) => ({
+      label: item.gsm,
+      value: item.gsm,
+    })) || [];
   const millOptions =
     mill?.data?.data?.map((item) => ({
       label: item.mill_name,
@@ -80,7 +107,7 @@ const QuotationForm = () => {
   const fetchQuotation = async () => {
     try {
       const res = await fetchTrigger({
-        url: `${PURCHASE_ORDER_LIST}/${id}`,
+        url: `${QUOTATION_LIST}/${id}`,
       });
       if (res?.data) {
         const formattedData = {
@@ -105,9 +132,11 @@ const QuotationForm = () => {
   }, [id]);
 
   const handleSubmit = async (values) => {
+    quotationRef.refetch();
+    console.log(values.quotation_ref, "quotation_ref");
     const payload = {
       ...values,
-      quotation_ref: initialData.quotation_ref || "",
+      // quotation_ref: initialData.quotation_ref || "",
       quotation_date: values.quotation_date
         ? dayjs(values.quotation_date).format("YYYY-MM-DD")
         : null,
@@ -120,11 +149,10 @@ const QuotationForm = () => {
         quotation_tmill: sub?.quotation_tmill || "",
         quotation_net_gst: sub?.quotation_net_gst || "",
       })),
+      ...(isEditMode && {
+        quotation_status: values?.quotation_status === true ? "Open" : "Close",
+      }),
     };
-
-    if (isEditMode) {
-      payload.quotation_status = values?.quotation_status ? "Open" : "Close";
-    }
 
     try {
       const res = await submitTrigger({
@@ -194,14 +222,16 @@ const QuotationForm = () => {
               </h2>
             }
             extra={
-              <>
+              <div className="flex items-center gap-2">
                 {isEditMode && (
                   <Form.Item
                     name="quotation_status"
                     valuePropName="checked"
                     className="!mb-0"
                   >
-                    <Switch />
+                    {/* <Tooltip title="Status" placement="top"> */}
+                    <Switch checkedChildren="Open" unCheckedChildren="Close" />
+                    {/* </Tooltip> */}
                   </Form.Item>
                 )}
                 <Form.Item className="text-center !mt-4">
@@ -213,7 +243,7 @@ const QuotationForm = () => {
                     {isEditMode ? "Update" : "Create"}
                   </Button>
                 </Form.Item>
-              </>
+              </div>
             }
             variant="borderless"
           >
@@ -221,10 +251,22 @@ const QuotationForm = () => {
               <Form.Item
                 label={
                   <span>
+                    Quotation Date <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_date"
+                rules={[{ required: true, message: "Please select date" }]}
+              >
+                <DatePicker className="w-full" format="DD-MM-YYYY" />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span>
                     Mill <span className="text-red-500">*</span>
                   </span>
                 }
-                name="purchase_orders_mill_id"
+                name="quotation_mill_id"
                 rules={[{ required: true, message: "Select mill" }]}
               >
                 <Select
@@ -246,7 +288,7 @@ const QuotationForm = () => {
                     Party <span className="text-red-500">*</span>
                   </span>
                 }
-                name="purchase_orders_party_id"
+                name="quotation_party_id"
                 rules={[{ required: true, message: "Select party" }]}
               >
                 <Select
@@ -261,17 +303,6 @@ const QuotationForm = () => {
                   showSearch
                   allowClear
                 />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Quotation Date <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_date"
-                rules={[{ required: true, message: "Please select date" }]}
-              >
-                <DatePicker className="w-full" format="DD-MM-YYYY" />
               </Form.Item>
 
               <Form.Item
@@ -296,100 +327,7 @@ const QuotationForm = () => {
               >
                 <Select
                   placeholder="Select Deckle"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    GSM <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_gsm_range"
-                rules={[{ required: true, message: "Select GSM" }]}
-              >
-                <Select
-                  placeholder="Select GSM"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Freight <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_freight"
-                rules={[{ required: true, message: "Select Freight" }]}
-              >
-                <Select
-                  placeholder="Select Freight"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Samples <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_samples"
-                rules={[{ required: true, message: "Select Samples" }]}
-              >
-                <Select
-                  placeholder="Select Samples"
-                  options={partyOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item name="quotation_payment" label="Payment">
-                <Input placeholder="Enter Payment" />
-              </Form.Item>
-              <Form.Item name="quotation_furnish" label="Furnish">
-                <Input placeholder="Enter Furnish" />
-              </Form.Item>
-              <Form.Item name="quotation_extra_charge" label="Extra Charge">
-                <Input placeholder="Enter Extra Charge" />
-              </Form.Item>
-              <Form.Item
-                label={
-                  <span>
-                    Delivery <span className="text-red-500">*</span>
-                  </span>
-                }
-                name="quotation_delivery"
-                rules={[{ required: true, message: "Select Delivery" }]}
-              >
-                <Select
-                  placeholder="Select Delivery"
-                  options={partyOptions}
+                  options={deckleOptions}
                   filterOption={(input, option) =>
                     (option?.label ?? "")
                       .toLowerCase()
@@ -410,7 +348,109 @@ const QuotationForm = () => {
               >
                 <Select
                   placeholder="Select Subject"
-                  options={partyOptions}
+                  options={subjectOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    GSM <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_gsm_range"
+                rules={[{ required: true, message: "Select GSM" }]}
+              >
+                <Select
+                  placeholder="Select GSM"
+                  options={gsmOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+
+              <Form.Item name="quotation_extra_charge" label="Extra Charge">
+                <Input placeholder="Enter Extra Charge" />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span>
+                    Freight <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_freight"
+                rules={[{ required: true, message: "Select Freight" }]}
+              >
+                <Select
+                  placeholder="Select Freight"
+                  options={quotationOptions.freightOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+
+              <Form.Item name="quotation_payment" label="Payment">
+                <Input placeholder="Enter Payment" />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <span>
+                    Delivery <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_delivery"
+                rules={[{ required: true, message: "Select Delivery" }]}
+              >
+                <Select
+                  placeholder="Select Delivery"
+                  options={deliveryOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item name="quotation_furnish" label="Furnish">
+                <Input placeholder="Enter Furnish" />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <span>
+                    Samples <span className="text-red-500">*</span>
+                  </span>
+                }
+                name="quotation_samples"
+                rules={[{ required: true, message: "Select Samples" }]}
+              >
+                <Select
+                  placeholder="Select Samples"
+                  options={quotationOptions.samplesOptions}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
                   showSearch
                   allowClear
                 />
@@ -418,9 +458,9 @@ const QuotationForm = () => {
               <Form.Item
                 name="quotation_footer"
                 label="Footer"
-                className="md:col-span-2"
+                className="md:col-span-3"
               >
-                <Input placeholder="Enter Footer" value="" />
+                <Input.TextArea placeholder="Enter Footer" />
               </Form.Item>
             </div>
             <Card size="small" className="bg-gray-50 my-4">
@@ -430,28 +470,45 @@ const QuotationForm = () => {
                 rules={[
                   {
                     validator: async (_, subs) => {
-                      if (!subs || subs.length < 1)
+                      if (!Array.isArray(subs) || subs.length === 0) {
                         return Promise.reject(
                           new Error("Please add at least one sub item.")
                         );
+                      }
 
-                      const hasAnyFilledRow = subs.some((row) =>
+                      const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
                           (val) => val !== undefined && val !== ""
                         )
                       );
 
-                      if (!hasAnyFilledRow)
+                      if (nonEmptyRows.length === 0) {
                         return Promise.reject(
                           new Error(
                             "Please fill at least one sub item before submitting."
                           )
                         );
+                      }
+
+                      const emptyRows = subs.filter((row) =>
+                        Object.values(row || {}).every(
+                          (val) => val === undefined || val === ""
+                        )
+                      );
+
+                      if (emptyRows.length > 0) {
+                        return Promise.reject(
+                          new Error(
+                            "Empty sub items are not allowed — please fill or remove them."
+                          )
+                        );
+                      }
 
                       return Promise.resolve();
                     },
                   },
                 ]}
+                validateTrigger={["onSubmit"]}
               >
                 {(fields, { add, remove }, { errors }) => (
                   <>
@@ -461,112 +518,146 @@ const QuotationForm = () => {
                       </div>
                       <Button
                         type="dashed"
+                        htmlType="button"
                         onClick={() => add()}
                         icon={<PlusOutlined />}
                       >
                         Add Item
                       </Button>
                     </div>
-                    {fields.map(({ key, name, ...restField }) => {
-                      const subItem = form.getFieldValue(["subs", name]);
-                      const hasId = subItem?.id;
-                      return (
-                        <Card
-                          key={key}
-                          size="small"
-                          className="!mb-3 bg-white border relative"
-                        >
-                          {fields.length > 1 &&
-                            (hasId ? (
-                              <Popconfirm
-                                title="Are you sure you want to delete this sub-item?"
-                                onConfirm={() => handleDelete(subItem?.id)}
-                                okText="Yes"
-                                cancelText="No"
+                    <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
+                        <div className="col-span-2">Quality</div>
+                        <div>Price</div>
+                        <div>Gst</div>
+                        <div>Insurance</div>
+                        <div>TMill</div>
+                        <div>Net Gst</div>
+                      </div>
+
+                      <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+                        {fields.map(({ key, name, ...restField }) => {
+                          const subItem = form.getFieldValue(["subs", name]);
+                          console.log(subItem, "subItem");
+                          const hasId = subItem?.id;
+                          return (
+                            <div
+                              key={key}
+                              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 p-2 items-center hover:bg-gray-50 transition relative"
+                            >
+                              {" "}
+                              {fields.length > 1 &&
+                                (hasId ? (
+                                  <Popconfirm
+                                    title="Are you sure you want to delete this sub-item?"
+                                    onConfirm={() => handleDelete(subItem?.id)}
+                                    okText="Yes"
+                                    cancelText="No"
+                                  >
+                                    <Button
+                                      type="text"
+                                      danger
+                                      icon={<DeleteOutlined />}
+                                      className="!absolute top-0 right-0 z-10 text-red-500"
+                                    />
+                                  </Popconfirm>
+                                ) : (
+                                  <Button
+                                    type="text"
+                                    danger
+                                    icon={<MinusCircleOutlined />}
+                                    className="!absolute top-0 right-0 z-10 text-red-500"
+                                    onClick={() => remove(name)}
+                                  />
+                                ))}
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_quality"]}
+                                noStyle
+                                className="!relative"
                               >
-                                <Button
-                                  type="text"
-                                  danger
-                                  icon={<DeleteOutlined />}
-                                  className="!absolute top-2 right-2 text-red-500"
+                                <Select
+                                  className="md:col-span-2"
+                                  placeholder="Select Quality"
+                                  options={item?.data?.data?.map((item) => ({
+                                    label: item.bf,
+                                    value: item.bf,
+                                  }))}
+                                  loading={item?.loading}
+                                  showSearch
+                                  allowClear
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
                                 />
-                              </Popconfirm>
-                            ) : (
-                              <Button
-                                type="text"
-                                danger
-                                icon={<MinusCircleOutlined />}
-                                className="!absolute top-2 right-2"
-                                onClick={() => remove(name)}
-                              />
-                            ))}
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_quality"]}
-                              label="Item"
-                            >
-                              <Select
-                                placeholder="Select Item"
-                                options={item?.data?.data?.map((item) => ({
-                                  label: item.bf,
-                                  value: item.bf,
-                                }))}
-                                loading={item?.loading}
-                                showSearch
-                                allowClear
-                                filterOption={(input, option) =>
-                                  (option?.label ?? "")
-                                    .toLowerCase()
-                                    .includes(input.toLowerCase())
-                                }
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_basic_price"]}
-                              label="Basic Price"
-                            >
-                              <Input placeholder="Basic Price" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_gst"]}
-                              label="Gst"
-                            >
-                              <Input placeholder="Gst" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_insurance"]}
-                              label="Insurance"
-                            >
-                              <Input type="number" placeholder="Insurance" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_tmill"]}
-                              label="T Mill"
-                            >
-                              <Input type="number" placeholder="T Mill" />
-                            </Form.Item>
-
-                            <Form.Item
-                              {...restField}
-                              name={[name, "quotation_net_gst"]}
-                              label="Net Gst"
-                            >
-                              <Input type="number" placeholder="Net Gst" />
-                            </Form.Item>
-                          </div>
-                        </Card>
-                      );
-                    })}
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_basic_price"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  type="number"
+                                  className="!w-full"
+                                  placeholder="Basic Price"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_gst"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  type="number"
+                                  className="!w-full"
+                                  placeholder="Gst"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_insurance"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  type="number"
+                                  className="!w-full"
+                                  placeholder="Insurance"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_tmill"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  type="number"
+                                  className="!w-full"
+                                  placeholder="T Mill"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "quotation_net_gst"]}
+                                noStyle
+                              >
+                                <InputNumber
+                                  type="number"
+                                  className="!w-full"
+                                  placeholder="Net Gst"
+                                  min={1}
+                                />
+                              </Form.Item>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                     {errors.length > 0 && (
                       <div className="text-red-500 text-sm mt-2">
                         {errors[0]}

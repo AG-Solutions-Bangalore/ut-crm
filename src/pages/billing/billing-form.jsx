@@ -9,7 +9,7 @@ import {
   InputNumber,
   Select,
   Spin,
-  Switch
+  Switch,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -380,6 +380,7 @@ const BillingForm = () => {
                     type="number"
                     placeholder="Enter Rate"
                     className="!w-full"
+                    min={1}
                   />
                 </Form.Item>
               </div>
@@ -389,6 +390,7 @@ const BillingForm = () => {
                     type="number"
                     placeholder="Enter Rate"
                     className="!w-full"
+                    min={1}
                   />
                 </Form.Item>
 

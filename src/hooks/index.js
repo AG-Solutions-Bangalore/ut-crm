@@ -1,9 +1,12 @@
-import dayjs from "dayjs";
 import {
+  ACTIVE_DECKLE,
+  ACTIVE_DELIVERY,
+  ACTIVE_GSM,
   ACTIVE_ITEM,
   ACTIVE_MILL,
   ACTIVE_PARTY,
   ACTIVE_SHADE,
+  ACTIVE_SUBJECT,
   ACTIVE_UNIT,
   PAYMENT_MODE,
   PURCHASE_ORDER_REF,
@@ -24,6 +27,10 @@ export const useMasterData = ({
   taxinvoice = false,
   payment = false,
   tradeinvoice = false,
+  deckle = false,
+  subject = false,
+  gsm = false,
+  delivery = false,
 } = {}) => {
   // const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
@@ -73,7 +80,7 @@ export const useMasterData = ({
     isLoading: TradeInvoiceRefLoading,
     refetch: refetchTradeInvoiceRefNo,
     error: TradeInvoiceError,
-  } = createApi(tradeinvoice,TRADE_INVOICE_REF, [
+  } = createApi(tradeinvoice, TRADE_INVOICE_REF, [
     "tradeinvoicerefdata",
     // formattedDateTime,
   ]);
@@ -114,6 +121,30 @@ export const useMasterData = ({
     refetch: refetchPayment,
     error: paymentError,
   } = createApi(payment, PAYMENT_MODE, ["activepaymentdata"]);
+  const {
+    data: DeckleData,
+    isLoading: deckleLoading,
+    refetch: refetchDeckle,
+    error: deckleError,
+  } = createApi(deckle, ACTIVE_DECKLE, ["activedeckledata"]);
+  const {
+    data: SubjectData,
+    isLoading: subjectLoading,
+    refetch: refetchSubject,
+    error: subjectError,
+  } = createApi(subject, ACTIVE_SUBJECT, ["activesubjectdata"]);
+  const {
+    data: GsmData,
+    isLoading: gsmLoading,
+    refetch: refetchGsm,
+    error: gsmError,
+  } = createApi(gsm, ACTIVE_GSM, ["activegsmdata"]);
+  const {
+    data: DeliveryData,
+    isLoading: deliveryLoading,
+    refetch: refetchDelivery,
+    error: deliveryError,
+  } = createApi(delivery, ACTIVE_DELIVERY, ["activedeliverydata"]);
 
   return {
     mill: {
@@ -175,6 +206,30 @@ export const useMasterData = ({
       loading: paymentLoading,
       refetch: refetchPayment,
       error: paymentError,
+    },
+    deckle: {
+      data: DeckleData,
+      loading: deckleLoading,
+      refetch: refetchDeckle,
+      error: deckleError,
+    },
+    subject: {
+      data: SubjectData,
+      loading: subjectLoading,
+      refetch: refetchSubject,
+      error: subjectError,
+    },
+    gsm: {
+      data: GsmData,
+      loading: gsmLoading,
+      refetch: refetchGsm,
+      error: gsmError,
+    },
+    delivery: {
+      data: DeliveryData,
+      loading: deliveryLoading,
+      refetch: refetchDelivery,
+      error: deliveryError,
     },
   };
 };

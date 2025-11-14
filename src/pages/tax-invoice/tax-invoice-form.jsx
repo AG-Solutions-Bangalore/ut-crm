@@ -197,7 +197,6 @@ const TaxInvoiceForm = () => {
       tax_invoice_sub_party_id: bill.billing_party_id,
     }));
     const data = {
-      tax_invoice_date: values?.tax_invoice_date || null,
       tax_invoice_ref: values?.tax_invoice_ref || "",
       tax_invoice_mill_id: values?.tax_invoice_mill_id || null,
       tax_invoice_description: values?.tax_invoice_description || "",

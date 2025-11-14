@@ -211,7 +211,7 @@ const PurchaseEditModal = ({ open, onClose, purchaseId, onSuccess }) => {
                                 ]}
                               >
                                 <InputNumber
-                                  min={0}
+                                  min={1}
                                   className="w-full"
                                   placeholder="Mill Rate"
                                 />

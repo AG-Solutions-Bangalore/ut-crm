@@ -1,0 +1,10 @@
+{
+  "freightOptions": [
+    { "label": "Included", "value": "Included" },
+    { "label": "Excluded", "value": "Excluded" }
+  ],
+  "samplesOptions": [
+    { "label": "Enclosed", "value": "Enclosed" },
+    { "label": "Disclosed", "value": "Disclosed" }
+  ]
+}

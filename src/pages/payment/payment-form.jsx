@@ -333,6 +333,7 @@ const PaymentForm = () => {
                     type="number"
                     placeholder="Enter Amount"
                     className="!w-full"
+                    min={1}
                   />
                 </Form.Item>
               </div>

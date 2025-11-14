@@ -102,21 +102,21 @@ const QuotationList = () => {
   };
   const columns = [
     {
-      title: "Purchase Ref No",
-      dataIndex: "purchase_orders_ref",
-      key: "purchase_orders_ref",
+      title: "Quotation Ref No",
+      dataIndex: "quotation_ref",
+      key: "quotation_ref",
+      fixed: "left",
       render: (text, record) => (
         <span className="font-medium text-blue-600">
-          {record.purchase_orders_ref}
+          {record.quotation_ref}
         </span>
       ),
     },
     {
-      title: "Purchase Date",
-      dataIndex: "purchase_orders_date",
-      key: "purchase_orders_date",
-      render: (_, record) =>
-        dayjs(record.purchase_orders_date).format("DD-MM-YYYY"),
+      title: "Quotation Date",
+      dataIndex: "quotation_date",
+      key: "quotation_date",
+      render: (_, record) => dayjs(record.quotation_date).format("DD-MM-YYYY"),
     },
     {
       title: "Mill Name",
@@ -131,22 +131,30 @@ const QuotationList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Total Bill Rate",
-      dataIndex: "total_bill_rate",
-      key: "total_bill_rate",
+      title: "Total Rate",
+      dataIndex: "total_rate",
+      key: "total_rate",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Total Agreed Rate",
-      dataIndex: "total_adreed_rate",
-      key: "total_adreed_rate",
+      title: "Deckle",
+      dataIndex: "quotation_deckle",
+      key: "quotation_deckle",
       align: "right",
-      render: (text) => <span>{Number(text).toFixed(2)}</span>,
+      render: (text) => <span className="text-gray-800">{text}</span>,
+    },
+    {
+      title: "Gsm",
+      dataIndex: "quotation_gsm_range",
+      key: "quotation_gsm_range",
+      align: "right",
+      render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
       title: "Status",
       dataIndex: "quotation_status",
+      fixed: "right",
       key: "quotation_status",
       render: (_, order) => {
         const isOpen = order.quotation_status == "Open";
@@ -174,6 +182,7 @@ const QuotationList = () => {
     {
       title: "Actions",
       key: "actions",
+      fixed: "right",
       render: (_, record) => (
         <Space>
           <Tooltip title="Edit Quotation">
@@ -182,6 +191,14 @@ const QuotationList = () => {
               icon={<EditOutlined />}
               size="small"
               onClick={() => navigate(`/quotation/edit/${record.id}`)}
+            />
+          </Tooltip>
+          <Tooltip title="View Quotation Report">
+            <Button
+              type="primary"
+              icon={<EyeOutlined />}
+              size="small"
+              onClick={() => navigate(`/quotation/view/${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="Delete Quotation">
