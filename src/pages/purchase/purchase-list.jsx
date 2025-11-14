@@ -235,8 +235,8 @@ const PurchaseList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Open", label: "Open Purchase List" },
-            { key: "Close", label: "Closed Purchase List" },
+            { key: "Open", label: "Open P/O List" },
+            { key: "Close", label: "Closed P/O List" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -253,7 +253,7 @@ const PurchaseList = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate("/purchase/create")}
           >
-            Add Purchase
+            Add P/O
           </Button>
         </div>
       </div>

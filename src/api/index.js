@@ -53,6 +53,8 @@ export const PURCHASE_ORDER_REF = `/purchase-order-ref`;
 export const UPDATE_STATUS_PURCHASE_ORDER = `/purchase-orders`;
 export const DELETE_ORDER_SUB = `/purchase-order-sub`;
 export const PURCHASE_LATEST_DATA = "/getlastpurchase";
+export const ACTIVE_PURCHASE_ORDER_REF = "/active-purchase-order-ref";
+export const GET_PURCHASE_ORDER_REF_DETAILS = "/get-purchase-order-ref-details";
 
 // ------------QUOTATION-------------------
 export const QUOTATION_LIST = `/quotation`;

@@ -184,7 +184,7 @@ const BillingView = () => {
               </h1>
               <span className="text-blue-400">•</span>
               <span className="text-xs font-semibold text-white/90 bg-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
-              Type: {billing.billing_type}
+                Type: {billing.billing_type}
               </span>
             </div>
           </div>
@@ -212,7 +212,11 @@ const BillingView = () => {
 
       {/* Metrics */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-2.5 mb-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <Stat
+            label="Bill Ref"
+            value={billing.billing_ref ? `${billing.billing_ref}` : "-"}
+          />
           <Stat
             label="Rate Diff"
             value={profit !== null ? `₹${profit.toFixed(2)}` : "-"}
@@ -225,9 +229,10 @@ const BillingView = () => {
             }
             variant={dueVariant}
           />
+
           <Stat
-            label="Quantity"
-            value={billing.billing_tones ? `${billing.billing_tones} T` : "-"}
+            label="Tones"
+            value={billing.billing_tones ? `${billing.billing_tones}` : "-"}
           />
           <Stat
             label="Commission"

@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { PURCHASE_ORDER_LIST } from "../../api";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Text } = Typography;
 
@@ -23,6 +24,7 @@ const PurchaseEditModal = ({ open, onClose, purchaseId, onSuccess }) => {
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const [purchaseData, setPurchaseData] = useState(null);
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchPurchaseDetails = async () => {
@@ -61,6 +63,7 @@ const PurchaseEditModal = ({ open, onClose, purchaseId, onSuccess }) => {
       });
 
       if (res.code === 201) {
+        queryClient.invalidateQueries(["purchasedata"]);
         message.success(res.message || "Purchase order updated successfully!");
         onSuccess?.();
         onClose();
