@@ -1,19 +1,33 @@
 import { useRef, useState } from "react";
 import reportlogo from "../../assets/report-logo.png";
 import ReportActions from "../reportformats/ReportActions";
+import { QUOTATION_LIST } from "../../api";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
+import { useSelector } from "react-redux";
+import dayjs from "dayjs";
 
 const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
 // const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
 
-const Quotation = () => {
+const QuotationView = () => {
   const componentRef = useRef(null);
-
+  const { id } = useParams();
   const [showSignature, setShowSignature] = useState(true);
-
+  const companydata = useSelector((state) => state?.auth?.userDetails);
+  console.log(companydata, "companydata");
   const toggleSignature = () => {
     setShowSignature(!showSignature);
   };
-
+  const {
+    data: quotationdata,
+    isLoading,
+    refetch,
+  } = useGetApiMutation({
+    url: `${QUOTATION_LIST}/${id}`,
+    queryKey: ["quotationdataview", id],
+  });
+  console.log(quotationdata, "quotationdata");
   return (
     <>
       <ReportActions
@@ -25,16 +39,16 @@ const Quotation = () => {
         includeSignatureToggle={true}
       />
 
-      <div className="flex justify-center bg-gray-50 p-4">
+      <div className="flex justify-center p-4 ">
         <div
-          className="w-full max-w-[210mm] bg-white border border-black"
+          className="w-full max-w-[210mm] bg-white border border-black "
           ref={componentRef}
         >
-          <div className="border-b-2 border-black p-4">
-            <div className="flex justify-end text-xs mb-3">
+          <div className="border-b-2 border-black p-4 relative">
+            <div className="flex justify-end text-xs mb-3 absolute top-2 right-2">
               <div className="text-right">
-                <div>Ph : 08026723020</div>
-                <div>Mobile : 9845400122</div>
+                <div>Email : {companydata?.company_email ?? ""}</div>
+                <div>Mobile : {companydata?.company_mobile ?? ""}</div>
               </div>
             </div>
 
@@ -52,17 +66,14 @@ const Quotation = () => {
               <div className="flex-1 text-center">
                 <div className="text-xl font-bold mb-1">QUOTATIONS</div>
                 <h1 className="text-3xl font-bold mb-1 instrument-font">
-                  THE UNITED TRADERS (Regd.)
+                  {companydata?.company_name ?? ""}
                 </h1>
                 <p className="text-xs font-semibold mb-2">
                   Dealers in : KRAFT PAPER & DUPLEX BOARD
                 </p>
 
                 <p className="text-[10px] leading-tight">
-                  Correspondence Address : #1141, 2nd Main, 1st Cross,
-                  Hoskerehalli, BSK 3rd Stage,
-                  <br />
-                  Bangalore 560085 Email : united1141@gmail.com
+                  {companydata?.company_cor_address ?? ""}
                 </p>
               </div>
             </div>
@@ -71,35 +82,51 @@ const Quotation = () => {
           <div className="px-4 py-3 border-b border-black">
             <div className="flex justify-between items-start mb-3">
               <div className="text-xs">
-                <div className="font-bold mb-1">To, ADITYA PACKAGING</div>
-                <div>NO 93/6 WEST PIPE LINE</div>
-                <div>KASTURIABA NAGAR, MYSORE ROAD</div>
-                <div>BANGALORE - 560026</div>
+                <div className="font-bold mb-1">
+                  To, {quotationdata?.data?.party_name ?? ""}
+                </div>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: (
+                      quotationdata?.party?.party_billing_address || ""
+                    ).replace(/\n/g, "<br/>"),
+                  }}
+                ></div>
+
                 <div className="mt-2">Dear Sir,</div>
               </div>
               <div className="text-xs text-right">
                 <div className="mb-1">
-                  <span className="font-bold">Date:</span> 13-03-2020
+                  <span className="font-bold">Date:</span>{" "}
+                  {quotationdata?.data?.quotation_date
+                    ? dayjs(quotationdata?.data?.quotation_date).format(
+                        "DD-MM-YYYY"
+                      )
+                    : ""}
                 </div>
                 <div>
-                  <span className="font-bold">Quotation Ref :</span> QT/2/201920
+                  <span className="font-bold">Quotation Ref :</span>
+                  {quotationdata?.data?.quotation_ref ?? ""}
                 </div>
               </div>
             </div>
 
             <div className="text-xs mb-3">
-              We take pleasure to offer Kraft Paper as per details
+              {quotationdata?.data?.quotation_subject ?? ""}
             </div>
 
             <div className="text-xs space-y-1">
               <div>
-                <span className="font-bold">Mill :</span> BALAJI MALT (P) LTD
+                <span className="font-bold">Mill :</span>{" "}
+                {quotationdata?.data?.mill_name ?? ""}
               </div>
               <div>
-                <span className="font-bold">Deckle :</span> 410 - 420 cms
+                <span className="font-bold">Deckle :</span>{" "}
+                {quotationdata?.data?.quotation_deckle ?? ""}
               </div>
               <div>
-                <span className="font-bold">GSM Range :</span> 120 - 250 GSM
+                <span className="font-bold">GSM Range :</span>{" "}
+                {quotationdata?.data?.quotation_gsm_range ?? ""}
               </div>
             </div>
           </div>
@@ -140,19 +167,19 @@ const Quotation = () => {
               <tbody>
                 <tr className="border-b border-black">
                   <td className="border-r border-black p-2 text-center">
-                    20 BF
+                    quotation_quality
                   </td>
                   <td className="border-r border-black p-2 text-center">22</td>
                   <td className="border-r border-black p-2 text-center">
-                    2.64
+                    quotation_basic_price
                   </td>
                   <td className="border-r border-black p-2 text-center">
-                    0.02
+                    quotation_gst
                   </td>
                   <td className="border-r border-black p-2 text-center">
-                    24.66
+                    quotation_insurance
                   </td>
-                  <td className="p-2 text-center">22.02</td>
+                  <td className="p-2 text-center">quotation_tmill</td>
                 </tr>
 
                 <tr style={{ height: "80px" }}>
@@ -233,4 +260,4 @@ const Quotation = () => {
   );
 };
 
-export default Quotation;
+export default QuotationView;

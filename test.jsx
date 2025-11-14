@@ -1,33 +1,102 @@
-quotation_date;
-quotation_ref;
-quotation_mill_id;
-quotation_party_id;
-quotation_subject;
-quotation_deckle;
-quotation_gsm_range;
-quotation_extra_charge;
-quotation_freight;
-quotation_payment;
-quotation_delivery;
-quotation_furnish;
-quotation_samples;
-quotation_footer;
-subs[
-  (quotation_quality,
-  quotation_basic_price,
-  quotation_gst,
-  quotation_insurance,
-  quotation_tmill,
-  quotation_net_gst)
-];
-
-
-
-
-
-
-
-
-
-
-
+// {
+//     "data": {
+//         "id": 2,
+//         "quotation_date": "2025-11-14",
+//         "quotation_ref": "UT\/QT\/2\/2025-26",
+//         "quotation_mill_id": 6,
+//         "mill_name": "kasrthicj",
+//         "quotation_party_id": 1,
+//         "party_name": "CARTON WORLD",
+//         "total_rate": "1804.00",
+//         "quotation_deckle": "410 - 420 cms",
+//         "quotation_gsm_range": "120 - 250 GSM",
+//         "quotation_status": "Open",
+//         "quotation_ref_no": "2",
+//         "quotation_subject": "We take pleasure to offer Kraft Paper as per details",
+//         "quotation_extra_charge": "FOR GYT - Rs 1.00 KG",
+//         "quotation_freight": "Included",
+//         "quotation_payment": "WITH IN 15 DAYS",
+//         "quotation_delivery": "8 - 10 Days from the receipt of your order",
+//         "quotation_furnish": "INDIAN + IMPORTED waste",
+//         "quotation_samples": "Disclosed",
+//         "quotation_footer": "We assure of our prompt and efficient services and look forward",
+//         "created_by": "superadmin",
+//         "created_at": "2025-11-14T04:53:46.000000Z",
+//         "updated_at": "2025-11-14T05:20:32.000000Z",
+//         "updated_by": "superadmin",
+//         "subs": [
+//             {
+//                 "id": 2,
+//                 "quotation_sub_ref": "UT\/QT\/2\/2025-26",
+//                 "quotation_quality": "Max",
+//                 "quotation_basic_price": "34.00",
+//                 "quotation_gst": "54.00",
+//                 "quotation_insurance": "566.00",
+//                 "quotation_tmill": "7.00",
+//                 "quotation_net_gst": "78.00"
+//             },
+//             {
+//                 "id": 3,
+//                 "quotation_sub_ref": "UT\/QT\/2\/2025-26",
+//                 "quotation_quality": "230\/LWC\/REELS\/MANGOOS\/122\/24\/10*22",
+//                 "quotation_basic_price": "45.00",
+//                 "quotation_gst": "45.00",
+//                 "quotation_insurance": "45.00",
+//                 "quotation_tmill": "45.00",
+//                 "quotation_net_gst": "45.00"
+//             },
+//             {
+//                 "id": 4,
+//                 "quotation_sub_ref": "UT\/QT\/2\/2025-26",
+//                 "quotation_quality": "230\/LWC\/REELS",
+//                 "quotation_basic_price": "56.00",
+//                 "quotation_gst": "673.00",
+//                 "quotation_insurance": "43.00",
+//                 "quotation_tmill": "34.00",
+//                 "quotation_net_gst": "34.00"
+//             }
+//         ]
+//     },
+//     "mill": {
+//         "id": 6,
+//         "mill_short": "kasrthicj",
+//         "mill_name": "kasrthicj",
+//         "mill_billing_address": "kasrthicj",
+//         "mill_gstin": null,
+//         "mill_shipping_address": null,
+//         "mill_state": null,
+//         "mill_email": null,
+//         "mill_bank_ac_no": null,
+//         "mill_bank_name": null,
+//         "mill_bank_ifsc": null,
+//         "mill_bank_branch_name": null,
+//         "mill_percentage": null,
+//         "mill_cp_name": null,
+//         "mill_cp_mobile": null,
+//         "mill_cp_email": null,
+//         "mill_type": null,
+//         "mill_status": "Active",
+//         "created_at": "2025-11-03T05:58:43.000000Z",
+//         "created_by": "superadmin",
+//         "updated_at": "2025-11-04T07:12:14.000000Z",
+//         "updated_by": "superadmin"
+//     },
+//     "party": {
+//         "id": 1,
+//         "party_short": "CARTON WORLD",
+//         "party_name": "CARTON WORLD",
+//         "party_billing_address": "83 BYRAVESHWARA INDS ESTATE,\nHEGGANHALLI PEENYA 2ND STAGE,\nBANGALORE",
+//         "party_gstin": "29AAEFC3159J1Z9",
+//         "party_delivery_address": "83 BYRAVESHWARA INDS ESTATE, HEGGANHALLI PEENYA 2ND STAGE, BANGALORE",
+//         "party_state": "KARNATAKA",
+//         "party_due_days": "30",
+//         "party_cp_name": null,
+//         "party_cp_mobile": null,
+//         "party_cp_email": null,
+//         "party_status": "Active",
+//         "created_by": "superadmin",
+//         "updated_by": "superadmin",
+//         "created_at": "2025-10-30T12:10:09.000000Z",
+//         "updated_at": "2025-11-03T06:47:11.000000Z"
+//     }
+// }

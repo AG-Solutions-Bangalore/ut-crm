@@ -25,7 +25,7 @@ export const ACTIVE_ITEM = `/activeBFs`;
 export const UPDATE_STATUS_ITEM = `/bfs`;
 // // ----------DELIVERY--------------
 // export const DELIVERY_LIST = `/delivery`;
-// export const ACTIVE_DELIVERY = `/activeDeliverys`;
+export const ACTIVE_DELIVERY = `/activeDeliverys`;
 // export const UPDATE_STATUS_DELIVERY = `/deliverys`;
 // ----------UNIT--------------
 export const UNIT_LIST = `/unit`;
@@ -37,7 +37,7 @@ export const ACTIVE_SHADE = `/activeShades`;
 export const UPDATE_STATUS_SHADE = `/shades`;
 // // ----------SUBJECT--------------
 // export const SUBJECT_LIST = `/subject`;
-// export const ACTIVE_SUBJECT = `/activeSubjects`;
+export const ACTIVE_SUBJECT = `/activeSubjects`;
 // export const UPDATE_STATUS_SUBJECT = `/subjects`;
 // // ----------DECKLE--------------
 // export const DECKLE_LIST = `/deckle`;
@@ -45,7 +45,7 @@ export const ACTIVE_DECKLE = `/activeDeckles`;
 // export const UPDATE_STATUS_DECKLE = `/deckle`;
 // // ----------GSM--------------
 // export const GSM_LIST = `/gsm`;
-// export const ACTIVE_GSM = `/activegsms`;
+export const ACTIVE_GSM = `/activegsms`;
 // export const UPDATE_STATUS_GSM = `/gsms`;
 // ------------PURCHASE_ORDER-------------------
 export const PURCHASE_ORDER_LIST = `/purchase-order`;

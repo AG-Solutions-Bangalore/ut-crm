@@ -175,14 +175,15 @@ const styles = {
     marginBottom: '12px',
   },
   errorStack: {
-    backgroundColor: '#fff',
-    padding: '16px',
-    borderRadius: '6px',
-    fontSize: '13px',
-    color: '#495057',
-    border: '1px solid #dee2e6',
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
+    backgroundColor: "#1e1e1e", 
+    color: "#d4d4d4", 
+    padding: "12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    lineHeight: "1.5",
+    whiteSpace: "pre-wrap",
+    fontFamily: "Consolas, 'Courier New', monospace",
+    overflowX: "auto",
   },
 };
 

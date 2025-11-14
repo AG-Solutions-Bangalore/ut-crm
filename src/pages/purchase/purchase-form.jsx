@@ -273,7 +273,7 @@ const PurchaseForm = () => {
             <Card size="small" className="!mb-2 !bg-gray-50 ">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="col-span-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2  gap-4">
                     <Form.Item
                       label={
                         <span>
@@ -319,6 +319,21 @@ const PurchaseForm = () => {
                         allowClear
                       />
                     </Form.Item>
+
+                    <Form.Item>
+                      <Input.TextArea
+                        value={selectedMill?.mill_billing_address}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </Form.Item>
+                    <Form.Item>
+                      <Input.TextArea
+                        value={selectedParty?.party_delivery_address}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </Form.Item>
                     <Form.Item
                       label={
                         <span>
@@ -331,23 +346,6 @@ const PurchaseForm = () => {
                       ]}
                     >
                       <DatePicker className="w-full" format="DD-MM-YYYY" />
-                    </Form.Item>
-
-                    <Form.Item>
-                      <Input.TextArea
-                        value={selectedMill?.mill_billing_address}
-                        rows={3}
-                        readOnly
-                        className="bg-gray-50"
-                      />
-                    </Form.Item>
-                    <Form.Item>
-                      <Input.TextArea
-                        value={selectedParty?.party_delivery_address}
-                        rows={3}
-                        readOnly
-                        className="bg-gray-50"
-                      />
                     </Form.Item>
                     <Form.Item
                       label={
@@ -368,11 +366,11 @@ const PurchaseForm = () => {
                     <Input.TextArea rows={2} placeholder="Enter Notes" />
                   </Form.Item>
                 </div>
-                <div className="h-full min-h-[300px] max-h-[300px] overflow-y-auto col-span-2">
+                <div className="h-full min-h-[340px] max-h-[340px] overflow-y-auto col-span-2">
                   {isEditMode ? (
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
                       <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
-                        Latest  Details
+                        Latest Details
                       </h4>
                       {fetchlatestLoading ? (
                         <div className="flex justify-center items-center py-4">
@@ -535,7 +533,6 @@ const PurchaseForm = () => {
                         );
                       }
 
-                      // Filter rows that are completely empty
                       const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
                           (val) => val !== undefined && val !== ""
@@ -550,7 +547,6 @@ const PurchaseForm = () => {
                         );
                       }
 
-                      // Check if there are empty rows in between
                       const emptyRows = subs.filter((row) =>
                         Object.values(row || {}).every(
                           (val) => val === undefined || val === ""

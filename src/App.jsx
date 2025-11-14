@@ -46,6 +46,7 @@ import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
 import TaxInvoice from "./pages/reportformats/TaxInvoice";
 import { DashboardNew } from "./features/dashboard";
 import LedgerReport from "./pages/report/ledger/ledger-report";
+import QuotationView from "./pages/quotation/quotation-view";
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
           <Route path="/quotation" element={<QuotationList />} />
           <Route path="/quotation/create" element={<QuotationForm />} />
           <Route path="/quotation/edit/:id" element={<QuotationForm />} />
+          <Route path="/quotation/view/:id" element={<QuotationView />} />
 
           <Route path="/billing" element={<BillingList />} />
           <Route path="/billing/create" element={<BillingForm />} />
