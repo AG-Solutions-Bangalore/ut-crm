@@ -135,16 +135,14 @@ const QuotationView = () => {
             <div className="text-xs text-right mb-2 font-bold">
               Rate Per Kg (Rs.)
             </div>
-            <table className="w-full border border-black text-xs">
+            <table className="w-full border border-black text-xs table-fixed">
               <thead>
                 <tr className="border-b border-black">
                   <th className="border-r border-black p-2 text-center font-bold">
                     QUALITY
                   </th>
                   <th className="border-r border-black p-2 text-center font-bold">
-                    BASIC
-                    <br />
-                    (Freight Included)
+                    BASIC <br /> (Freight Included)
                   </th>
                   <th className="border-r border-black p-2 text-center font-bold">
                     GST
@@ -153,43 +151,45 @@ const QuotationView = () => {
                     INSURANCE
                   </th>
                   <th className="border-r border-black p-2 text-center font-bold">
-                    TOTAL
-                    <br />
-                    EX.MILL
+                    TOTAL <br /> EX.MILL
                   </th>
                   <th className="p-2 text-center font-bold">
-                    NET OF
-                    <br />
-                    GST
+                    NET OF <br /> GST
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr className="border-b border-black">
-                  <td className="border-r border-black p-2 text-center">
-                    quotation_quality
-                  </td>
-                  <td className="border-r border-black p-2 text-center">22</td>
-                  <td className="border-r border-black p-2 text-center">
-                    quotation_basic_price
-                  </td>
-                  <td className="border-r border-black p-2 text-center">
-                    quotation_gst
-                  </td>
-                  <td className="border-r border-black p-2 text-center">
-                    quotation_insurance
-                  </td>
-                  <td className="p-2 text-center">quotation_tmill</td>
-                </tr>
 
-                <tr style={{ height: "80px" }}>
-                  <td className="border-r border-black"></td>
-                  <td className="border-r border-black"></td>
-                  <td className="border-r border-black"></td>
-                  <td className="border-r border-black"></td>
-                  <td className="border-r border-black"></td>
-                  <td></td>
-                </tr>
+              <tbody>
+                {quotationdata?.data?.subs?.length > 0 ? (
+                  quotationdata.data.subs.map((data, key) => (
+                    <tr className="border-b border-black" key={key}>
+                      <td className="border-r border-black p-2 text-center">
+                        {data.quotation_quality ?? ""}
+                      </td>
+                      <td className="border-r border-black p-2 text-center">
+                        {data.quotation_basic_price ?? ""}
+                      </td>
+                      <td className="border-r border-black p-2 text-center">
+                        {data.quotation_gst ?? ""}
+                      </td>
+                      <td className="border-r border-black p-2 text-center">
+                        {data.quotation_insurance ?? ""}
+                      </td>
+                      <td className="border-r border-black p-2 text-center">
+                        {data.quotation_tmill ?? ""}
+                      </td>
+                      <td className="p-2 text-center">
+                        {data.quotation_net_gst ?? ""}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center text-gray-600">
+                      No Data
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
