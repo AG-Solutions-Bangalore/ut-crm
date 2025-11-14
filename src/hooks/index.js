@@ -5,6 +5,7 @@ import {
   ACTIVE_ITEM,
   ACTIVE_MILL,
   ACTIVE_PARTY,
+  ACTIVE_PURCHASE_ORDER_REF,
   ACTIVE_SHADE,
   ACTIVE_SUBJECT,
   ACTIVE_UNIT,
@@ -31,6 +32,7 @@ export const useMasterData = ({
   subject = false,
   gsm = false,
   delivery = false,
+  // purchaseorderref = false,
 } = {}) => {
   // const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
@@ -65,6 +67,7 @@ export const useMasterData = ({
     "purchaseorderrefdata",
     // formattedDateTime,
   ]);
+
 
   const {
     data: QuotationOrderRef,
@@ -231,5 +234,11 @@ export const useMasterData = ({
       refetch: refetchDelivery,
       error: deliveryError,
     },
+    // purchaseorderref: {
+    //   data: ActivePurchaseOrderRef,
+    //   loading: activepoRefLoading,
+    //   refetch: refetchPoRefNo,
+    //   error: ActivepoRefError,
+    // },
   };
 };

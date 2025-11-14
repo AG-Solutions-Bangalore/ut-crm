@@ -14,9 +14,14 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { BILLING_LIST } from "../../api";
+import {
+  ACTIVE_PURCHASE_ORDER_REF,
+  BILLING_LIST,
+  GET_PURCHASE_ORDER_REF_DETAILS,
+} from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const billingTypes = [
   { label: "Comm", value: "Comm" },
@@ -32,11 +37,11 @@ const BillingForm = () => {
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { mill, party, item, purchaseRef } = useMasterData({
+  const { mill, party, item, purchaseorderref } = useMasterData({
     mill: true,
     party: true,
     item: true,
-    purchaseRef: true,
+    purchaseorderref: true,
   });
 
   const [initialData, setInitialData] = useState({
@@ -50,21 +55,43 @@ const BillingForm = () => {
     sale_date: null,
     sale_rate: "",
     billing_party_id: null,
-    purchase_orders_ref: "",
+    purchase_orders_ref: null,
     billing_type: null,
     billing_payment_type: null,
     billing_due_days: "",
     billing_status: false,
   });
+  const [selectedMillId, setSelectedMillId] = useState(null);
+  const [selectedRefId, setSelectetReflId] = useState(null);
   const [totalRate, setTotalRate] = useState(null);
   const [daysDifference, setDaysDifference] = useState(null);
-
+  const { data: purchaserefdata, isLoading } = useGetApiMutation({
+    url: `${ACTIVE_PURCHASE_ORDER_REF}/${selectedMillId}`,
+    queryKey: ["purchasereforderdata", selectedMillId],
+    options: {
+      enabled: !!selectedMillId,
+    },
+  });
+  const { data: getpurchaserefdetails, isLoading: loadingrefdetails } =
+    useGetApiMutation({
+      url: `${GET_PURCHASE_ORDER_REF_DETAILS}?purchase_orders_ref=${selectedRefId}`,
+      queryKey: ["getpurchaserefdetails", selectedRefId],
+      options: {
+        enabled: !!selectedRefId,
+      },
+    });
+  console.log(getpurchaserefdetails);
   const resetForm = () => {
     form.resetFields();
     setTotalRate(null);
     setDaysDifference(null);
   };
 
+  const poRefOptions =
+    purchaserefdata?.data?.map((item) => ({
+      label: item.purchase_orders_ref,
+      value: item.purchase_orders_ref,
+    })) || [];
   const millOptions =
     mill?.data?.data?.map((item) => ({
       label: item.mill_name,
@@ -111,12 +138,13 @@ const BillingForm = () => {
     else resetForm();
   }, [id]);
 
-  const handleChange = () => {
-    purchaseRef.refetch();
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef?.data?.data);
-    }
+  const handleChange = (value) => {
+    setSelectedMillId(value);
   };
+  const handleChangeRef = (value) => {
+    setSelectetReflId(value);
+  };
+
   const handleValueChange = (_, allValues) => {
     const { purchase_rate, sale_rate, sale_date } = allValues;
     const pRate = parseFloat(purchase_rate) || 0;
@@ -181,6 +209,8 @@ const BillingForm = () => {
       message.error(error?.message || "Error while saving billing.");
     }
   };
+  const main = getpurchaserefdetails?.data || {};
+  const subs = main?.subs || [];
   const loadingdata =
     item?.loading || fetchLoading || mill.loading || party.loading;
   return (
@@ -267,198 +297,413 @@ const BillingForm = () => {
                 </div>
               }
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Form.Item
-                  name="purchase_date"
-                  label={
-                    <span>
-                      Purchase Date <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Select Purchase Date" }]}
-                >
-                  <DatePicker
-                    autoFocus
-                    className="w-full"
-                    format="DD-MM-YYYY"
-                    onChange={handleChange}
-                  />
-                </Form.Item>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Form.Item
+                      name="purchase_date"
+                      label={
+                        <span>
+                          Purchase Date <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[
+                        { required: true, message: "Select Purchase Date" },
+                      ]}
+                    >
+                      <DatePicker
+                        autoFocus
+                        className="w-full"
+                        format="DD-MM-YYYY"
+                      />
+                    </Form.Item>
 
-                <Form.Item
-                  label={
-                    <span>
-                      Mill Name <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  name="billing_mill_id"
-                  rules={[{ required: true, message: "Select Mill Name" }]}
-                >
-                  <Select
-                    placeholder="Select Mill Name"
-                    options={millOptions}
-                    onChange={handleChange}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    showSearch
-                    allowClear
-                  />
-                </Form.Item>
+                    <Form.Item
+                      label={
+                        <span>
+                          Mill Name <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      name="billing_mill_id"
+                      rules={[{ required: true, message: "Select Mill Name" }]}
+                    >
+                      <Select
+                        placeholder="Select Mill Name"
+                        options={millOptions}
+                        onChange={handleChange}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
 
-                <Form.Item name="purchase_orders_ref" label="PO Reference">
-                  <Input placeholder="Enter PO Reference" readOnly />
-                </Form.Item>
+                    <Form.Item
+                      name="purchase_orders_ref"
+                      label="PO Reference"
+                      rules={[
+                        { required: true, message: "Select PO Reference" },
+                      ]}
+                    >
+                      {/* <Input placeholder="Enter PO Reference" /> */}
+                      <Select
+                        placeholder="Select PO Reference"
+                        options={poRefOptions}
+                        loading={isLoading}
+                        onChange={handleChangeRef}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
 
-                <Form.Item
-                  name="billing_no"
-                  label={
-                    <span>
-                      Billing No <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Enter Billing Number" }]}
-                >
-                  <Input placeholder="Enter Billing No" />
-                </Form.Item>
+                    <Form.Item
+                      name="billing_no"
+                      label={
+                        <span>
+                          Billing No <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[
+                        { required: true, message: "Enter Billing Number" },
+                      ]}
+                    >
+                      <Input placeholder="Enter Billing No" />
+                    </Form.Item>
 
-                <Form.Item
-                  name="billing_bf"
-                  label={
-                    <span>
-                      Item <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Select Item" }]}
-                >
-                  <Select
-                    placeholder="Select Item"
-                    options={
-                      item?.data?.data?.map((i) => ({
-                        label: i.bf,
-                        value: i.bf,
-                      })) || []
-                    }
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    showSearch
-                    allowClear
-                  />
-                </Form.Item>
+                    <Form.Item
+                      name="billing_bf"
+                      label={
+                        <span>
+                          Item <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Select Item" }]}
+                    >
+                      <Select
+                        placeholder="Select Item"
+                        options={
+                          item?.data?.data?.map((i) => ({
+                            label: i.bf,
+                            value: i.bf,
+                          })) || []
+                        }
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
 
-                <Form.Item
-                  name="billing_tones"
-                  label={
-                    <span>
-                      Tones <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Enter Tones" }]}
-                >
-                  <Input placeholder="Enter Tones" />
-                </Form.Item>
+                    <Form.Item
+                      name="billing_tones"
+                      label={
+                        <span>
+                          Tones <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Enter Tones" }]}
+                    >
+                      <Input placeholder="Enter Tones" />
+                    </Form.Item>
 
-                <Form.Item name="purchase_amount" label="Purchase Amount">
-                  <Input placeholder="Enter Amount" />
-                </Form.Item>
+                    <Form.Item name="purchase_amount" label="Purchase Amount">
+                      <Input placeholder="Enter Amount" />
+                    </Form.Item>
 
-                <Form.Item
-                  name="purchase_rate"
-                  label={
-                    <span>
-                      Purchase Rate <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Enter Purchase Rate" }]}
-                >
-                  <InputNumber
-                    type="number"
-                    placeholder="Enter Rate"
-                    className="!w-full"
-                    min={1}
-                  />
-                </Form.Item>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Form.Item name="sale_rate" label="Sale Rate">
-                  <InputNumber
-                    type="number"
-                    placeholder="Enter Rate"
-                    className="!w-full"
-                    min={1}
-                  />
-                </Form.Item>
+                    <Form.Item
+                      name="purchase_rate"
+                      label={
+                        <span>
+                          Purchase Rate <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[
+                        { required: true, message: "Enter Purchase Rate" },
+                      ]}
+                    >
+                      <InputNumber
+                        type="number"
+                        placeholder="Enter Rate"
+                        className="!w-full"
+                        min={1}
+                      />
+                    </Form.Item>
+                    {/* </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4"> */}
+                    <Form.Item name="sale_rate" label="Sale Rate">
+                      <InputNumber
+                        type="number"
+                        placeholder="Enter Rate"
+                        className="!w-full"
+                        min={1}
+                      />
+                    </Form.Item>
 
-                <Form.Item name="sale_date" label="Sale Date">
-                  <DatePicker className="w-full" format="DD-MM-YYYY" />
-                </Form.Item>
+                    <Form.Item name="sale_date" label="Sale Date">
+                      <DatePicker className="w-full" format="DD-MM-YYYY" />
+                    </Form.Item>
 
-                <Form.Item
-                  name="billing_party_id"
-                  label={
-                    <span>
-                      Party<span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Select Party" }]}
-                >
-                  <Select
-                    placeholder="Select Party"
-                    options={partyOptions}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    showSearch
-                    allowClear
-                  />
-                </Form.Item>
+                    <Form.Item
+                      name="billing_party_id"
+                      label={
+                        <span>
+                          Party<span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Select Party" }]}
+                    >
+                      <Select
+                        placeholder="Select Party"
+                        options={partyOptions}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
 
-                <Form.Item
-                  name="billing_type"
-                  label={
-                    <span>
-                      Billing Type <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Select Billing Type" }]}
-                >
-                  <Select
-                    placeholder="Select Billing Type"
-                    options={billingTypes}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    showSearch
-                    allowClear
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="billing_payment_type"
-                  label={
-                    <span>
-                      Payment Type <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  rules={[{ required: true, message: "Select Payment Type" }]}
-                >
-                  <Select
-                    placeholder="Select Payment Type"
-                    options={[
-                      { label: "Payables", value: "Payables" },
-                      { label: "Receivables", value: "Receivables" },
-                    ]}
-                    allowClear
-                  />
-                </Form.Item>
+                    <Form.Item
+                      name="billing_type"
+                      label={
+                        <span>
+                          Billing Type <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[
+                        { required: true, message: "Select Billing Type" },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Select Billing Type"
+                        options={billingTypes}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="billing_payment_type"
+                      label={
+                        <span>
+                          Payment Type <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[
+                        { required: true, message: "Select Payment Type" },
+                      ]}
+                    >
+                      <Select
+                        placeholder="Select Payment Type"
+                        options={[
+                          { label: "Payables", value: "Payables" },
+                          { label: "Receivables", value: "Receivables" },
+                        ]}
+                        allowClear
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+                {/* <div className="w-full max-w-4xl mx-auto p-4 space-y-4 min-h-[340px] max-h-[400px] overflow-y-auto">
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+                    <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
+                      Latest Purchase Details
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="font-semibold">Mill: </span>
+                        {main?.mill_name}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Party: </span>
+                        {main?.party_name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 ">
+                    {subs.map((item, index) => (
+                      <Card
+                        key={index}
+                        size="small"
+                        title={item.purchase_orders_sub_ref || "Item Details"}
+                        className="shadow-sm border"
+                      >
+                        <div className="border border-gray-100 rounded-md p-2 shadow-sm">
+                          <div className="grid grid-cols-2 text-xs gap-1">
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                GSM:
+                              </span>{" "}
+                              {item.gsm ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                BF:
+                              </span>{" "}
+                              {item.bf ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Size:
+                              </span>{" "}
+                              {item.size ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Shade:
+                              </span>{" "}
+                              {item.shade ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Qty:
+                              </span>{" "}
+                              {item.qnty ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Unit:
+                              </span>{" "}
+                              {item.unit ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Bill Rate:
+                              </span>{" "}
+                              ₹{item.bill_rate}
+                            </p>
+
+                            <p>
+                              <span className="font-medium text-gray-500">
+                                Agreed Rate:
+                              </span>{" "}
+                              ₹{item.agreed_rate}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div> */}
+                <div className="w-full max-w-4xl mx-auto p-4 space-y-4 min-h-[340px] max-h-[400px] overflow-y-auto">
+                  {/* MAIN CARD */}
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+                    <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
+                       Purchase Details
+                    </h4>
+                    {loadingrefdetails ? (
+                      <div className="flex justify-center items-center py-4">
+                        <Spin size="small" />
+                      </div>
+                    ) : main && Object.keys(main).length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-2">
+                          <p>
+                            <span className="font-semibold">Mill:</span>{" "}
+                            {main?.mill_name}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Party:</span>{" "}
+                            {main?.party_name}
+                          </p>
+                        </div>
+
+                        {/* SUB CARDS */}
+                        <div className="grid grid-cols-1 gap-4">
+                          {subs.map((item, index) => (
+                            <Card
+                              key={index}
+                              size="small"
+                              className="shadow-sm border"
+                            >
+                              <div className="rounded-md p-2 text-xs grid grid-cols-2 gap-1">
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    GSM:
+                                  </span>{" "}
+                                  {item.gsm ?? "-"}
+                                </p>
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    BF:
+                                  </span>{" "}
+                                  {item.bf ?? "-"}
+                                </p>
+
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Size:
+                                  </span>{" "}
+                                  {item.size ?? "-"}
+                                </p>
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Shade:
+                                  </span>{" "}
+                                  {item.shade ?? "-"}
+                                </p>
+
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Qty:
+                                  </span>{" "}
+                                  {item.qnty ?? "-"}
+                                </p>
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Unit:
+                                  </span>{" "}
+                                  {item.unit ?? "-"}
+                                </p>
+
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Bill:
+                                  </span>{" "}
+                                  ₹{item.bill_rate}
+                                </p>
+                                <p>
+                                  <span className="font-medium text-gray-500">
+                                    Agreed:
+                                  </span>{" "}
+                                  ₹{item.agreed_rate}
+                                </p>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="bg-gray-50 border border-dashed border-gray-300 rounded-md p-3 text-center text-gray-500">
+                        No recent data available
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </Card>
           </Card>
