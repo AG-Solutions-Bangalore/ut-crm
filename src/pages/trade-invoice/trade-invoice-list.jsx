@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   App,
   Button,
@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { QUOTATION_LIST, TRADE_INVOICE_LIST } from "../../api";
+import {  TRADE_INVOICE_LIST } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
 import { useApiMutation } from "../../hooks/useApiMutation";
@@ -50,7 +50,7 @@ const TradeInvoiceList = () => {
 
     try {
       const res = await deleteTrigger({
-        url: `${QUOTATION_LIST}/${subId}`,
+        url: `${TRADE_INVOICE_LIST}/${subId}`,
         method: "delete",
       });
 
@@ -67,26 +67,26 @@ const TradeInvoiceList = () => {
   };
   const columns = [
     {
-      title: "Purchase Ref No",
-      dataIndex: "purchase_orders_ref",
-      key: "purchase_orders_ref",
+      title: "Trade Invoice No",
+      dataIndex: "trade_invoice_no",
+      key: "trade_invoice_no",
       render: (text, record) => (
         <span className="font-medium text-blue-600">
-          {record.purchase_orders_ref}
+          {record.trade_invoice_no}
         </span>
       ),
     },
     {
-      title: "Purchase Date",
-      dataIndex: "purchase_orders_date",
-      key: "purchase_orders_date",
+      title: "Invoice Date",
+      dataIndex: "trade_invoice_date",
+      key: "trade_invoice_date",
       render: (_, record) =>
-        dayjs(record.purchase_orders_date).format("DD-MM-YYYY"),
+        dayjs(record.trade_invoice_date).format("DD-MM-YYYY"),
     },
     {
-      title: "Mill Name",
-      dataIndex: "mill_name",
-      key: "mill_name",
+      title: "Invoice Ref",
+      dataIndex: "trade_invoice_ref",
+      key: "trade_invoice_ref",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
@@ -96,20 +96,27 @@ const TradeInvoiceList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Total Bill Rate",
-      dataIndex: "total_bill_rate",
-      key: "total_bill_rate",
+      title: "Discount",
+      dataIndex: "trade_invoice_discount",
+      key: "trade_invoice_discount",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Total Agreed Rate",
-      dataIndex: "total_adreed_rate",
-      key: "total_adreed_rate",
+      title: "Freight",
+      dataIndex: "trade_invoice_freight",
+      key: "trade_invoice_freight",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
-
+    {
+      title: "Insurance",
+      dataIndex: "trade_invoice_insurance",
+      key: "trade_invoice_insurance",
+      align: "right",
+      render: (text) => <span>{Number(text).toFixed(2)}</span>,
+    },
+  
     {
       title: "Actions",
       key: "actions",
@@ -121,6 +128,14 @@ const TradeInvoiceList = () => {
               icon={<EditOutlined />}
               size="small"
               onClick={() => navigate(`/trade-invoice/edit/${record.id}`)}
+            />
+          </Tooltip>
+          <Tooltip title="View Trade Invoice">
+            <Button
+              type="primary"
+              icon={<EyeOutlined />}
+              size="small"
+              onClick={() => navigate(`/trade-invoice/view/${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="Delete Trade Invoice">
@@ -138,6 +153,7 @@ const TradeInvoiceList = () => {
       width: 120,
     },
   ];
+  
   const apiData = tradeinvoicedata?.data || {};
   const tableData = apiData.data || [];
 
