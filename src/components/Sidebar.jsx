@@ -17,7 +17,7 @@ import {
   ShoppingCartOutlined,
   SolutionOutlined,
   TeamOutlined,
-  WalletOutlined
+  WalletOutlined,
 } from "@ant-design/icons";
 import { Alert, Menu } from "antd";
 import { motion } from "framer-motion";
@@ -72,11 +72,11 @@ const getMenuItems = (collapsed) => {
       icon: <ReconciliationOutlined />,
       label: "Balance Order",
     },
-    {
-      key: "/report/balance-close-order",
-      icon: <FileDoneOutlined />,
-      label: "Balance Close Order",
-    },
+    // {
+    //   key: "/report/balance-close-order",
+    //   icon: <FileDoneOutlined />,
+    //   label: "Balance Close Order",
+    // },
     {
       key: "/report/price-rate",
       icon: <BarChartOutlined />,
@@ -98,25 +98,30 @@ const getMenuItems = (collapsed) => {
       label: "Party Wise",
     },
     {
-      key: "/report/balance-payable",
+      key: "/report/balance",
       icon: <WalletOutlined />,
-      label: "Balance Payable",
+      label: "Balance Report",
     },
-    {
-      key: "/report/balance-receivable",
-      icon: <DollarCircleOutlined />,
-      label: "Balance Receivable",
-    },
-    {
-      key: "/report/party",
-      icon: <TeamOutlined />,
-      label: "Party",
-    },
-    {
-      key: "/report/mill",
-      icon: <BankOutlined />,
-      label: "Mill",
-    },
+    // {
+    //   key: "/report/balance-payable",
+    //   icon: <WalletOutlined />,
+    //   label: "Balance Payable",
+    // },
+    // {
+    //   key: "/report/balance-receivable",
+    //   icon: <DollarCircleOutlined />,
+    //   label: "Balance Receivable",
+    // },
+    // {
+    //   key: "/report/party",
+    //   icon: <TeamOutlined />,
+    //   label: "Party",
+    // },
+    // {
+    //   key: "/report/mill",
+    //   icon: <BankOutlined />,
+    //   label: "Mill",
+    // },
     {
       key: "/report/ledger-report",
       icon: <BankOutlined />,
@@ -365,7 +370,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 12-11-2025
+                    Updated on: 14-11-2025
                   </div>
                 </div>
               }

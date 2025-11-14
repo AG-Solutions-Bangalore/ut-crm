@@ -1,16 +1,19 @@
-import { useRef, useState } from "react";
-import reportlogo from "../../assets/report-logo.png";
-import ReportActions from "../reportformats/ReportActions";
-import { QUOTATION_LIST } from "../../api";
-import { useParams, useSearchParams } from "react-router-dom";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-import { useSelector } from "react-redux";
+import { App, Button } from "antd";
 import dayjs from "dayjs";
+import html2pdf from "html2pdf.js";
+import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import { QUOTATION_LIST } from "../../api";
+import reportlogo from "../../assets/report-logo.png";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
 // const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
 
 const QuotationView = () => {
+  const { message } = App.useApp();
   const componentRef = useRef(null);
   const { id } = useParams();
   const [showSignature, setShowSignature] = useState(true);
@@ -19,6 +22,7 @@ const QuotationView = () => {
   const toggleSignature = () => {
     setShowSignature(!showSignature);
   };
+
   const {
     data: quotationdata,
     isLoading,
@@ -27,18 +31,110 @@ const QuotationView = () => {
     url: `${QUOTATION_LIST}/${id}`,
     queryKey: ["quotationdataview", id],
   });
-  console.log(quotationdata, "quotationdata");
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Quotation--Report-${dayjs().format("DD-MM-YYYY")}`,
+    removeAfterPrint: true,
+    pageStyle: `
+                @page {
+                  size: A4;
+                  margin: 5mm;
+                }
+                @media print {
+                  body {
+                    margin: 0;
+                    padding: 0;
+                  }
+                  .print-hide {
+                    display: none !important;
+                  }
+                  .ant-card {
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                  .ant-card-body {
+                    padding: 0 !important;
+                  }
+                }
+              `,
+  });
+  const handleDownload = () => {
+    const element = componentRef?.current;
+
+    if (!element) {
+      message.error("Failed to generate PDF");
+      return;
+    }
+
+    const elementForPdf = element.cloneNode(true);
+    const printHideElements = elementForPdf.querySelectorAll(".print-hide");
+    printHideElements.forEach((el) => el.remove());
+
+    const style = document.createElement("style");
+    style.textContent = `
+                * {
+                  color: #000000 !important;
+                  background-color: transparent !important;
+                }
+                .bg-gray-200, .bg-gray-100, .bg-white {
+                  background-color: #ffffff !important;
+                }
+              `;
+    elementForPdf.appendChild(style);
+
+    const options = {
+      margin: [5, 5, 5, 5],
+      filename: `Quotation-Report-${dayjs().format("DD-MM-YYYY")}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: elementForPdf.scrollHeight,
+        backgroundColor: "#FFFFFF",
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+      },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+    };
+
+    html2pdf()
+      .from(elementForPdf)
+      .set(options)
+      .save()
+      .then(() => {
+        message.success("PDF downloaded successfully");
+      })
+      .catch((error) => {
+        console.error("PDF download error:", error);
+        message.error("Failed to download PDF");
+      });
+  };
   return (
     <>
-      <ReportActions
+      {/* <ReportActions
         componentRef={componentRef}
         filename="Quotation_Invoice.pdf"
         documentTitle="Quotation Invoice"
         onToggleSignature={toggleSignature}
         showSignature={showSignature}
         includeSignatureToggle={true}
-      />
+      /> */}
+      <div className="flex flex-row items-center gap-2">
+        <Button onClick={handlePrint}>Print</Button>
 
+        <Button onClick={handleDownload}>PDF</Button>
+
+        <Button
+          type={showSignature ? "primary" : "default"}
+          onClick={toggleSignature}
+        >
+          {showSignature ? "With Signature" : "Without Signature"}
+        </Button>
+      </div>
       <div className="flex justify-center p-4 ">
         <div
           className="w-full max-w-[210mm] bg-white border border-black "
@@ -132,29 +228,34 @@ const QuotationView = () => {
           </div>
 
           <div className="px-4 py-3">
-            <div className="text-xs text-right mb-2 font-bold">
+            <div className="text-xs text-center mb-2 font-bold">
               Rate Per Kg (Rs.)
             </div>
             <table className="w-full border border-black text-xs table-fixed">
               <thead>
                 <tr className="border-b border-black">
-                  <th className="border-r border-black p-2 text-center font-bold">
+                  <th className="w-40 border-r border-black px-1 py-2 text-center font-bold">
                     QUALITY
                   </th>
-                  <th className="border-r border-black p-2 text-center font-bold">
+
+                  <th className="w-32 border-r border-black px-1 py-2 text-center font-bold">
                     BASIC <br /> (Freight Included)
                   </th>
-                  <th className="border-r border-black p-2 text-center font-bold">
+
+                  <th className="w-20 border-r border-black px-1 py-2 text-center font-bold">
                     GST
                   </th>
-                  <th className="border-r border-black p-2 text-center font-bold">
+
+                  <th className="w-24 border-r border-black px-1 py-2 text-center font-bold">
                     INSURANCE
                   </th>
-                  <th className="border-r border-black p-2 text-center font-bold">
-                    TOTAL <br /> EX.MILL
+
+                  <th className="w-28 border-r border-black px-1 py-2 text-center font-bold">
+                    TOTAL  EX.MILL
                   </th>
-                  <th className="p-2 text-center font-bold">
-                    NET OF <br /> GST
+
+                  <th className="w-28 px-1 py-2 text-center font-bold">
+                    NET OF GST
                   </th>
                 </tr>
               </thead>
@@ -163,22 +264,27 @@ const QuotationView = () => {
                 {quotationdata?.data?.subs?.length > 0 ? (
                   quotationdata.data.subs.map((data, key) => (
                     <tr className="border-b border-black" key={key}>
-                      <td className="border-r border-black p-2 text-center">
+                      <td className="w-40 px-1 py-2 whitespace-pre-line break-words border-r border-black">
                         {data.quotation_quality ?? ""}
                       </td>
-                      <td className="border-r border-black p-2 text-center">
+
+                      <td className="w-32 px-1 py-2 text-center border-r border-black">
                         {data.quotation_basic_price ?? ""}
                       </td>
-                      <td className="border-r border-black p-2 text-center">
+
+                      <td className="w-20 px-1 py-2 text-center border-r border-black">
                         {data.quotation_gst ?? ""}
                       </td>
-                      <td className="border-r border-black p-2 text-center">
+
+                      <td className="w-24 px-1 py-2 text-center border-r border-black">
                         {data.quotation_insurance ?? ""}
                       </td>
-                      <td className="border-r border-black p-2 text-center">
+
+                      <td className="w-28 px-1 py-2 text-center border-r border-black">
                         {data.quotation_tmill ?? ""}
                       </td>
-                      <td className="p-2 text-center">
+
+                      <td className="w-28 px-1 py-2 text-center">
                         {data.quotation_net_gst ?? ""}
                       </td>
                     </tr>
@@ -197,45 +303,42 @@ const QuotationView = () => {
           <div className="px-4 py-3 text-xs">
             <div className="mb-3">
               <div className="flex mb-1">
-                <span className="font-bold w-40">EXTRA CHARGES :</span>
-                <span>For GYT - Rs 1.00 PER KG</span>
-              </div>
-              <div className="flex mb-1">
-                <span className="font-bold w-40">( Add to Basic )</span>
-                <span>For 120 GSM - Rs 0.50 PER KG</span>
-              </div>
-              <div className="flex mb-1">
-                <span className="w-40"></span>
-                <span>For 201 GSM - 250 GSM - Rs 0.50 PER KG</span>
+                <div>
+                  <span className="font-bold w-40">EXTRA CHARGES :</span>
+                  <p className="font-bold w-40">( Add to Basic )</p>
+                </div>
+                <span>
+                  {" "}
+                  {quotationdata?.data?.quotation_extra_charge ?? ""}
+                </span>
               </div>
             </div>
 
             <div className="space-y-1 mb-3">
               <div className="flex">
                 <span className="font-bold w-40">FREIGHT :</span>
-                <span>Included</span>
+                <span> {quotationdata?.data?.quotation_freight ?? ""}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-40">PAYMENT :</span>
-                <span>WITHIN 15 Days</span>
+                <span> {quotationdata?.data?.quotation_payment ?? ""}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-40">DELIVERY :</span>
-                <span>8 - 10 Days from the receipt of your order</span>
+                <span> {quotationdata?.data?.quotation_delivery ?? ""}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-40">FURNISH :</span>
-                <span>INDIANe IMPORTED waste paper</span>
+                <span> {quotationdata?.data?.quotation_furnish ?? ""}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-40">SAMPLES :</span>
-                <span>Enclosed</span>
+                <span> {quotationdata?.data?.quotation_samples ?? ""}</span>
               </div>
             </div>
 
             <div className="mb-3 leading-relaxed">
-              We assure you of our prompt and efficient services and look
-              forward for your esteemed orders
+              {quotationdata?.data?.quotation_footer ?? ""}
             </div>
 
             <div className="mb-3">Thanking You,</div>

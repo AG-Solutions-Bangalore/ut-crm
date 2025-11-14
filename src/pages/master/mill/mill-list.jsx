@@ -172,6 +172,12 @@ const MillList = () => {
 
           <Button
             type="primary"
+            onClick={() => navigate("/master/mill/report")}
+          >
+            View Report
+          </Button>
+          <Button
+            type="primary"
             icon={<PlusOutlined />}
             onClick={() => navigate("/master/mill/create")}
           >
