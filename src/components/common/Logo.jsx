@@ -6,7 +6,7 @@ const useFinalUserImage = () => {
     (state) => state?.company?.companyDetails?.store_logo_image
   );
   const userBaseUrl = imageUrls?.find(
-    (img) => img.image_for === "Company"
+    (img) => img.image_for == "Company"
   )?.image_url;
   const noImageUrl = imageUrls?.find(
     (img) => img.image_for === "No Image"

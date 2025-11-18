@@ -17,6 +17,7 @@ import {
   Spin,
   Switch,
 } from "antd";
+import { useWatch } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -27,8 +28,7 @@ import {
 } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import { useWatch } from "antd/es/form/Form";
-
+import orderOptions from "../../components/json/orderTypes.json";
 const PurchaseForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -361,10 +361,31 @@ const PurchaseForm = () => {
                     >
                       <Input disabled value={purchaseRef?.data?.data} />
                     </Form.Item>
+                    <Form.Item
+                      label={
+                        <span>
+                          Order Type <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      name="purchase_orders_type"
+                      rules={[{ required: true, message: "Select Order Type" }]}
+                    >
+                      <Select
+                        placeholder="Select Order Type"
+                        options={orderOptions}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
+                        allowClear
+                      />
+                    </Form.Item>
+                    <Form.Item label="Notes" name="purchase_orders_note">
+                      <Input.TextArea rows={2} placeholder="Enter Notes" />
+                    </Form.Item>
                   </div>
-                  <Form.Item label="Notes" name="purchase_orders_note">
-                    <Input.TextArea rows={2} placeholder="Enter Notes" />
-                  </Form.Item>
                 </div>
                 <div className="h-full min-h-[340px] max-h-[340px] overflow-y-auto col-span-2">
                   {isEditMode ? (
