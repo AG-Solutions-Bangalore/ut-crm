@@ -1,485 +1,647 @@
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Spin,
-  Switch,
-} from "antd";
+import { Button, message, Spin } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { BILLING_LIST } from "../../api";
-import { useMasterData } from "../../hooks";
+import html2pdf from "html2pdf.js";
+import { Mail, Phone, PhoneCall } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import { TAX_INVOICE_EMAIL, TAX_INVOICE_LIST } from "../../api";
+import useFinalUserImage from "../../components/common/Logo";
+import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import billingOptions from "../../constants/billingOptions.json";
-
-const BillingForm = () => {
-  const { message } = App.useApp();
-  const [form] = Form.useForm();
-  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
-  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
+import mockdata from "../../constants/mockdata.json";
+const TaxInvoice = () => {
+  const componentRef = useRef(null);
+  const [showSignature, setShowSignature] = useState(true);
+  const SiginImagePath = companyFinalSiginImage();
+  const finalUserImage = useFinalUserImage();
   const { id } = useParams();
-  const isEditMode = Boolean(id);
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { mill, party, item, purchaseRef } = useMasterData({
-    mill: true,
-    party: true,
-    item: true,
-    purchaseRef: true,
-  });
+  const company = useSelector((state) => state.company.companyDetails);
+  const { trigger: emailTrigger, loading: loadingemail } = useApiMutation();
+  const [selectedMill, setSelectedMill] = useState(null);
 
-  const [initialData, setInitialData] = useState({
-    purchase_date: dayjs(),
-    billing_no: "",
-    billing_mill_id: null,
-    billing_tones: "",
-    purchase_rate: "",
-    billing_bf: null,
-    purchase_amount: "",
-    sale_date: null,
-    sale_rate: "",
-    billing_party_id: null,
-    purchase_orders_ref: "",
-    billing_type: null,
-    billing_payment_type: null,
-    billing_due_days: "",
-    billing_status: false,
-  });
-  const [totalRate, setTotalRate] = useState(null);
-  const [daysDifference, setDaysDifference] = useState(null);
+  const [data, setData] = useState(null);
 
-  const resetForm = () => {
-    form.resetFields();
-    setTotalRate(null);
-    setDaysDifference(null);
-  };
+  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
 
-  const millOptions =
-    mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
-      value: item.id,
-    })) || [];
-
-  const partyOptions =
-    party?.data?.data?.map((item) => ({
-      label: item.party_name,
-      value: item.id,
-    })) || [];
-
-  const fetchBilling = async () => {
+  const fetchPurchase = async () => {
     try {
-      const res = await fetchTrigger({ url: `${BILLING_LIST}/${id}` });
+      const res = await fetchTrigger({
+        url: `${TAX_INVOICE_LIST}/${id}`,
+      });
       if (res?.data) {
-        const formattedData = {
-          ...res.data,
-          purchase_date: res.data.purchase_date
-            ? dayjs(res.data.purchase_date)
-            : null,
-          sale_date: res.data.sale_date ? dayjs(res.data.sale_date) : null,
-          billing_status: res.data.billing_status == "Open" ? true : false,
-        };
-        const diff = dayjs()
-          .startOf("day")
-          .diff(dayjs(formattedData?.sale_date).startOf("day"), "day");
-        const total =
-          Number(formattedData?.sale_rate) -
-          Number(formattedData?.purchase_rate);
-        setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
-        setDaysDifference(diff);
-        setInitialData(formattedData);
-        form.setFieldsValue(formattedData);
+        setSelectedMill(res?.mill || null);
+
+        setData(res?.data || null);
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      message.error("Failed to load billing details.");
+      message.error("Failed to load tax details.");
     }
   };
 
   useEffect(() => {
-    if (id) fetchBilling();
-    else resetForm();
+    if (id) fetchPurchase();
   }, [id]);
 
-  const handleChange = () => {
-    purchaseRef.refetch();
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef?.data?.data);
-    }
+  const loading = fetchLoading;
+
+  const totalCommission =
+    data?.subs?.reduce((sum, item) => {
+      return sum + (parseFloat(item.tax_invoice_sub_commn) || 0);
+    }, 0) || 0;
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB");
   };
-  const handleValueChange = (_, allValues) => {
-    const { purchase_rate, sale_rate, sale_date } = allValues;
-    const pRate = parseFloat(purchase_rate) || 0;
-    const sRate = parseFloat(sale_rate) || 0;
-    const total = sRate - pRate;
-    setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
 
-    if (sale_date) {
-      const diff = dayjs()
-        .startOf("day")
-        .diff(dayjs(sale_date).startOf("day"), "day");
+  const numberToWords = (num) => {
+    const ones = [
+      "",
+      "One",
+      "Two",
+      "Three",
+      "Four",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+      "Nine",
+    ];
+    const teens = [
+      "Ten",
+      "Eleven",
+      "Twelve",
+      "Thirteen",
+      "Fourteen",
+      "Fifteen",
+      "Sixteen",
+      "Seventeen",
+      "Eighteen",
+      "Nineteen",
+    ];
+    const tens = [
+      "",
+      "",
+      "Twenty",
+      "Thirty",
+      "Forty",
+      "Fifty",
+      "Sixty",
+      "Seventy",
+      "Eighty",
+      "Ninety",
+    ];
 
-      setDaysDifference(diff);
+    if (num === 0) return "Zero";
 
-      form.setFieldsValue({
-        billing_due_days: diff,
-      });
-    } else {
-      setDaysDifference(null);
-      form.setFieldsValue({
-        billing_due_days: "",
-      });
+    let words = "";
+
+    if (num >= 1000) {
+      words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
+      num %= 1000;
     }
+
+    if (num >= 100) {
+      words += ones[Math.floor(num / 100)] + " Hundred ";
+      num %= 100;
+    }
+
+    if (num >= 20) {
+      words += tens[Math.floor(num / 10)] + " ";
+      num %= 10;
+    } else if (num >= 10) {
+      words += teens[num - 10] + " ";
+      num = 0;
+    }
+
+    if (num > 0) {
+      words += ones[num] + " ";
+    }
+
+    return words.trim() + " Only";
   };
-  const handleSubmit = async (values) => {
-    const payload = {
-      ...values,
-      billing_due_days: daysDifference ? daysDifference : 0,
-      billing_tones: values.billing_tones ? Number(values.billing_tones) : 0,
-      purchase_rate: values.purchase_rate ? Number(values.purchase_rate) : 0,
-      purchase_amount: values.purchase_amount
-        ? Number(values.purchase_amount)
-        : 0,
-      sale_rate: values.sale_rate ? Number(values.sale_rate) : 0,
-      purchase_date: values.purchase_date
-        ? dayjs(values.purchase_date).format("YYYY-MM-DD")
-        : null,
-      sale_date: values.sale_date
-        ? dayjs(values.sale_date).format("YYYY-MM-DD")
-        : null,
-      ...(isEditMode && {
-        billing_status: values?.billing_status === true ? "Open" : "Close",
-      }),
+
+  const grossTotal = totalCommission;
+  const cgstAmount =
+    (grossTotal * (parseFloat(data?.tax_invoice_cgst) || 0)) / 100;
+  const sgstAmount =
+    (grossTotal * (parseFloat(data?.tax_invoice_sgst) || 0)) / 100;
+  const igstAmount =
+    (grossTotal * (parseFloat(data?.tax_invoice_igst) || 0)) / 100;
+  const totalAmount = grossTotal + cgstAmount + sgstAmount + igstAmount;
+
+  const handleDownload = async () => {
+    const element = componentRef?.current;
+
+    if (!element) {
+      message.error("Failed to generate PDF");
+      return;
+    }
+
+    const elementForPdf = element.cloneNode(true);
+    const printHideElements = elementForPdf.querySelectorAll(".print-hide");
+    printHideElements.forEach((el) => el.remove());
+
+    // Remove fixed positioning styles for PDF
+    const style = document.createElement("style");
+    style.textContent = `
+      * {
+        color: #000000 !important;
+        background-color: transparent !important;
+      }
+      .bg-gray-200, .bg-gray-100, .bg-white {
+        background-color: #ffffff !important;
+      }
+      .bg-gray-50 {
+        background-color: #f9fafb !important;
+      }
+      .text-blue-900 {
+        color: #1e3a8a !important;
+      }
+      .text-gray-700 {
+        color: #374151 !important;
+      }
+      .text-gray-600 {
+        color: #4b5563 !important;
+      }
+      .text-gray-800 {
+        color: #1f2937 !important;
+      }
+      .text-red-600 {
+        color: #dc2626 !important;
+      }
+      .border-blue-900 {
+        border-color: #1e3a8a !important;
+      }
+      .border-gray-300 {
+        border-color: #d1d5db !important;
+      }
+      .border-gray-800 {
+        border-color: #1f2937 !important;
+      }
+      .border-black {
+        border-color: #000000 !important;
+      }
+      /* Remove fixed positioning for PDF */
+      .fixed-header, .fixed-footer {
+        position: relative !important;
+      }
+      .page-content {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+    `;
+    elementForPdf.appendChild(style);
+
+    const options = {
+      margin: [10, 10, 10, 10],
+      filename: `Tax-Report-${dayjs().format("DD-MM-YYYY")}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: elementForPdf.scrollHeight,
+        backgroundColor: "#FFFFFF",
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+      },
+      pagebreak: {
+        mode: ["avoid-all", "css", "legacy"],
+        before: ".fixed-footer",
+      },
     };
 
+    html2pdf()
+      .from(elementForPdf)
+      .set(options)
+      .save()
+      .then(() => {
+        message.success("PDF downloaded successfully");
+      })
+      .catch((error) => {
+        console.error("PDF download error:", error);
+        message.error("Failed to download PDF");
+      });
+  };
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: `Tax_Invoice_${data?.tax_invoice_no || "invoice"}`,
+    onBeforeGetContent: () => {
+      const signatureElement = componentRef.current?.querySelector(
+        'img[alt="Signature"]'
+      );
+      if (signatureElement) {
+        signatureElement.style.display = showSignature ? "block" : "none";
+      }
+    },
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 5mm !important;
+        border:2px solid black
+      }
+      @media print {
+       
+        .print-hide {
+          display: none !important;
+        }
+        .fixed-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          background: white;
+        }
+        .fixed-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          background: white;
+        }
+        .page-content {
+          margin-top: 200px;
+          margin-bottom: 180px;
+        }
+      }
+    `,
+  });
+  const handleEmail = async () => {
+    const payload = showSignature === true ? "with-signature" : "without";
     try {
-      const res = await submitTrigger({
-        url: isEditMode ? `${BILLING_LIST}/${id}` : BILLING_LIST,
-        method: isEditMode ? "put" : "post",
-        data: payload,
+      const res = await emailTrigger({
+        url: `${TAX_INVOICE_EMAIL}/${id}?type=${payload}`,
       });
 
-      if (res.code === 201) {
-        message.success(res.message || "Billing saved successfully!");
-        await queryClient.invalidateQueries({ queryKey: ["billingdata"] });
-        navigate("/billing");
+      if (res.code == 201) {
+        message.success(res.message || "Mail Send Sucessfully");
       } else {
-        message.error(res.message || "Failed to save billing.");
+        message.error(res.message || "Failed to send mail.");
       }
     } catch (error) {
       console.error(error);
-      message.error(error?.message || "Error while saving billing.");
+      message.error(
+        error?.response?.data?.message ||
+          "Something went wrong while sending mail."
+      );
     }
   };
-  const loadingdata =
-    item?.loading || fetchLoading || mill.loading || party.loading;
+  const toggleSignature = () => {
+    setShowSignature(!showSignature);
+  };
+
   return (
     <>
-      {loadingdata ? (
+      <div className="print-hide flex gap-2 mb-4">
+        <Button onClick={handlePrint}>Print</Button>
+
+        <Button
+          type={showSignature ? "primary" : "default"}
+          onClick={toggleSignature}
+        >
+          {showSignature ? "With Signature" : "Without Signature"}
+        </Button>
+        <Button onClick={handleEmail} loading={loadingemail}>
+          {loadingemail ? "Sending" : "Send Email"}
+        </Button>
+      </div>
+
+      {loading ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
       ) : (
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          onValuesChange={handleValueChange}
-          initialValues={initialData}
-          className="mt-4"
-          requiredMark={false}
-        >
-          <Card
-            title={
-              <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Billing" : "Create Billing"}
-              </h2>
-            }
-            extra={
-              <div className="flex items-center gap-2">
-                {isEditMode && (
-                  <Form.Item
-                    name="billing_status"
-                    valuePropName="checked"
-                    className="!mb-0"
-                  >
-                    {/* <Tooltip title="Status" placement="top"> */}
-                    <Switch checkedChildren="Open" unCheckedChildren="Close" />
-                    {/* </Tooltip> */}
-                  </Form.Item>
-                )}
-
-                <Form.Item className="text-center !mt-4">
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={submitLoading}
-                  >
-                    {isEditMode ? "Update" : "Create"}
-                  </Button>
-                </Form.Item>
-              </div>
-            }
-            variant="borderless"
+        <div className="min-h-screen bg-gray-100 p-8">
+          <div
+            className="max-w-4xl mx-auto bg-white print:border-none border-2 border-blue-900"
+            ref={componentRef}
           >
-            <Card
-              size="small"
-              title={<span className="font-semibold">Purchase Info</span>}
-              className="!mt-2 !bg-gray-50"
-              extra={
-                <div className="flex">
-                  <Form.Item name="purchase_orders_ref" noStyle>
-                    <Input placeholder="PO Reference" readOnly />
-                  </Form.Item>
-                  {daysDifference !== null && (
-                    <div className="flex">
-                      <span
-                        className={`mt-1 w-40 text-center px-1 py-1.5 ${
-                          daysDifference < 0
-                            ? "text-red-600 font-semibold"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        Due Days: {daysDifference || 0}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* PR - SR */}
-                  {totalRate !== null && (
-                    <div className="flex items-center justify-center">
-                      <span
-                        className={`px-1 py-1.5 rounded-md text-sm font-medium ${
-                          totalRate < 0 ? "text-red-600" : "text-gray-800"
-                        }`}
-                      >
-                        PR - SR: {totalRate || 0}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              }
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Form.Item
-                      name="purchase_date"
-                      label={
-                        <span>
-                          Purchase Date <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Select Purchase Date" },
-                      ]}
-                    >
-                      <DatePicker
-                        autoFocus
-                        className="w-full"
-                        format="DD-MM-YYYY"
-                        onChange={handleChange}
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      label={
-                        <span>
-                          Mill Name <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="billing_mill_id"
-                      rules={[{ required: true, message: "Select Mill Name" }]}
-                    >
-                      <Select
-                        placeholder="Select Mill Name"
-                        options={millOptions}
-                        onChange={handleChange}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-
-                    <Form.Item name="purchase_orders_ref" label="PO Reference">
-                      <Input placeholder="Enter PO Reference" readOnly />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_no"
-                      label={
-                        <span>
-                          Billing No <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Enter Billing Number" },
-                      ]}
-                    >
-                      <Input placeholder="Enter Billing No" />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_bf"
-                      label={
-                        <span>
-                          Item <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[{ required: true, message: "Select Item" }]}
-                    >
-                      <Select
-                        placeholder="Select Item"
-                        options={
-                          item?.data?.data?.map((i) => ({
-                            label: i.bf,
-                            value: i.bf,
-                          })) || []
-                        }
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_tones"
-                      label={
-                        <span>
-                          Tones <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[{ required: true, message: "Enter Tones" }]}
-                    >
-                      <Input placeholder="Enter Tones" />
-                    </Form.Item>
-
-                    <Form.Item name="purchase_amount" label="Purchase Amount">
-                      <Input placeholder="Enter Amount" />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="purchase_rate"
-                      label={
-                        <span>
-                          Purchase Rate <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Enter Purchase Rate" },
-                      ]}
-                    >
-                      <InputNumber
-                        type="number"
-                        placeholder="Enter Rate"
-                        className="!w-full"
-                        min={1}
-                      />
-                    </Form.Item>
-                    {/* </div>
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4"> */}
-                    <Form.Item name="sale_rate" label="Sale Rate">
-                      <InputNumber
-                        type="number"
-                        placeholder="Enter Rate"
-                        className="!w-full"
-                        min={1}
-                      />
-                    </Form.Item>
-
-                    <Form.Item name="sale_date" label="Sale Date">
-                      <DatePicker className="w-full" format="DD-MM-YYYY" />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_party_id"
-                      label={
-                        <span>
-                          Party<span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[{ required: true, message: "Select Party" }]}
-                    >
-                      <Select
-                        placeholder="Select Party"
-                        options={partyOptions}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_type"
-                      label={
-                        <span>
-                          Billing Type <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Select Billing Type" },
-                      ]}
-                    >
-                      <Select
-                        placeholder="Select Billing Type"
-                        options={billingOptions?.billingOptions}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      name="billing_payment_type"
-                      label={
-                        <span>
-                          Payment Type <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Select Payment Type" },
-                      ]}
-                    >
-                      <Select
-                        placeholder="Select Payment Type"
-                        options={[
-                          { label: "Payables", value: "Payables" },
-                          { label: "Receivables", value: "Receivables" },
-                        ]}
-                        allowClear
-                      />
-                    </Form.Item>
+            <div className="fixed-header border-b-2 relative border-blue-900 px-2 py-1 bg-white">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold text-blue-900 instrument-font">
+                    {company?.company_name}
+                  </h1>
+                  <p className="text-sm text-gray-700 mt-2">
+                    Dealers in : KRAFT PAPER & DUPLEX BOARD
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {company?.company_address}
+                  </p>
+                  <div className="mt-4 flex justify-start gap-5 text-xs">
+                    <div>GSTIN : {company?.company_gst}</div>
+                    <div>Pan No : {company?.company_pan}</div>
                   </div>
-                  <div></div>
+                </div>
+                <div className="text-right">
+                  <div className="text-white text-center">
+                    <img
+                      src={finalUserImage}
+                      alt="Company Logo"
+                      className="w-[120px] h-[9rem] object-contain"
+                    />
+                  </div>
                 </div>
               </div>
-            </Card>
-          </Card>
-        </Form>
+              <div className="absolute w-full text-lg text-center -translate-y-8 -translate-x-2 font-bold text-gray-700">
+                TAX INVOICE
+              </div>
+            </div>
+
+            <div className="page-content">
+              <div className="flex gap-8 px-4 py-2 border-b border-gray-300">
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-gray-700 mb-2">To</p>
+                  <h3 className="font-bold text-blue-900 mb-1">
+                    {selectedMill?.mill_name}
+                  </h3>
+                  <p className="text-xs text-gray-700 whitespace-pre-line">
+                    {selectedMill?.mill_billing_address}
+                  </p>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-700">
+                      Invoice No. :
+                    </span>
+                    <span className="text-xs">{data?.tax_invoice_no}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-700">
+                      Invoice Date :
+                    </span>
+                    <span className="text-xs">
+                      {formatDate(data?.tax_invoice_date)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-700">
+                      Service State :
+                    </span>
+                    <span className="text-xs">{selectedMill?.mill_state}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-700">
+                      Party GST :
+                    </span>
+                    <span className="text-xs">{selectedMill?.mill_gstin}</span>
+                  </div>
+                </div>
+              </div>
+
+              <table className="w-full text-xs">
+                <thead className="bg-gray-100">
+                  <tr className="border-t-2 border-blue-900">
+                    <th className="border-r-2 border-blue-900 p-2 text-left font-semibold w-16">
+                      Sl. No.
+                    </th>
+                    <th className="border-r-2 border-blue-900 p-2 text-left font-semibold">
+                      Description of Goods / Services
+                    </th>
+                    <th className="border-r-2 border-blue-900 p-2 text-left font-semibold w-32">
+                      HSN Code
+                    </th>
+                    <th className="p-2 text-right font-semibold w-48">
+                      Total Value (INR)
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr className="border-y-2 border-blue-900">
+                    <td className="border-r-2 border-blue-900 p-2">1.</td>
+
+                    <td className="border-r-2 border-blue-900 p-2">
+                      {data?.tax_invoice_description}
+                    </td>
+
+                    <td className="border-r-2 border-blue-900 p-2">
+                      {data?.tax_invoice_hsn_code}
+                    </td>
+
+                    <td className="p-2 text-right font-medium">
+                      {totalCommission.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="w-[80%] p-2">
+                <div className="text-left pb-1">
+                  <h2 className="text-md font-bold text-gray-800">Summary</h2>
+                </div>
+                <table className="w-full border border-gray-800 border-collapse text-xs">
+                  <thead>
+                    <tr className="border border-gray-800 bg-gray-100">
+                      <th className="border border-gray-800 p-1 text-left font-bold">
+                        Date
+                      </th>
+                      <th className="border border-gray-800 p-1 text-left font-bold">
+                        Bill Ref.
+                      </th>
+                      <th className="border border-gray-800 p-1 text-left font-bold">
+                        BF
+                      </th>
+                      <th className="border border-gray-800 p-1 text-right font-bold">
+                        Quantity
+                      </th>
+                      <th className="border border-gray-800 p-1 text-right font-bold">
+                        Rate
+                      </th>
+                      <th className="border border-gray-800 p-1 text-right font-bold">
+                        Disc. Rate
+                      </th>
+                      <th className="border border-gray-800 p-1 text-right font-bold">
+                        Diff.
+                      </th>
+                      <th className="border border-gray-800 p-1 text-right font-bold">
+                        Commn
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {/* {data?.subs?.map((row, idx) => ( */}
+                    {mockdata?.map((row, idx) => (
+                      <tr key={idx} className="border border-gray-800">
+                        <td className="border border-gray-800 p-1">
+                          {formatDate(row.tax_invoice_sub_purchase_date)}
+                        </td>
+
+                        <td className="border border-gray-800 p-1">
+                          {row.tax_invoice_sub_billing_ref}
+                        </td>
+
+                        <td className="border border-gray-800 p-1">
+                          {row.tax_invoice_sub_bf}
+                        </td>
+
+                        <td className="border border-gray-800 p-1 text-right">
+                          {row.tax_invoice_sub_tones}
+                        </td>
+
+                        <td className="border border-gray-800 p-1 text-right">
+                          {row.tax_invoice_sub_sale_rate}
+                        </td>
+
+                        <td className="border border-gray-800 p-1 text-right">
+                          {row.tax_invoice_sub_purchase_rate}
+                        </td>
+
+                        <td className="border border-gray-800 p-1 text-right">
+                          {row.tax_invoice_sub_rate_diff}
+                        </td>
+
+                        <td className="border border-gray-800 p-1 text-right">
+                          {row.tax_invoice_sub_commn}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="flex justify-end mt-2">
+                  <div className="w-48">
+                    <div className="flex justify-between text-xs font-bold border-t-2 border-gray-800 pt-1">
+                      <span>Total =</span>
+                      <span className="text-red-600">
+                        Rs.{" "}
+                        {totalCommission.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="fixed-footer bg-white">
+              <div className="flex p-4 border-b-2 border-blue-900">
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-gray-700 mb-1">
+                    Total Amount (INR IN WORDS) :
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {numberToWords(Math.round(totalAmount))} .....
+                  </p>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Note : Any dispute is Subject to Bangalore Jurisdiction.
+                  </p>
+                </div>
+                <div className="flex-1 text-right text-xs">
+                  <div className="flex justify-between mb-1">
+                    <span>Discount (if any)</span>
+                    <span className="font-semibold">
+                      {data?.tax_invoice_discount || "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between mb-1 font-bold border-b-2 border-blue-900 pb-1">
+                    <span>Gross Total :</span>
+                    <span>Rs. {grossTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span>ADD - CGST {data?.tax_invoice_cgst}% :</span>
+                    <span>
+                      {cgstAmount > 0 ? `Rs. ${cgstAmount.toFixed(2)}` : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span>ADD - SGST {data?.tax_invoice_sgst}% :</span>
+                    <span>
+                      {sgstAmount > 0 ? `Rs. ${sgstAmount.toFixed(2)}` : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span>ADD - IGST {data?.tax_invoice_igst}% :</span>
+                    <span className="font-semibold">
+                      {igstAmount > 0 ? `Rs. ${igstAmount.toFixed(2)}` : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-1">
+                    <span>Total Amount :</span>
+                    <span>Rs. {totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-6 p-4 border-b border-blue-900">
+                <div className="flex-1 text-xs">
+                  <p className="font-bold mb-1">
+                    Acc Name : The United Trades (R)
+                  </p>
+                  <p className="mb-1">Bank : {selectedMill?.mill_bank_name}</p>
+                  <p className="mb-1">
+                    Branch : {selectedMill?.mill_bank_branch_name}
+                  </p>
+                  <p className="mb-1">
+                    A/C No : {selectedMill?.mill_bank_ac_no}
+                  </p>
+                  <p>IFSC Code : {selectedMill?.mill_bank_ifsc}</p>
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="text-md font-bold">
+                    THE UNITED TRADERS (Regd.)
+                  </p>
+                  <div className="relative mt-8">
+                    {showSignature && (
+                      <img
+                        src={SiginImagePath}
+                        alt="Signature"
+                        className="w-28 h-auto object-contain absolute right-0 -top-12"
+                      />
+                    )}
+                    <p className="text-xs mt-12">Authorised Signatory</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-blue-900 p-4">
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-gray-700 flex-1">
+                    Corr. Address : {company?.company_cor_address}
+                  </p>
+                  <div className="flex gap-4 items-center mx-4">
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                        <Phone className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-xs">8626728620</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                        <PhoneCall className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-xs">9854420122</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                        <Mail className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-xs">united1141@email.com</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
 };
 
-export default BillingForm;
+export default TaxInvoice;

@@ -10,7 +10,7 @@ import { TAX_INVOICE_EMAIL, TAX_INVOICE_LIST } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import mockdata from "../../constants/mockdata.json";
+// import mockdata from "../../constants/mockdata.json";
 const TaxInvoice = () => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
@@ -20,6 +20,8 @@ const TaxInvoice = () => {
   const company = useSelector((state) => state.company.companyDetails);
   const { trigger: emailTrigger, loading: loadingemail } = useApiMutation();
   const [selectedMill, setSelectedMill] = useState(null);
+  const companydata = useSelector((state) => state.auth.userDetails);
+  console.log(companydata);
 
   const [data, setData] = useState(null);
 
@@ -59,6 +61,14 @@ const TaxInvoice = () => {
   };
 
   const numberToWords = (num) => {
+    if (num === null || num === undefined) return "";
+
+    // Convert to string & split integer + decimals
+    const [rupeesStr, paisaStr] = num.toString().split(".");
+
+    const rupees = parseInt(rupeesStr);
+    const paisa = paisaStr ? parseInt(paisaStr.padEnd(2, "0")) : 0;
+
     const ones = [
       "",
       "One",
@@ -70,8 +80,6 @@ const TaxInvoice = () => {
       "Seven",
       "Eight",
       "Nine",
-    ];
-    const teens = [
       "Ten",
       "Eleven",
       "Twelve",
@@ -83,6 +91,7 @@ const TaxInvoice = () => {
       "Eighteen",
       "Nineteen",
     ];
+
     const tens = [
       "",
       "",
@@ -96,33 +105,44 @@ const TaxInvoice = () => {
       "Ninety",
     ];
 
-    if (num === 0) return "Zero";
+    const convert = (n) => {
+      if (n < 20) return ones[n];
+      if (n < 100)
+        return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
+      if (n < 1000)
+        return (
+          ones[Math.floor(n / 100)] +
+          " Hundred" +
+          (n % 100 ? " " + convert(n % 100) : "")
+        );
+      if (n < 100000)
+        return (
+          convert(Math.floor(n / 1000)) +
+          " Thousand" +
+          (n % 1000 ? " " + convert(n % 1000) : "")
+        );
+      if (n < 10000000)
+        return (
+          convert(Math.floor(n / 100000)) +
+          " Lakh" +
+          (n % 100000 ? " " + convert(n % 100000) : "")
+        );
+      return (
+        convert(Math.floor(n / 10000000)) +
+        " Crore" +
+        (n % 10000000 ? " " + convert(n % 10000000) : "")
+      );
+    };
 
-    let words = "";
+    // Convert rupees
+    let result = `${convert(rupees)}`;
 
-    if (num >= 1000) {
-      words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
-      num %= 1000;
+    // Add paisa if available
+    if (paisa > 0) {
+      result += ` and ${convert(paisa)} Paisa`;
     }
 
-    if (num >= 100) {
-      words += ones[Math.floor(num / 100)] + " Hundred ";
-      num %= 100;
-    }
-
-    if (num >= 20) {
-      words += tens[Math.floor(num / 10)] + " ";
-      num %= 10;
-    } else if (num >= 10) {
-      words += teens[num - 10] + " ";
-      num = 0;
-    }
-
-    if (num > 0) {
-      words += ones[num] + " ";
-    }
-
-    return words.trim() + " Only";
+    return result + " Only";
   };
 
   const grossTotal = totalCommission;
@@ -133,7 +153,7 @@ const TaxInvoice = () => {
   const igstAmount =
     (grossTotal * (parseFloat(data?.tax_invoice_igst) || 0)) / 100;
   const totalAmount = grossTotal + cgstAmount + sgstAmount + igstAmount;
-
+  console.log(totalAmount, "totalAmount");
   const handleDownload = async () => {
     const element = componentRef?.current;
 
@@ -250,7 +270,6 @@ const TaxInvoice = () => {
         border:2px solid black
       }
       @media print {
-       
         .print-hide {
           display: none !important;
         }
@@ -271,7 +290,7 @@ const TaxInvoice = () => {
           background: white;
         }
         .page-content {
-          margin-top: 200px;
+          margin-top: 150px;
           margin-bottom: 180px;
         }
       }
@@ -472,8 +491,8 @@ const TaxInvoice = () => {
                   </thead>
 
                   <tbody>
-                    {/* {data?.subs?.map((row, idx) => ( */}
-                    {mockdata?.map((row, idx) => (
+                    {/* {mockdata?.map((row, idx) => ( */}
+                    {data?.subs?.map((row, idx) => (
                       <tr key={idx} className="border border-gray-800">
                         <td className="border border-gray-800 p-1">
                           {formatDate(row.tax_invoice_sub_purchase_date)}
@@ -536,7 +555,7 @@ const TaxInvoice = () => {
                     Total Amount (INR IN WORDS) :
                   </p>
                   <p className="text-sm font-semibold">
-                    {numberToWords(Math.round(totalAmount))} .....
+                    {numberToWords(Math.round(totalAmount))}
                   </p>
                   <p className="text-xs text-gray-600 mt-2">
                     Note : Any dispute is Subject to Bangalore Jurisdiction.
@@ -555,20 +574,16 @@ const TaxInvoice = () => {
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>ADD - CGST {data?.tax_invoice_cgst}% :</span>
-                    <span>
-                      {cgstAmount > 0 ? `Rs. ${cgstAmount.toFixed(2)}` : "-"}
-                    </span>
+                    <span>{`Rs. ${cgstAmount.toFixed(2)}` ?? "0"}</span>
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>ADD - SGST {data?.tax_invoice_sgst}% :</span>
-                    <span>
-                      {sgstAmount > 0 ? `Rs. ${sgstAmount.toFixed(2)}` : "-"}
-                    </span>
+                    <span>{`Rs. ${sgstAmount.toFixed(2)}` ?? "0"}</span>
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>ADD - IGST {data?.tax_invoice_igst}% :</span>
                     <span className="font-semibold">
-                      {igstAmount > 0 ? `Rs. ${igstAmount.toFixed(2)}` : "-"}
+                      {`Rs. ${igstAmount.toFixed(2)}` ?? "0"}
                     </span>
                   </div>
                   <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-1">
@@ -581,20 +596,18 @@ const TaxInvoice = () => {
               <div className="flex gap-6 p-4 border-b border-blue-900">
                 <div className="flex-1 text-xs">
                   <p className="font-bold mb-1">
-                    Acc Name : The United Trades (R)
+                    Acc Name : {companydata?.company_account_name}
                   </p>
-                  <p className="mb-1">Bank : {selectedMill?.mill_bank_name}</p>
+                  <p className="mb-1">Bank : {companydata?.company_bank}</p>
+                  <p className="mb-1">Branch : {companydata?.company_branch}</p>
                   <p className="mb-1">
-                    Branch : {selectedMill?.mill_bank_branch_name}
+                    A/C No : {companydata?.company_account_no}
                   </p>
-                  <p className="mb-1">
-                    A/C No : {selectedMill?.mill_bank_ac_no}
-                  </p>
-                  <p>IFSC Code : {selectedMill?.mill_bank_ifsc}</p>
+                  <p>IFSC Code : {companydata?.company_ifsc_code}</p>
                 </div>
                 <div className="flex-1 text-right">
                   <p className="text-md font-bold">
-                    THE UNITED TRADERS (Regd.)
+                    {companydata?.company_name}
                   </p>
                   <div className="relative mt-8">
                     {showSignature && (
@@ -615,23 +628,35 @@ const TaxInvoice = () => {
                     Corr. Address : {company?.company_cor_address}
                   </p>
                   <div className="flex gap-4 items-center mx-4">
-                    <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
-                        <Phone className="w-3 h-3 text-white" />
+                    {companydata?.company_mobile2 && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                          <Phone className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-xs">
+                          {companydata?.company_mobile2}
+                        </span>
                       </div>
-                      <span className="text-xs">8626728620</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
-                        <PhoneCall className="w-3 h-3 text-white" />
+                    )}
+                    {companydata?.company_mobile && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                          <PhoneCall className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-xs">
+                          {" "}
+                          {companydata?.company_mobile}
+                        </span>
                       </div>
-                      <span className="text-xs">9854420122</span>
-                    </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
                         <Mail className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-xs">united1141@email.com</span>
+                      <span className="text-xs">
+                        {" "}
+                        {companydata?.company_to_email}
+                      </span>
                     </div>
                   </div>
                 </div>
