@@ -6,7 +6,7 @@ import { PANEL_LOGIN } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { setCredentials } from "../../store/auth/authSlice";
-import logo from "../../assets/logo-1.png";
+// import logo from "../../assets/logo-1.png";
 import bgSignin from "../../assets/bg-sigin.png";
 
 const { Title, Text } = Typography;
@@ -19,7 +19,7 @@ const SignIn = () => {
   const { trigger, loading } = useApiMutation();
   const token = useSelector((state) => state.auth.token);
 
-  // const logo = useFinalUserImage();
+  const logo = useFinalUserImage();
   if (token) {
     return <Navigate to="/home" replace />;
   }
@@ -208,17 +208,17 @@ const SignIn = () => {
                 <Form.Item
                   label={
                     <span className="text-gray-700 font-medium">
-                      Username <span className="text-red-500">*</span>
+                      Mobile No <span className="text-red-500">*</span>
                     </span>
                   }
                   name="email"
                   rules={[
-                    { required: true, message: "Please enter your username" },
+                    { required: true, message: "Please enter your Mobile No" },
                   ]}
                 >
                   <Input
                     size="large"
-                    placeholder="Enter username"
+                    placeholder="Enter Mobile No"
                     autoFocus
                     maxLength={10}
                     className="rounded-lg hover:border-blue-400 transition-all duration-300"

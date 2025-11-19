@@ -227,6 +227,7 @@ const TaxInvoiceForm = () => {
       if (res.code == 201) {
         message.success(res.message || "Tax data saved successfully!");
         await queryClient.invalidateQueries({ queryKey: ["taxinvoicedata"] });
+        await queryClient.invalidateQueries({ queryKey: ["billingdata"] });
         navigate("/tax-invoice");
       } else {
         message.error(res.message || "Failed to save Tax data.");

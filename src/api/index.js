@@ -78,3 +78,8 @@ export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
 export const PAYMENT_LIST = "/payment";
 export const PAYMENT_BILLING_REF = "/getpendingbillingamount";
 export const PAYMENT_MODE = "/panel-fetch-payment-mode";
+// -------------------EMAILS----------------------
+export const PURCHASE_ORDER_EMAIL = "/sendPurchaseOrderEmail";
+export const QUOTATION_EMAIL = "/sendQuotationEmail";
+export const TRADE_INVOICE_EMAIL = "/sendTradeInvoiceEmail";
+export const TAX_INVOICE_EMAIL = "/sendTaxInvoiceEmail";

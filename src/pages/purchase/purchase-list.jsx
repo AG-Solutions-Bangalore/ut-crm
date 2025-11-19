@@ -115,7 +115,7 @@ const PurchaseList = () => {
   };
   const columns = [
     {
-      title: "Purchase Ref No",
+      title: "P/O Ref No",
       dataIndex: "purchase_orders_ref",
       key: "purchase_orders_ref",
       render: (text, record) => (
@@ -125,7 +125,7 @@ const PurchaseList = () => {
       ),
     },
     {
-      title: "Purchase Date",
+      title: "P/O Date",
       dataIndex: "purchase_orders_date",
       key: "purchase_orders_date",
       render: (_, record) =>
@@ -189,16 +189,19 @@ const PurchaseList = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Purchase">
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              size="small"
-              onClick={() => navigate(`/purchase/edit/${record.id}`)}
-            />
-          </Tooltip>
+          {/* Show Edit only if status is NOT Close */}
+          {record.purchase_orders_status !== "Close" && (
+            <Tooltip title="Edit P/O">
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                size="small"
+                onClick={() => navigate(`/purchase/edit/${record.id}`)}
+              />
+            </Tooltip>
+          )}
 
-          <Tooltip title="View Purchase">
+          <Tooltip title="View P/O">
             <Button
               type="primary"
               icon={<EyeOutlined />}
@@ -206,7 +209,8 @@ const PurchaseList = () => {
               onClick={() => navigate(`/purchase/view/${record.id}`)}
             />
           </Tooltip>
-          <Tooltip title="Delete Purchase">
+
+          <Tooltip title="Delete P/O">
             <Popconfirm
               title="Are you sure you want to delete this item?"
               onConfirm={() => handleDelete(record?.id)}
@@ -227,7 +231,6 @@ const PurchaseList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        {/* <h2 className="text-2xl font-bold heading">Purchase List</h2> */}
         <Tabs
           activeKey={activeTab}
           onChange={(key) => {
@@ -282,7 +285,7 @@ const PurchaseList = () => {
                 const isEmpty = !hasInvoice;
 
                 const iconStyle = {
-                  color: isEmpty ? "#dc2626" : "#16a34a", 
+                  color: isEmpty ? "#dc2626" : "#16a34a",
                   fontSize: 16,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
@@ -307,7 +310,7 @@ const PurchaseList = () => {
                 if (!invoice) {
                   return (
                     <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
-                      No Purchase details Available
+                      No P/O details Available
                     </div>
                   );
                 }
@@ -375,7 +378,7 @@ const PurchaseList = () => {
           />
         ) : (
           <div className="text-center text-gray-500 py-20">
-            No Purchase data found.
+            No P/O data found.
           </div>
         )}
       </div>

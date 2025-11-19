@@ -161,8 +161,8 @@ const PurchaseForm = () => {
         size: sub?.size || "",
         qnty: sub?.qnty || "",
         unit: sub?.unit || "",
-        bill_rate: sub?.bill_rate || "",
-        agreed_rate: sub?.agreed_rate || "",
+        bill_rate: sub?.bill_rate || 0,
+        agreed_rate: sub?.agreed_rate || 0,
         remarks: sub?.remarks || "",
       })),
     };
@@ -241,7 +241,7 @@ const PurchaseForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Purchase Order" : "Create Purchase Order"}
+                {isEditMode ? "Update P/O" : "Create P/O"}
               </h2>
             }
             extra={

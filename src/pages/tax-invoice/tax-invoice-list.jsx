@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, EyeFilled, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   App,
   Button,
@@ -17,8 +17,8 @@ import { useNavigate } from "react-router-dom";
 import { TAX_INVOICE_LIST } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 
@@ -133,7 +133,7 @@ const TaxInvoiceList = () => {
           </Tooltip>
           <Tooltip title="View Tax Invoice">
             <Button
-              icon={<EyeFilled />}
+              icon={<EyeOutlined />}
               type="primary"
               size="small"
               onClick={() => navigate(`/tax-invoice/view/${record.id}`)}

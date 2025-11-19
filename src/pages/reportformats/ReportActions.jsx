@@ -1,18 +1,19 @@
-
 import { Button } from "antd";
 import html2pdf from "html2pdf.js";
 import { useReactToPrint } from "react-to-print";
 
-const ReportActions = ({ 
-  componentRef, 
+const ReportActions = ({
+  componentRef,
   filename = "document.pdf",
   documentTitle = "Report",
   onToggleSignature,
   showSignature = true,
-  includeSignatureToggle = false
+  includeSignatureToggle = false,
+  handleEmail,
+  loadingemail,
 }) => {
   const generatePdf = () => {
-    const element = componentRef?.current; 
+    const element = componentRef?.current;
 
     if (!element) {
       console.error("PDF generation failed: element not found");
@@ -86,13 +87,16 @@ const ReportActions = ({
       <Button onClick={handlePrint}>Print</Button>
       <Button onClick={generatePdf}>PDF</Button>
       {includeSignatureToggle && (
-        <Button 
+        <Button
           type={showSignature ? "primary" : "default"}
           onClick={onToggleSignature}
         >
           {showSignature ? "With Signature" : "Without Signature"}
         </Button>
       )}
+      <Button onClick={handleEmail} loading={loadingemail}>
+        {loadingemail ? "Sending" : "Send Email"}
+      </Button>
     </div>
   );
 };

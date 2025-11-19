@@ -5,20 +5,21 @@ import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
-import { QUOTATION_LIST } from "../../api";
-import reportlogo from "../../assets/report-logo.png";
+import { QUOTATION_EMAIL, QUOTATION_LIST } from "../../api";
+import useFinalUserImage from "../../components/common/Logo";
+import companyFinalSiginImage from "../../components/common/Sigin";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-
-const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
-// const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
+import { useApiMutation } from "../../hooks/useApiMutation";
 
 const QuotationView = () => {
   const { message } = App.useApp();
   const componentRef = useRef(null);
   const { id } = useParams();
   const [showSignature, setShowSignature] = useState(true);
+  const { trigger: emailTrigger, loading: loadingemail } = useApiMutation();
   const companydata = useSelector((state) => state?.auth?.userDetails);
-  console.log(companydata, "companydata");
+  const SiginImagePath = companyFinalSiginImage();
+  const finalUserImage = useFinalUserImage();
   const toggleSignature = () => {
     setShowSignature(!showSignature);
   };
@@ -113,16 +114,28 @@ const QuotationView = () => {
         message.error("Failed to download PDF");
       });
   };
+  const handleEmail = async () => {
+    const payload = showSignature === true ? "with-signature" : "without";
+    try {
+      const res = await emailTrigger({
+        url: `${QUOTATION_EMAIL}/${id}?type=${payload}`,
+      });
+
+      if (res.code == 201) {
+        message.success(res.message || "Mail Send Sucessfully");
+      } else {
+        message.error(res.message || "Failed to send mail.");
+      }
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message ||
+          "Something went wrong while sending mail."
+      );
+    }
+  };
   return (
     <>
-      {/* <ReportActions
-        componentRef={componentRef}
-        filename="Quotation_Invoice.pdf"
-        documentTitle="Quotation Invoice"
-        onToggleSignature={toggleSignature}
-        showSignature={showSignature}
-        includeSignatureToggle={true}
-      /> */}
       <div className="flex flex-row items-center gap-2">
         <Button onClick={handlePrint}>Print</Button>
 
@@ -133,6 +146,9 @@ const QuotationView = () => {
           onClick={toggleSignature}
         >
           {showSignature ? "With Signature" : "Without Signature"}
+        </Button>
+        <Button onClick={handleEmail} loading={loadingemail}>
+          {loadingemail ? "Sending" : "Send Email"}
         </Button>
       </div>
       <div className="flex justify-center p-4 ">
@@ -152,7 +168,7 @@ const QuotationView = () => {
               <div className="flex-shrink-0 w-20 h-20 bg-blue-900 rounded-full flex items-center justify-center">
                 <div className="text-white text-center">
                   <img
-                    src={reportlogo}
+                    src={finalUserImage}
                     alt="Company Logo"
                     className="w-[120px] h-auto object-contain"
                   />
@@ -251,7 +267,7 @@ const QuotationView = () => {
                   </th>
 
                   <th className="w-28 border-r border-black px-1 py-2 text-center font-bold">
-                    TOTAL  EX.MILL
+                    TOTAL EX.MILL
                   </th>
 
                   <th className="w-28 px-1 py-2 text-center font-bold">
@@ -347,7 +363,7 @@ const QuotationView = () => {
             <div className="relative mt-12 mb-8">
               {showSignature && (
                 <img
-                  src={devUrl}
+                  src={SiginImagePath}
                   alt="Signature"
                   className="w-28 h-auto object-contain absolute left-12 -top-16"
                 />

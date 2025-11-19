@@ -39,7 +39,7 @@ const AppInitializer = ({ children }) => {
 
         const serverVer = statusRes?.version?.version_panel;
 
-        if (statusRes?.code === 201) {
+        if (statusRes?.code == 201) {
           dispatch(setCompanyDetails(statusRes?.company_detils));
           dispatch(setCompanyImage(statusRes?.company_image));
         } else {
@@ -62,7 +62,6 @@ const AppInitializer = ({ children }) => {
           throw new Error("Invalid environment config");
         }
 
-      
         if (location.pathname === "/maintenance") {
           navigate("/");
         }
@@ -80,8 +79,6 @@ const AppInitializer = ({ children }) => {
         }
       }
     };
-
-    
 
     validateEnvironment();
   }, [dispatch, navigate]);
