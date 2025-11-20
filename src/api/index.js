@@ -11,6 +11,8 @@ export const PANEL_SEND_PASSWORD = `/panel-send-password`;
 //PANEL_CHANGE_PASSWORD
 export const PANEL_CHANGE_PASSWORD = `/panel-change-password`;
 // ------------------------------------New-------------------------------------------------
+export const STATE_LIST = `/panel-fetch-state`;
+
 // ----------MILLS--------------
 export const MILL_LIST = `/mill`;
 export const ACTIVE_MILL = `/activeMills`;

@@ -10,7 +10,8 @@ import { TAX_INVOICE_EMAIL, TAX_INVOICE_LIST } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
-// import mockdata from "../../constants/mockdata.json";
+import mockdata from "../../constants/mockdata.json";
+
 const TaxInvoice = () => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
@@ -20,8 +21,6 @@ const TaxInvoice = () => {
   const company = useSelector((state) => state.company.companyDetails);
   const { trigger: emailTrigger, loading: loadingemail } = useApiMutation();
   const [selectedMill, setSelectedMill] = useState(null);
-  const companydata = useSelector((state) => state.auth.userDetails);
-  console.log(companydata);
 
   const [data, setData] = useState(null);
 
@@ -34,7 +33,6 @@ const TaxInvoice = () => {
       });
       if (res?.data) {
         setSelectedMill(res?.mill || null);
-
         setData(res?.data || null);
       }
     } catch (err) {
@@ -49,10 +47,11 @@ const TaxInvoice = () => {
 
   const loading = fetchLoading;
 
-  const totalCommission =
-    data?.subs?.reduce((sum, item) => {
-      return sum + (parseFloat(item.tax_invoice_sub_commn) || 0);
-    }, 0) || 0;
+  const tableData = data?.subs || [];
+
+  const totalCommission = tableData.reduce((sum, item) => {
+    return sum + (parseFloat(item.tax_invoice_sub_commn) || 0);
+  }, 0);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -61,14 +60,6 @@ const TaxInvoice = () => {
   };
 
   const numberToWords = (num) => {
-    if (num === null || num === undefined) return "";
-
-    // Convert to string & split integer + decimals
-    const [rupeesStr, paisaStr] = num.toString().split(".");
-
-    const rupees = parseInt(rupeesStr);
-    const paisa = paisaStr ? parseInt(paisaStr.padEnd(2, "0")) : 0;
-
     const ones = [
       "",
       "One",
@@ -80,6 +71,8 @@ const TaxInvoice = () => {
       "Seven",
       "Eight",
       "Nine",
+    ];
+    const teens = [
       "Ten",
       "Eleven",
       "Twelve",
@@ -91,7 +84,6 @@ const TaxInvoice = () => {
       "Eighteen",
       "Nineteen",
     ];
-
     const tens = [
       "",
       "",
@@ -105,44 +97,33 @@ const TaxInvoice = () => {
       "Ninety",
     ];
 
-    const convert = (n) => {
-      if (n < 20) return ones[n];
-      if (n < 100)
-        return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
-      if (n < 1000)
-        return (
-          ones[Math.floor(n / 100)] +
-          " Hundred" +
-          (n % 100 ? " " + convert(n % 100) : "")
-        );
-      if (n < 100000)
-        return (
-          convert(Math.floor(n / 1000)) +
-          " Thousand" +
-          (n % 1000 ? " " + convert(n % 1000) : "")
-        );
-      if (n < 10000000)
-        return (
-          convert(Math.floor(n / 100000)) +
-          " Lakh" +
-          (n % 100000 ? " " + convert(n % 100000) : "")
-        );
-      return (
-        convert(Math.floor(n / 10000000)) +
-        " Crore" +
-        (n % 10000000 ? " " + convert(n % 10000000) : "")
-      );
-    };
+    if (num === 0) return "Zero";
 
-    // Convert rupees
-    let result = `${convert(rupees)}`;
+    let words = "";
 
-    // Add paisa if available
-    if (paisa > 0) {
-      result += ` and ${convert(paisa)} Paisa`;
+    if (num >= 1000) {
+      words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
+      num %= 1000;
     }
 
-    return result + " Only";
+    if (num >= 100) {
+      words += ones[Math.floor(num / 100)] + " Hundred ";
+      num %= 100;
+    }
+
+    if (num >= 20) {
+      words += tens[Math.floor(num / 10)] + " ";
+      num %= 10;
+    } else if (num >= 10) {
+      words += teens[num - 10] + " ";
+      num = 0;
+    }
+
+    if (num > 0) {
+      words += ones[num] + " ";
+    }
+
+    return words.trim() + " Only";
   };
 
   const grossTotal = totalCommission;
@@ -153,7 +134,7 @@ const TaxInvoice = () => {
   const igstAmount =
     (grossTotal * (parseFloat(data?.tax_invoice_igst) || 0)) / 100;
   const totalAmount = grossTotal + cgstAmount + sgstAmount + igstAmount;
-  console.log(totalAmount, "totalAmount");
+
   const handleDownload = async () => {
     const element = componentRef?.current;
 
@@ -166,7 +147,6 @@ const TaxInvoice = () => {
     const printHideElements = elementForPdf.querySelectorAll(".print-hide");
     printHideElements.forEach((el) => el.remove());
 
-    // Remove fixed positioning styles for PDF
     const style = document.createElement("style");
     style.textContent = `
       * {
@@ -206,7 +186,6 @@ const TaxInvoice = () => {
       .border-black {
         border-color: #000000 !important;
       }
-      /* Remove fixed positioning for PDF */
       .fixed-header, .fixed-footer {
         position: relative !important;
       }
@@ -267,12 +246,16 @@ const TaxInvoice = () => {
       @page {
         size: A4;
         margin: 5mm !important;
-        border:2px solid black
       }
       @media print {
         .print-hide {
           display: none !important;
         }
+        
+        ${
+          tableData.length <= 8
+            ? `
+        /* Data <= 8: Fixed header and footer */
         .fixed-header {
           position: fixed;
           top: 0;
@@ -290,12 +273,51 @@ const TaxInvoice = () => {
           background: white;
         }
         .page-content {
-          margin-top: 150px;
+          margin-top: 200px;
           margin-bottom: 180px;
+        }
+        .first-page-summary-table {
+          display: table !important;
+        }
+        .continuation-section {
+          display: none !important;
+        }
+        `
+            : `
+        /* Data > 8: Header and footer on page 1 (no table), all table data on page 2 */
+        .fixed-header {
+          position: relative;
+          background: white;
+        }
+        .fixed-footer {
+          position: relative;
+          background: white;
+          page-break-after: always;
+        }
+        .page-content {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+     .first-page-summary-table {
+    visibility: hidden !important;   
+    height: 300px !important;        
+    min-height: 300px !important;   
+  }
+        .continuation-section {
+          display: block !important;
+          page-break-before: always;
+          margin-top: 20px;
+        }
+        /* Show all data in continuation table */
+        .show-all-data-in-continuation {
+          display: table-row !important;
+        }
+        `
         }
       }
     `,
   });
+
   const handleEmail = async () => {
     const payload = showSignature === true ? "with-signature" : "without";
     try {
@@ -304,7 +326,7 @@ const TaxInvoice = () => {
       });
 
       if (res.code == 201) {
-        message.success(res.message || "Mail Send Sucessfully");
+        message.success(res.message || "Mail Send Successfully");
       } else {
         message.error(res.message || "Failed to send mail.");
       }
@@ -316,15 +338,19 @@ const TaxInvoice = () => {
       );
     }
   };
+
   const toggleSignature = () => {
     setShowSignature(!showSignature);
   };
+
+  // Split data for first page (8 rows) and continuation
+  const firstPageData = tableData.slice(0, 8);
+  const continuationData = tableData.slice(8);
 
   return (
     <>
       <div className="print-hide flex gap-2 mb-4">
         <Button onClick={handlePrint}>Print</Button>
-
         <Button
           type={showSignature ? "primary" : "default"}
           onClick={toggleSignature}
@@ -343,24 +369,27 @@ const TaxInvoice = () => {
       ) : (
         <div className="min-h-screen bg-gray-100 p-8">
           <div
-            className="max-w-4xl mx-auto bg-white print:border-none border-2 border-blue-900"
+            className="max-w-4xl mx-auto bg-white  border-2 border-blue-900"
             ref={componentRef}
           >
-            <div className="fixed-header border-b-2 relative border-blue-900 px-2 py-1 bg-white">
+            <div className="fixed-header border-b-2 border-l-2 border-r-2 relative border-blue-900 px-2 py-1 bg-white">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h1 className="text-4xl font-bold text-blue-900 instrument-font">
-                    {company?.company_name}
+                    {company?.company_name || "THE UNITED TRADERS (Regd.)"}
                   </h1>
                   <p className="text-sm text-gray-700 mt-2">
                     Dealers in : KRAFT PAPER & DUPLEX BOARD
                   </p>
                   <p className="text-xs text-gray-600">
-                    {company?.company_address}
+                    {company?.company_address ||
+                      "No. 123, Commercial Street, Bangalore - 560001"}
                   </p>
                   <div className="mt-4 flex justify-start gap-5 text-xs">
-                    <div>GSTIN : {company?.company_gst}</div>
-                    <div>Pan No : {company?.company_pan}</div>
+                    <div>
+                      GSTIN : {company?.company_gst || "29AABCT1234F1Z5"}
+                    </div>
+                    <div>Pan No : {company?.company_pan || "AABCT1234F"}</div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -383,10 +412,11 @@ const TaxInvoice = () => {
                 <div className="flex-1">
                   <p className="text-xs font-bold text-gray-700 mb-2">To</p>
                   <h3 className="font-bold text-blue-900 mb-1">
-                    {selectedMill?.mill_name}
+                    {selectedMill?.mill_name || "ABC Paper Mills Pvt. Ltd."}
                   </h3>
                   <p className="text-xs text-gray-700 whitespace-pre-line">
-                    {selectedMill?.mill_billing_address}
+                    {selectedMill?.mill_billing_address ||
+                      "Plot No. 45, Industrial Area\nPhase II, GIDC Estate\nMumbai - 400053\nMaharashtra, India"}
                   </p>
                 </div>
                 <div className="flex-1">
@@ -394,27 +424,33 @@ const TaxInvoice = () => {
                     <span className="text-xs font-bold text-gray-700">
                       Invoice No. :
                     </span>
-                    <span className="text-xs">{data?.tax_invoice_no}</span>
+                    <span className="text-xs">
+                      {data?.tax_invoice_no || "TUT/2024-25/001234"}
+                    </span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-xs font-bold text-gray-700">
                       Invoice Date :
                     </span>
                     <span className="text-xs">
-                      {formatDate(data?.tax_invoice_date)}
+                      {formatDate(data?.tax_invoice_date) || "20/11/2025"}
                     </span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-xs font-bold text-gray-700">
                       Service State :
                     </span>
-                    <span className="text-xs">{selectedMill?.mill_state}</span>
+                    <span className="text-xs">
+                      {selectedMill?.mill_state || "Maharashtra"}
+                    </span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-xs font-bold text-gray-700">
                       Party GST :
                     </span>
-                    <span className="text-xs">{selectedMill?.mill_gstin}</span>
+                    <span className="text-xs">
+                      {selectedMill?.mill_gstin || "27AABCP1234M1ZK"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -440,15 +476,13 @@ const TaxInvoice = () => {
                 <tbody>
                   <tr className="border-y-2 border-blue-900">
                     <td className="border-r-2 border-blue-900 p-2">1.</td>
-
                     <td className="border-r-2 border-blue-900 p-2">
-                      {data?.tax_invoice_description}
+                      {data?.tax_invoice_description ||
+                        "Commission on sale of Kraft Paper and Duplex Board as per details below"}
                     </td>
-
                     <td className="border-r-2 border-blue-900 p-2">
-                      {data?.tax_invoice_hsn_code}
+                      {data?.tax_invoice_hsn_code || "998599"}
                     </td>
-
                     <td className="p-2 text-right font-medium">
                       {totalCommission.toFixed(2)}
                     </td>
@@ -456,7 +490,7 @@ const TaxInvoice = () => {
                 </tbody>
               </table>
 
-              <div className="w-[80%] p-2">
+              <div className="w-[80%] p-2 min-h-[300px] first-page-summary-table">
                 <div className="text-left pb-1">
                   <h2 className="text-md font-bold text-gray-800">Summary</h2>
                 </div>
@@ -491,37 +525,30 @@ const TaxInvoice = () => {
                   </thead>
 
                   <tbody>
-                    {/* {mockdata?.map((row, idx) => ( */}
-                    {data?.subs?.map((row, idx) => (
+                    {/* {(tableData.length <= 8 ? tableData : firstPageData).map( */}
+                    {tableData.map((row, idx) => (
                       <tr key={idx} className="border border-gray-800">
                         <td className="border border-gray-800 p-1">
                           {formatDate(row.tax_invoice_sub_purchase_date)}
                         </td>
-
                         <td className="border border-gray-800 p-1">
                           {row.tax_invoice_sub_billing_ref}
                         </td>
-
                         <td className="border border-gray-800 p-1">
                           {row.tax_invoice_sub_bf}
                         </td>
-
                         <td className="border border-gray-800 p-1 text-right">
                           {row.tax_invoice_sub_tones}
                         </td>
-
                         <td className="border border-gray-800 p-1 text-right">
                           {row.tax_invoice_sub_sale_rate}
                         </td>
-
                         <td className="border border-gray-800 p-1 text-right">
                           {row.tax_invoice_sub_purchase_rate}
                         </td>
-
                         <td className="border border-gray-800 p-1 text-right">
                           {row.tax_invoice_sub_rate_diff}
                         </td>
-
                         <td className="border border-gray-800 p-1 text-right">
                           {row.tax_invoice_sub_commn}
                         </td>
@@ -555,7 +582,7 @@ const TaxInvoice = () => {
                     Total Amount (INR IN WORDS) :
                   </p>
                   <p className="text-sm font-semibold">
-                    {numberToWords(Math.round(totalAmount))}
+                    {numberToWords(Math.round(totalAmount))} .....
                   </p>
                   <p className="text-xs text-gray-600 mt-2">
                     Note : Any dispute is Subject to Bangalore Jurisdiction.
@@ -573,17 +600,21 @@ const TaxInvoice = () => {
                     <span>Rs. {grossTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between mb-1">
-                    <span>ADD - CGST {data?.tax_invoice_cgst}% :</span>
-                    <span>{`Rs. ${cgstAmount.toFixed(2)}` ?? "0"}</span>
+                    <span>ADD - CGST {data?.tax_invoice_cgst || 9}% :</span>
+                    <span>
+                      {cgstAmount > 0 ? `Rs. ${cgstAmount.toFixed(2)}` : "-"}
+                    </span>
                   </div>
                   <div className="flex justify-between mb-1">
-                    <span>ADD - SGST {data?.tax_invoice_sgst}% :</span>
-                    <span>{`Rs. ${sgstAmount.toFixed(2)}` ?? "0"}</span>
+                    <span>ADD - SGST {data?.tax_invoice_sgst || 9}% :</span>
+                    <span>
+                      {sgstAmount > 0 ? `Rs. ${sgstAmount.toFixed(2)}` : "-"}
+                    </span>
                   </div>
                   <div className="flex justify-between mb-1">
-                    <span>ADD - IGST {data?.tax_invoice_igst}% :</span>
+                    <span>ADD - IGST {data?.tax_invoice_igst || 0}% :</span>
                     <span className="font-semibold">
-                      {`Rs. ${igstAmount.toFixed(2)}` ?? "0"}
+                      {igstAmount > 0 ? `Rs. ${igstAmount.toFixed(2)}` : "-"}
                     </span>
                   </div>
                   <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-1">
@@ -596,23 +627,35 @@ const TaxInvoice = () => {
               <div className="flex gap-6 p-4 border-b border-blue-900">
                 <div className="flex-1 text-xs">
                   <p className="font-bold mb-1">
-                    Acc Name : {companydata?.company_account_name}
+                    Acc Name : The United Trades (R)
                   </p>
-                  <p className="mb-1">Bank : {companydata?.company_bank}</p>
-                  <p className="mb-1">Branch : {companydata?.company_branch}</p>
                   <p className="mb-1">
-                    A/C No : {companydata?.company_account_no}
+                    Bank :{" "}
+                    {selectedMill?.mill_bank_name || "State Bank of India"}
                   </p>
-                  <p>IFSC Code : {companydata?.company_ifsc_code}</p>
+                  <p className="mb-1">
+                    Branch :{" "}
+                    {selectedMill?.mill_bank_branch_name ||
+                      "Commercial Street Branch"}
+                  </p>
+                  <p className="mb-1">
+                    A/C No : {selectedMill?.mill_bank_ac_no || "1234567890123"}
+                  </p>
+                  <p>
+                    IFSC Code : {selectedMill?.mill_bank_ifsc || "SBIN0001234"}
+                  </p>
                 </div>
                 <div className="flex-1 text-right">
                   <p className="text-md font-bold">
-                    {companydata?.company_name}
+                    THE UNITED TRADERS (Regd.)
                   </p>
                   <div className="relative mt-8">
                     {showSignature && (
                       <img
-                        src={SiginImagePath}
+                        src={
+                          SiginImagePath ||
+                          "https://via.placeholder.com/112x60?text=Signature"
+                        }
                         alt="Signature"
                         className="w-28 h-auto object-contain absolute right-0 -top-12"
                       />
@@ -625,43 +668,121 @@ const TaxInvoice = () => {
               <div className="border-t-2 border-blue-900 p-4">
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-gray-700 flex-1">
-                    Corr. Address : {company?.company_cor_address}
+                    Corr. Address :{" "}
+                    {company?.company_cor_address ||
+                      "Shop No. 15, Ground Floor, MG Road, Bangalore - 560001"}
                   </p>
                   <div className="flex gap-4 items-center mx-4">
-                    {companydata?.company_mobile2 && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
-                          <Phone className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-xs">
-                          {companydata?.company_mobile2}
-                        </span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                        <Phone className="w-3 h-3 text-white" />
                       </div>
-                    )}
-                    {companydata?.company_mobile && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
-                          <PhoneCall className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-xs">
-                          {" "}
-                          {companydata?.company_mobile}
-                        </span>
+                      <span className="text-xs">8626728620</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
+                        <PhoneCall className="w-3 h-3 text-white" />
                       </div>
-                    )}
+                      <span className="text-xs">9854420122</span>
+                    </div>
                     <div className="flex items-center gap-1">
                       <div className="w-4 h-4 rounded-full bg-blue-900 flex items-center justify-center">
                         <Mail className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-xs">
-                        {" "}
-                        {companydata?.company_to_email}
-                      </span>
+                      <span className="text-xs">united1141@email.com</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {tableData.length > 8 && (
+              <div className="continuation-section hidden print:block">
+                <div className="p-2">
+                  <div className="text-left pb-1">
+                    <h2 className="text-md font-bold text-gray-800">
+                      Summary {tableData.length <= 8 ? "" : ""}
+                    </h2>
+                  </div>
+                  <table className="w-full border border-gray-800 border-collapse text-xs">
+                    <thead>
+                      <tr className="border border-gray-800 bg-gray-100">
+                        <th className="border border-gray-800 p-1 text-left font-bold">
+                          Date
+                        </th>
+                        <th className="border border-gray-800 p-1 text-left font-bold">
+                          Bill Ref.
+                        </th>
+                        <th className="border border-gray-800 p-1 text-left font-bold">
+                          BF
+                        </th>
+                        <th className="border border-gray-800 p-1 text-right font-bold">
+                          Quantity
+                        </th>
+                        <th className="border border-gray-800 p-1 text-right font-bold">
+                          Rate
+                        </th>
+                        <th className="border border-gray-800 p-1 text-right font-bold">
+                          Disc. Rate
+                        </th>
+                        <th className="border border-gray-800 p-1 text-right font-bold">
+                          Diff.
+                        </th>
+                        <th className="border border-gray-800 p-1 text-right font-bold">
+                          Commn
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {tableData.map((row, idx) => (
+                        <tr key={idx} className="border border-gray-800">
+                          <td className="border border-gray-800 p-1">
+                            {formatDate(row.tax_invoice_sub_purchase_date)}
+                          </td>
+                          <td className="border border-gray-800 p-1">
+                            {row.tax_invoice_sub_billing_ref}
+                          </td>
+                          <td className="border border-gray-800 p-1">
+                            {row.tax_invoice_sub_bf}
+                          </td>
+                          <td className="border border-gray-800 p-1 text-right">
+                            {row.tax_invoice_sub_tones}
+                          </td>
+                          <td className="border border-gray-800 p-1 text-right">
+                            {row.tax_invoice_sub_sale_rate}
+                          </td>
+                          <td className="border border-gray-800 p-1 text-right">
+                            {row.tax_invoice_sub_purchase_rate}
+                          </td>
+                          <td className="border border-gray-800 p-1 text-right">
+                            {row.tax_invoice_sub_rate_diff}
+                          </td>
+                          <td className="border border-gray-800 p-1 text-right">
+                            {row.tax_invoice_sub_commn}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="flex justify-end mt-2">
+                    <div className="w-48">
+                      <div className="flex justify-between text-xs font-bold border-t-2 border-gray-800 pt-1">
+                        <span>Total =</span>
+                        <span className="text-red-600">
+                          Rs.{" "}
+                          {totalCommission.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

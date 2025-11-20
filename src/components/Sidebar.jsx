@@ -110,7 +110,7 @@ const getMenuItems = (collapsed) => {
         label: "Management",
         children: managementChildren,
       },
-      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
       { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
       {
@@ -148,7 +148,7 @@ const getMenuItems = (collapsed) => {
         },
       ],
     },
-    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
     { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
     { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
@@ -342,7 +342,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 19-11-2025
+                    Updated on: 20-11-2025
                   </div>
                 </div>
               }

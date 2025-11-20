@@ -1,9 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { App, Button, Card, Form, Input, Spin, Switch } from "antd";
+import { App, Button, Card, Form, Input, Select, Spin, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PARTY_LIST } from "../../../api";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useMasterData } from "../../../hooks";
 
 const PartyForm = () => {
   const { message } = App.useApp();
@@ -15,7 +16,9 @@ const PartyForm = () => {
   const navigate = useNavigate();
   const [initialData, setInitialData] = useState({});
   const queryClient = useQueryClient();
-
+  const { state } = useMasterData({
+    state: true,
+  });
   const resetForm = () => {
     form.resetFields();
   };
@@ -78,10 +81,11 @@ const PartyForm = () => {
       );
     }
   };
+  const loading = fetchLoading || state.loading;
 
   return (
     <>
-      {fetchLoading ? (
+      {loading ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
@@ -151,10 +155,31 @@ const PartyForm = () => {
                   <Input maxLength={100} placeholder="Enter Party Name" />
                 </Form.Item>
 
-                <Form.Item label="State" name="party_state">
-                  <Input placeholder="Enter Enter" />
+                <Form.Item
+                  name="party_state"
+                  label={
+                    <span>
+                      State<span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true, message: "State is required" }]}
+                >
+                  {/* <Input placeholder="Enter Enter" /> */}
+                  <Select
+                    placeholder="Select State"
+                    options={state?.data?.data.map((item) => ({
+                      value: item.state_name,
+                      label: item.state_name,
+                    }))}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
                 </Form.Item>
-
                 <Form.Item label="GSTIN" name="party_gstin">
                   <Input maxLength={15} placeholder="Enter GST" />
                 </Form.Item>
