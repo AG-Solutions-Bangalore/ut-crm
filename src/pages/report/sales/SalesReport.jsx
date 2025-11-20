@@ -345,7 +345,7 @@ const SalesReport = () => {
                     >
                       {millsData?.data?.map((mill) => (
                         <Option key={mill.id} value={mill.id}>
-                          {mill.mill_name}
+                          {mill.mill_short}
                         </Option>
                       ))}
                     </Select>
@@ -353,12 +353,7 @@ const SalesReport = () => {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <Button 
-                    onClick={handleReset}
-                    size="large"
-                  >
-                    Reset
-                  </Button>
+               
                   <Button 
                     type="primary" 
                     onClick={handleGenerateReport}

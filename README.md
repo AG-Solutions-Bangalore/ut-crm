@@ -29,7 +29,6 @@
 ├── vite.config.js             # Vite build configuration
 ├── eslint.config.js           # ESLint configuration
 ├── index.html                 # Main HTML template
-└── test.jsx                   # Test components
 ```
 
 ### Source Code (`/src`)

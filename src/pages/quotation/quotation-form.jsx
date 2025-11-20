@@ -83,14 +83,14 @@ const QuotationForm = () => {
     })) || [];
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
       mill_billing_address: item.mill_billing_address,
     })) || [];
 
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
       party_delivery_address: item.party_delivery_address,
     })) || [];

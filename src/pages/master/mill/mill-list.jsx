@@ -76,14 +76,6 @@ const MillList = () => {
   };
   const columns = [
     {
-      title: "Mill Name",
-      dataIndex: "mill_name",
-      key: "mill_name",
-      render: (_, record) => (
-        <HighlightText text={record.mill_name} match={debouncedSearch} />
-      ),
-    },
-    {
       title: "Short Name",
       dataIndex: "mill_short",
       key: "mill_short",
@@ -91,6 +83,15 @@ const MillList = () => {
         <HighlightText text={record.mill_short} match={debouncedSearch} />
       ),
     },
+    {
+      title: "Mill Name",
+      dataIndex: "mill_name",
+      key: "mill_name",
+      render: (_, record) => (
+        <HighlightText text={record.mill_name} match={debouncedSearch} />
+      ),
+    },
+
     {
       title: "Type",
       dataIndex: "mill_type",

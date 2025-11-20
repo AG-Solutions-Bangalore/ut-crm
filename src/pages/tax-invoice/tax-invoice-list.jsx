@@ -92,8 +92,8 @@ const TaxInvoiceList = () => {
     },
     {
       title: "Mill Name",
-      dataIndex: "mill_name",
-      key: "mill_name",
+      dataIndex: "mill_short",
+      key: "mill_short",
       render: (text) => <span className="text-gray-800">{text || "-"}</span>,
     },
     {

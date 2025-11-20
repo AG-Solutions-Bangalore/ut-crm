@@ -94,13 +94,13 @@ const BillingForm = () => {
     })) || [];
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
     })) || [];
 
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
     })) || [];
 

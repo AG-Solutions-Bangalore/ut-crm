@@ -52,7 +52,7 @@ const TaxInvoiceForm = () => {
   });
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
       mill_state: item.mill_state,
     })) || [];

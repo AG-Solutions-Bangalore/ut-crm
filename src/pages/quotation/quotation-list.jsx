@@ -120,14 +120,14 @@ const QuotationList = () => {
     },
     {
       title: "Mill Name",
-      dataIndex: "mill_name",
-      key: "mill_name",
+      dataIndex: "mill_short",
+      key: "mill_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
       title: "Party Name",
-      dataIndex: "party_name",
-      key: "party_name",
+      dataIndex: "party_short",
+      key: "party_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
