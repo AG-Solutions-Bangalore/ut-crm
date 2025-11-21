@@ -95,11 +95,13 @@ const BillingList = () => {
       fixed: "left",
       render: (_, record) => (
         <div className="flex flex-col">
-          <span className="text-black font-bold">
-            {record.purchase_orders_ref ? record.purchase_orders_ref : "-"}
-          </span>
+          {record.purchase_orders_ref && (
+            <span className="text-black font-bold">
+              {record.purchase_orders_ref}
+            </span>
+          )}
           <span className="text-gray-800">
-            {record.billing_payment_type ? (
+            {record.billing_payment_type && (
               <span
                 className={`inline-flex items-center justify-center w-6 h-6 mr-1 rounded-full text-white font-semibold uppercase ${
                   record.billing_payment_type[0].toLowerCase() === "p"
@@ -109,30 +111,8 @@ const BillingList = () => {
               >
                 {record.billing_payment_type.charAt(0)}
               </span>
-            ) : (
-              ""
             )}
             B No : {record.billing_no ? record.billing_no : ""}{" "}
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Date",
-      key: "date",
-      render: (_, record) => (
-        <div className="flex flex-col">
-          <span className="text-gray-800">
-            Purchase:{" "}
-            {record.purchase_date
-              ? dayjs(record.purchase_date).format("DD-MM-YYYY")
-              : "-"}
-          </span>
-          <span className="text-gray-600">
-            Sale:{" "}
-            {record.sale_date
-              ? dayjs(record.sale_date).format("DD-MM-YYYY")
-              : "-"}
           </span>
         </div>
       ),
@@ -140,48 +120,36 @@ const BillingList = () => {
 
     {
       title: "Mill Name",
-      dataIndex: "mill_name",
-      key: "mill_name",
+      dataIndex: "mill_short",
+      key: "mill_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
       title: "Party Name",
-      dataIndex: "party_name",
-      key: "party_name",
+      dataIndex: "party_short",
+      key: "party_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
+
     {
-      title: "Billing BF",
-      dataIndex: "billing_bf",
-      key: "billing_bf",
-      render: (text) => <span className="text-gray-800">{text}</span>,
-    },
-    {
-      title: "Billing Tones",
-      dataIndex: "billing_tones",
-      key: "billing_tones",
+      title: "Total Tones",
+      dataIndex: "billing_total_tones",
+      key: "billing_total_tones",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Rate",
-      key: "rate",
-      align: "left",
-      render: (_, record) => (
-        <div className="flex flex-col items-end">
-          <span className="text-green-600">
-            Sale: {Number(record.sale_rate).toFixed(2)}
-          </span>
-          <span className="text-blue-600">
-            POR: {Number(record.purchase_rate).toFixed(2)}
-          </span>
-        </div>
-      ),
+      title: "Total Comm",
+      dataIndex: "billing_total_commn",
+      key: "billing_total_commn",
+      align: "right",
+      render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
+
     {
-      title: "Sale Amount",
-      dataIndex: "purchase_amount",
-      key: "purchase_amount",
+      title: "Total Amount",
+      dataIndex: "billing_total_sale_amount",
+      key: "billing_total_sale_amount",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
@@ -423,10 +391,7 @@ const BillingList = () => {
                             </tbody>
                             <tfoot>
                               <tr className="bg-gray-50 text-center font-semibold">
-                                <td
-                                  colSpan={1}
-                                  className="p-2 text-right"
-                                >
+                                <td colSpan={1} className="p-2 text-right">
                                   Total :
                                 </td>
                                 <td className="p-2 ">

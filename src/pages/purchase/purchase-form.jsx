@@ -55,14 +55,14 @@ const PurchaseForm = () => {
   const [selectedParty, setSelectedParty] = useState(null);
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
       mill_billing_address: item.mill_billing_address,
     })) || [];
 
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
       party_delivery_address: item.party_delivery_address,
     })) || [];
@@ -161,8 +161,8 @@ const PurchaseForm = () => {
         size: sub?.size || "",
         qnty: sub?.qnty || "",
         unit: sub?.unit || "",
-        bill_rate: sub?.bill_rate || "",
-        agreed_rate: sub?.agreed_rate || "",
+        bill_rate: sub?.bill_rate || 0,
+        agreed_rate: sub?.agreed_rate || 0,
         remarks: sub?.remarks || "",
       })),
     };
@@ -241,7 +241,7 @@ const PurchaseForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Purchase Order" : "Create Purchase Order"}
+                {isEditMode ? "Update P/O" : "Create P/O"}
               </h2>
             }
             extra={

@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { PANEL_SEND_PASSWORD } from "../../api";
 import bgSignin from "../../assets/bg-sigin.png";
-import logo from "../../assets/logo-1.png";
 import useFinalUserImage from "../../components/common/Logo";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
@@ -95,7 +94,8 @@ const ForgotPassword = () => {
       <motion.div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(135deg, rgba(38, 29, 84, 0.4), rgba(61, 47, 122, 0.3), rgba(74, 54, 148, 0.25))",
+          background:
+            "linear-gradient(135deg, rgba(38, 29, 84, 0.4), rgba(61, 47, 122, 0.3), rgba(74, 54, 148, 0.25))",
         }}
         animate={{
           backgroundPosition: ["0% 0%", "100% 100%"],
@@ -144,17 +144,6 @@ const ForgotPassword = () => {
             className="flex flex-col justify-center px-8 md:px-12 py-12 bg-gradient-to-br from-white to-purple-50/30"
           >
             <motion.div variants={itemVariants} className="text-center mb-8">
-              {/* <motion.div
-                variants={logoVariants}
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                className="inline-block"
-              >
-                <img
-                  src={logo || ""}
-                  alt="Logo"
-                  className="h-20 mx-auto drop-shadow-lg"
-                />
-              </motion.div> */}
               <Title level={2} className="!text-gray-800 !mt-6 !mb-2">
                 Reset Your Password
               </Title>
@@ -178,18 +167,22 @@ const ForgotPassword = () => {
                 <Form.Item
                   label={
                     <span className="text-gray-700 font-medium">
-                      Username <span className="text-red-500">*</span>
+                      Mobile No <span className="text-red-500">*</span>
                     </span>
                   }
                   name="username"
                   rules={[
-                    { required: true, message: "Please enter your username" },
+                    {
+                      required: true,
+                      message: "Please enter your Mobile No",
+                    },
                   ]}
                 >
                   <Input
                     size="large"
-                    placeholder="Enter username"
+                    placeholder="Enter Mobile No"
                     autoFocus
+                    maxLength={10}
                     className="rounded-lg hover:border-purple-400 transition-all duration-300"
                     style={{
                       boxShadow: "0 2px 8px rgba(38, 29, 84, 0.08)",
@@ -225,7 +218,10 @@ const ForgotPassword = () => {
 
               <motion.div variants={itemVariants}>
                 <Form.Item className="!mb-4">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
                     <Button
                       type="primary"
                       htmlType="submit"
@@ -234,13 +230,13 @@ const ForgotPassword = () => {
                       size="large"
                       className="!h-12 !rounded-lg !font-semibold !text-base shadow-lg hover:shadow-xl transition-all duration-300"
                       style={{
-                        background: "linear-gradient(135deg, #261d54 0%, #3d2f7a 50%, #4a3694 100%)",
+                        background:
+                          "linear-gradient(135deg, #261d54 0%, #3d2f7a 50%, #4a3694 100%)",
                         border: "none",
                       }}
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
-                         
                           Processing...
                         </span>
                       ) : (
@@ -282,9 +278,10 @@ const ForgotPassword = () => {
                 </motion.div>
                 <div>
                   <Text className="text-sm text-gray-600">
-                    <strong className="text-gray-700">Need help?</strong> 
+                    <strong className="text-gray-700">Need help?</strong>
                     <br />
-                    Contact your administrator if you don't receive the reset email within a few minutes.
+                    Contact your administrator if you don't receive the reset
+                    email within a few minutes.
                   </Text>
                 </div>
               </div>
@@ -298,7 +295,8 @@ const ForgotPassword = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="hidden md:flex items-center justify-center relative overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #261d54 0%, #3d2f7a 50%, #4a3694 100%)",
+              background:
+                "linear-gradient(135deg, #261d54 0%, #3d2f7a 50%, #4a3694 100%)",
             }}
           >
             {/* Animated circles background */}
@@ -356,28 +354,14 @@ const ForgotPassword = () => {
                   }}
                 >
                   <img
-                    src={logo}
+                    src={finalUserImage}
                     alt="Reset Password Illustration"
                     className="w-64 h-64 object-contain drop-shadow-2xl"
                   />
-                  {/* Lock overlay effect */}
-                  {/* <motion.div
-                    className="absolute inset-0 flex items-center justify-center"
-                    animate={{
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                    }}
-                  >
-                    <div className="text-8xl">🔐</div>
-                  </motion.div> */}
                 </motion.div>
               </div>
             </motion.div>
 
-            {/* Decorative elements */}
             {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}

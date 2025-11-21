@@ -3,21 +3,20 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SettingOutlined,
-  UserOutlined,
+  SettingOutlined
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown } from "antd";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import useLogout from "../hooks/useLogout";
 import ChangePassword from "../pages/profile/ChangePassword";
-import { useState } from "react";
 export default function Navbar({ collapsed, onToggle }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpenDialog] = useState(false);
   const imageUrls = useSelector((state) => state?.auth?.userImage);
-  const userImagePath = useSelector((state) => state?.auth?.user?.avatar_photo);
+  const userImagePath = useSelector((state) => state?.auth?.user?.user_image);
   const userBaseUrl = imageUrls.find(
     (img) => img.image_for == "User"
   )?.image_url;
@@ -43,15 +42,7 @@ export default function Navbar({ collapsed, onToggle }) {
 
   const profileMenu = {
     items: [
-      // {
-      //   key: "profile",
-      //   label: (
-      //     <div className="flex items-center gap-2 px-2 py-2">
-      //       <UserOutlined className="text-teal-600" />
-      //       <span className="text-gray-800">Profile</span>
-      //     </div>
-      //   ),
-      // },
+ 
       {
         key: "chnagepassword",
         label: (

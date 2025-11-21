@@ -11,6 +11,8 @@ export const PANEL_SEND_PASSWORD = `/panel-send-password`;
 //PANEL_CHANGE_PASSWORD
 export const PANEL_CHANGE_PASSWORD = `/panel-change-password`;
 // ------------------------------------New-------------------------------------------------
+export const STATE_LIST = `/panel-fetch-state`;
+
 // ----------MILLS--------------
 export const MILL_LIST = `/mill`;
 export const ACTIVE_MILL = `/activeMills`;
@@ -78,3 +80,8 @@ export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
 export const PAYMENT_LIST = "/payment";
 export const PAYMENT_BILLING_REF = "/getpendingbillingamount";
 export const PAYMENT_MODE = "/panel-fetch-payment-mode";
+// -------------------EMAILS----------------------
+export const PURCHASE_ORDER_EMAIL = "/sendPurchaseOrderEmail";
+export const QUOTATION_EMAIL = "/sendQuotationEmail";
+export const TRADE_INVOICE_EMAIL = "/sendTradeInvoiceEmail";
+export const TAX_INVOICE_EMAIL = "/sendTaxInvoiceEmail";

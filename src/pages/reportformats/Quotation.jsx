@@ -3,7 +3,6 @@ import reportlogo from "../../assets/report-logo.png";
 import ReportActions from "../reportformats/ReportActions";
 
 const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
-// const prodUrl = "https://theunitedtraders.co.in/crmapi/public/assets/images/company_images/sign.jpeg";
 
 const Quotation = () => {
   const componentRef = useRef(null);

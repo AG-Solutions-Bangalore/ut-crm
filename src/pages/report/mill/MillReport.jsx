@@ -1,14 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { Button, Card, message } from 'antd';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import dayjs from 'dayjs';
-import useToken from '../../../api/usetoken';
-import { Download, Printer, FileSpreadsheet } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
-import html2pdf from 'html2pdf.js';
-import * as ExcelJS from 'exceljs';
-import Loader from '../../../components/common/Loader';
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, message, Spin } from "antd";
+import axios from "axios";
+import dayjs from "dayjs";
+import * as ExcelJS from "exceljs";
+import html2pdf from "html2pdf.js";
+import { Download, FileSpreadsheet, Printer } from "lucide-react";
+import { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import useToken from "../../../api/usetoken";
 
 const MillReport = () => {
   const [reportData, setReportData] = useState([]);
@@ -16,15 +15,15 @@ const MillReport = () => {
   const token = useToken();
 
   const { isFetching } = useQuery({
-    queryKey: ['millReport'],
+    queryKey: ["millReport"],
     queryFn: async () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}millReport`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       setReportData(response.data.data || []);
@@ -43,18 +42,18 @@ const MillReport = () => {
   }, {});
 
   const handleDownload = () => {
-    const element = containerRef?.current; 
+    const element = containerRef?.current;
 
     if (!element) {
-      message.error('Failed to generate PDF');
+      message.error("Failed to generate PDF");
       return;
     }
 
     const elementForPdf = element.cloneNode(true);
-    const printHideElements = elementForPdf.querySelectorAll('.print-hide');
-    printHideElements.forEach(el => el.remove());
+    const printHideElements = elementForPdf.querySelectorAll(".print-hide");
+    printHideElements.forEach((el) => el.remove());
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       * {
         color: #000000 !important;
@@ -97,14 +96,14 @@ const MillReport = () => {
 
     const options = {
       margin: [10, 10, 10, 10],
-      filename: `Mill-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+      filename: `Mill-Report-${dayjs().format("DD-MM-YYYY")}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
         useCORS: true,
         scrollY: 0,
         windowHeight: elementForPdf.scrollHeight,
-        backgroundColor: '#FFFFFF'
+        backgroundColor: "#FFFFFF",
       },
       jsPDF: {
         unit: "mm",
@@ -119,17 +118,17 @@ const MillReport = () => {
       .set(options)
       .save()
       .then(() => {
-        message.success('PDF downloaded successfully');
+        message.success("PDF downloaded successfully");
       })
       .catch((error) => {
-        console.error('PDF download error:', error);
-        message.error('Failed to download PDF');
+        console.error("PDF download error:", error);
+        message.error("Failed to download PDF");
       });
   };
 
   const handlePrint = useReactToPrint({
     content: () => containerRef.current,
-    documentTitle: `Mill-Report-${dayjs().format('DD-MM-YYYY')}`,
+    documentTitle: `Mill-Report-${dayjs().format("DD-MM-YYYY")}`,
     removeAfterPrint: true,
     pageStyle: `
       @page {
@@ -187,86 +186,99 @@ const MillReport = () => {
 
   const handleExcelExport = async () => {
     if (reportData.length === 0) {
-      message.error('No data to export');
+      message.error("No data to export");
       return;
     }
 
     try {
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Mill Report');
+      const worksheet = workbook.addWorksheet("Mill Report");
 
-      
-      worksheet.mergeCells('A1:D1');
-      worksheet.getCell('A1').value = 'Mill Information';
-      worksheet.getCell('A1').font = { bold: true, size: 14 };
-      worksheet.getCell('A1').alignment = { horizontal: 'center' };
+      worksheet.mergeCells("A1:D1");
+      worksheet.getCell("A1").value = "Mill Information";
+      worksheet.getCell("A1").font = { bold: true, size: 14 };
+      worksheet.getCell("A1").alignment = { horizontal: "center" };
 
-     
-      worksheet.getCell('A2').value = 'Mill Name & Billing Address';
-      worksheet.getCell('B2').value = 'Contact Details';
-      worksheet.getCell('C2').value = 'Bank Details';
-      worksheet.getCell('D2').value = 'State & Status';
+      worksheet.getCell("A2").value = "Mill Name & Billing Address";
+      worksheet.getCell("B2").value = "Contact Details";
+      worksheet.getCell("C2").value = "Bank Details";
+      worksheet.getCell("D2").value = "State & Status";
 
-      ['A2', 'B2', 'C2', 'D2'].forEach(cell => {
+      ["A2", "B2", "C2", "D2"].forEach((cell) => {
         worksheet.getCell(cell).font = { bold: true };
         worksheet.getCell(cell).fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFD3D3D3' }
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFD3D3D3" },
         };
         worksheet.getCell(cell).border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
       });
 
       let currentRow = 3;
 
       reportData.forEach((mill) => {
-   
         worksheet.getCell(`A${currentRow}`).value = mill.mill_name;
         worksheet.getCell(`A${currentRow}`).font = { bold: true };
-        worksheet.getCell(`A${currentRow + 1}`).value = 'Billing Address:';
+        worksheet.getCell(`A${currentRow + 1}`).value = "Billing Address:";
         worksheet.getCell(`A${currentRow + 1}`).font = { bold: true };
-        worksheet.getCell(`A${currentRow + 2}`).value = mill.mill_billing_address;
+        worksheet.getCell(`A${currentRow + 2}`).value =
+          mill.mill_billing_address;
         worksheet.getCell(`A${currentRow + 2}`).alignment = { wrapText: true };
 
- 
-        worksheet.getCell(`B${currentRow}`).value = 'Contact Details:';
+        worksheet.getCell(`B${currentRow}`).value = "Contact Details:";
         worksheet.getCell(`B${currentRow}`).font = { bold: true };
-        worksheet.getCell(`B${currentRow + 1}`).value = `Name: ${mill.mill_cp_name || '-'}`;
-        worksheet.getCell(`B${currentRow + 2}`).value = `Mobile: ${mill.mill_cp_mobile || '-'}`;
-        worksheet.getCell(`B${currentRow + 3}`).value = `Email: ${mill.mill_cp_email || '-'}`;
-        worksheet.getCell(`B${currentRow + 4}`).value = `GSTIN: ${mill.mill_gstin || '-'}`;
+        worksheet.getCell(`B${currentRow + 1}`).value = `Name: ${
+          mill.mill_cp_name || "-"
+        }`;
+        worksheet.getCell(`B${currentRow + 2}`).value = `Mobile: ${
+          mill.mill_cp_mobile || "-"
+        }`;
+        worksheet.getCell(`B${currentRow + 3}`).value = `Email: ${
+          mill.mill_cp_email || "-"
+        }`;
+        worksheet.getCell(`B${currentRow + 4}`).value = `GSTIN: ${
+          mill.mill_gstin || "-"
+        }`;
 
-       
-        worksheet.getCell(`C${currentRow}`).value = 'Bank Details:';
+        worksheet.getCell(`C${currentRow}`).value = "Bank Details:";
         worksheet.getCell(`C${currentRow}`).font = { bold: true };
-        worksheet.getCell(`C${currentRow + 1}`).value = `BANK: ${mill.mill_bank_name || '-'}`;
-        worksheet.getCell(`C${currentRow + 2}`).value = `A/c No: ${mill.mill_bank_ac_no || '-'}`;
-        worksheet.getCell(`C${currentRow + 3}`).value = `IFSC: ${mill.mill_bank_ifsc || '-'}`;
-        worksheet.getCell(`C${currentRow + 4}`).value = `Branch: ${mill.mill_bank_branch_name || '-'}`;
+        worksheet.getCell(`C${currentRow + 1}`).value = `BANK: ${
+          mill.mill_bank_name || "-"
+        }`;
+        worksheet.getCell(`C${currentRow + 2}`).value = `A/c No: ${
+          mill.mill_bank_ac_no || "-"
+        }`;
+        worksheet.getCell(`C${currentRow + 3}`).value = `IFSC: ${
+          mill.mill_bank_ifsc || "-"
+        }`;
+        worksheet.getCell(`C${currentRow + 4}`).value = `Branch: ${
+          mill.mill_bank_branch_name || "-"
+        }`;
 
-    
-        worksheet.getCell(`D${currentRow}`).value = `State: ${mill.mill_state || '-'}`;
-        worksheet.getCell(`D${currentRow + 1}`).value = `Status: ${mill.mill_status || '-'}`;
+        worksheet.getCell(`D${currentRow}`).value = `State: ${
+          mill.mill_state || "-"
+        }`;
+        worksheet.getCell(`D${currentRow + 1}`).value = `Status: ${
+          mill.mill_status || "-"
+        }`;
 
-      
         for (let row = currentRow; row <= currentRow + 4; row++) {
           for (let col = 1; col <= 4; col++) {
             const cell = worksheet.getCell(row, col);
             cell.border = {
-              top: { style: 'thin' },
-              left: { style: 'thin' },
-              bottom: { style: 'thin' },
-              right: { style: 'thin' }
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
             };
           }
         }
 
-   
         worksheet.getRow(currentRow).height = 20;
         worksheet.getRow(currentRow + 1).height = 20;
         worksheet.getRow(currentRow + 2).height = 40;
@@ -276,56 +288,55 @@ const MillReport = () => {
         currentRow += 6;
       });
 
-
       worksheet.columns = [
-        { width: 35 }, 
-        { width: 25 }, 
-        { width: 25 }, 
-        { width: 15 } 
+        { width: 35 },
+        { width: 25 },
+        { width: 25 },
+        { width: 15 },
       ];
 
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `Mill-Report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
+      link.download = `Mill-Report-${dayjs().format("DD-MM-YYYY")}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
-      message.success('Excel file downloaded successfully');
+      message.success("Excel file downloaded successfully");
     } catch (error) {
-      console.error('Excel export error:', error);
-      message.error('Failed to export Excel file');
+      console.error("Excel export error:", error);
+      message.error("Failed to export Excel file");
     }
   };
 
-  if(isFetching){
-    return <Loader msg="Mill Report"/>
+  if (isFetching) {
+    return (
+      <div className="flex justify-center py-20">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-        <div className="text-center">
-          {!token && (
-            <div className="text-red-500 text-sm mt-2">
-              Please log in to access this feature
-            </div>
-          )}
-        </div>
-
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full">
-            <Card 
-              title="Mill Report" 
+            <Card
+              title="Mill Report"
               className="shadow-lg min-h-[800px]"
               extra={
                 <>
                   {reportData.length > 0 && (
                     <div className="print-hide flex justify-between items-center">
                       <div className="flex flex-row items-center gap-1 font-bold">
-                        {reportData.length > 0 ? `${reportData.length} records found` : 'No data to display'}
+                        {reportData.length > 0
+                          ? `${reportData.length} records found`
+                          : "No data to display"}
                         <Button
                           className="ml-2 bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={handleDownload}
@@ -354,89 +365,124 @@ const MillReport = () => {
                 <div>
                   <div ref={containerRef} className="">
                     <div className="p-4">
-                      <h1 className="text-2xl font-bold text-center">Mill Report</h1>
+                      <h1 className="text-2xl font-bold text-center">
+                        Mill Report
+                      </h1>
                     </div>
 
                     <div>
-                      {Object.entries(groupedReportData).map(([millName, millData]) => {
-                        const mill = millData[0];
-                        
-                        return (
-                          <div
-                            key={millName}
-                            className="mb-6 border border-black text-[13px]"
-                          >
-                            <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
-                              <span>{millName}</span>
-                              <span className="text-sm font-normal">{mill.mill_state}</span>
-                            </div>
-                            
-                            <div className="flex flex-col md:flex-row">
-                       
-                              <div className="flex-1 border-r border-black min-h-[150px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Billing Address
-                                </div>
-                                <div className="p-3 h-full flex items-start">
-                                  <div className="whitespace-pre-line break-words">
-                                    {mill.mill_billing_address}
-                                  </div>
-                                </div>
+                      {Object.entries(groupedReportData).map(
+                        ([millName, millData]) => {
+                          const mill = millData[0];
+
+                          return (
+                            <div
+                              key={millName}
+                              className="mb-6 border border-black text-[13px]"
+                            >
+                              <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
+                                <span>{millName}</span>
+                                <span className="text-sm font-normal">
+                                  {mill.mill_state}
+                                </span>
                               </div>
 
-                      
-                              <div className="flex-1 border-r border-black min-h-[150px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Contact Details
-                                </div>
-                                <div className="h-full">
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Name:</span>
-                                    <span className="text-right">{mill.mill_cp_name || '-'}</span>
+                              <div className="flex flex-col md:flex-row">
+                                <div className="flex-1 border-r border-black min-h-[150px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Billing Address
                                   </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Mobile:</span>
-                                    <span className="text-right">{mill.mill_cp_mobile || '-'}</span>
-                                  </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Email:</span>
-                                    <span className="text-right break-all">{mill.mill_cp_email || '-'}</span>
-                                  </div>
-                                  <div className="p-2 flex justify-between">
-                                    <span className="font-semibold">GSTIN:</span>
-                                    <span className="text-right break-all">{mill.mill_gstin || '-'}</span>
+                                  <div className="p-3 h-full flex items-start">
+                                    <div className="whitespace-pre-line break-words">
+                                      {mill.mill_billing_address}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                      
-                              <div className="flex-1 min-h-[150px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Bank Details
+                                <div className="flex-1 border-r border-black min-h-[150px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Contact Details
+                                  </div>
+                                  <div className="h-full">
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Name:
+                                      </span>
+                                      <span className="text-right">
+                                        {mill.mill_cp_name || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Mobile:
+                                      </span>
+                                      <span className="text-right">
+                                        {mill.mill_cp_mobile || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Email:
+                                      </span>
+                                      <span className="text-right break-all">
+                                        {mill.mill_cp_email || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 flex justify-between">
+                                      <span className="font-semibold">
+                                        GSTIN:
+                                      </span>
+                                      <span className="text-right break-all">
+                                        {mill.mill_gstin || "-"}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="h-full">
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">BANK:</span>
-                                    <span className="text-right">{mill.mill_bank_name || '-'}</span>
+
+                                <div className="flex-1 min-h-[150px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Bank Details
                                   </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">A/c No:</span>
-                                    <span className="text-right break-all">{mill.mill_bank_ac_no || '-'}</span>
-                                  </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">IFSC:</span>
-                                    <span className="text-right">{mill.mill_bank_ifsc || '-'}</span>
-                                  </div>
-                                  <div className="p-2 flex justify-between">
-                                    <span className="font-semibold">Branch:</span>
-                                    <span className="text-right break-all">{mill.mill_bank_branch_name || '-'}</span>
+                                  <div className="h-full">
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        BANK:
+                                      </span>
+                                      <span className="text-right">
+                                        {mill.mill_bank_name || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        A/c No:
+                                      </span>
+                                      <span className="text-right break-all">
+                                        {mill.mill_bank_ac_no || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        IFSC:
+                                      </span>
+                                      <span className="text-right">
+                                        {mill.mill_bank_ifsc || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 flex justify-between">
+                                      <span className="font-semibold">
+                                        Branch:
+                                      </span>
+                                      <span className="text-right break-all">
+                                        {mill.mill_bank_branch_name || "-"}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        }
+                      )}
                     </div>
                   </div>
                 </div>

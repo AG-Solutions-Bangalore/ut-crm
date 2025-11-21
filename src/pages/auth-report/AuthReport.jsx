@@ -1,66 +1,77 @@
-import React, { useState } from 'react';
-import { Select, Input, Button, Form, message, Row, Col, Card } from 'antd';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import useToken from '../../api/usetoken';
-import AuthInvoice from '../reportformats/AuthInvoice';
+import React, { useState } from "react";
+import {
+  Select,
+  Input,
+  Button,
+  Form,
+  message,
+  Row,
+  Col,
+  Card,
+  DatePicker,
+  InputNumber,
+} from "antd";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import useToken from "../../api/usetoken";
+import AuthInvoice from "../reportformats/AuthInvoice";
 
 const { Option } = Select;
 
 const AuthReport = () => {
   const [selectedParty, setSelectedParty] = useState(null);
   const [selectedThirdParty, setSelectedThirdParty] = useState(null);
-  const [invoiceNo, setInvoiceNo] = useState('');
-  const [date, setDate] = useState('');
-  const [amount, setAmount] = useState('');
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [date, setDate] = useState("");
+  const [amount, setAmount] = useState("");
   const [form] = Form.useForm();
 
   const token = useToken();
 
   const { data: partiesData, isLoading: partiesLoading } = useQuery({
-    queryKey: ['activeParties'],
+    queryKey: ["activeParties"],
     queryFn: async () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}activePartys`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       return response.data;
     },
-    enabled: !!token, 
+    enabled: !!token,
   });
 
   const { data: thirdPartiesData, isLoading: thirdPartiesLoading } = useQuery({
-    queryKey: ['thirdParties'],
+    queryKey: ["thirdParties"],
     queryFn: async () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}activePartys`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       return response.data;
     },
-    enabled: !!token, 
+    enabled: !!token,
   });
 
   const [showAuthInvoice, setShowAuthInvoice] = useState(false);
 
   const handlePartyChange = (value) => {
-    const party = partiesData?.data?.find(p => p.id === value);
+    const party = partiesData?.data?.find((p) => p.id === value);
     setSelectedParty(party);
     updateAuthInvoice();
   };
 
   const handleThirdPartyChange = (value) => {
-    const thirdParty = thirdPartiesData?.data?.find(p => p.id === value);
+    const thirdParty = thirdPartiesData?.data?.find((p) => p.id === value);
     setSelectedThirdParty(thirdParty);
     updateAuthInvoice();
   };
@@ -70,11 +81,14 @@ const AuthReport = () => {
     updateAuthInvoice();
   };
 
-  const handleDateChange = (e) => {
-    setDate(e.target.value);
+  // const handleDateChange = (e) => {
+  //   setDate(e.target.value);
+  //   updateAuthInvoice();
+  // };
+  const handleDateChange = (date, dateString) => {
+    setDate(date); // or setDate(dateString) depending on what you want
     updateAuthInvoice();
   };
-
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
     updateAuthInvoice();
@@ -90,12 +104,12 @@ const AuthReport = () => {
 
   const handleGenerate = () => {
     if (!selectedParty || !selectedThirdParty) {
-      message.error('Please select both Party and Third Party');
+      message.error("Please select both Party and Third Party");
       return;
     }
 
     if (!invoiceNo || !date || !amount) {
-      message.error('Please fill all invoice fields');
+      message.error("Please fill all invoice fields");
       return;
     }
 
@@ -105,9 +119,9 @@ const AuthReport = () => {
   const handleReset = () => {
     setSelectedParty(null);
     setSelectedThirdParty(null);
-    setInvoiceNo('');
-    setDate('');
-    setAmount('');
+    setInvoiceNo("");
+    setDate("");
+    setAmount("");
     setShowAuthInvoice(false);
     form.resetFields();
   };
@@ -116,7 +130,6 @@ const AuthReport = () => {
     <div className="min-h-screen  ">
       <div className="max-w-full mx-auto">
         <div className="text-center ">
-        
           {!token && (
             <div className="text-red-500 text-sm mt-2">
               Please log in to access this feature
@@ -125,29 +138,31 @@ const AuthReport = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-2">
-       
           <div className="w-full lg:w-2/6">
-            <Card 
-              title="Authorization Details" 
+            <Card
+              title="Authorization Details"
               className="shadow-lg sticky "
               extra={
-                <Button 
-                  type="link" 
-                  onClick={handleReset}
-                  size="small"
-                >
+                <Button type="link" onClick={handleReset} size="small">
                   Reset
                 </Button>
               }
             >
-              <Form form={form}  requiredMark={false} layout="vertical" className="p-2">
-            
+              <Form
+                form={form}
+                requiredMark={false}
+                layout="vertical"
+                className="p-2"
+              >
                 <div className="mb-6">
-                  <Form.Item   label={
-                    <span>
-                      Party Name <span className="text-red-500">*</span>
-                    </span>
-                  } required>
+                  <Form.Item
+                    label={
+                      <span>
+                        Party Name <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    required
+                  >
                     <Select
                       placeholder="Select Party Name"
                       loading={partiesLoading}
@@ -155,29 +170,34 @@ const AuthReport = () => {
                       allowClear
                       showSearch
                       filterOption={(input, option) =>
-                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        option.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
                       }
                       value={selectedParty?.id}
                     >
                       {partiesData?.data?.map((party) => (
                         <Option key={party.id} value={party.id}>
-                          {party.party_name}
+                          {party.party_short}
                         </Option>
                       ))}
                     </Select>
                     {selectedParty && (
                       <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
-                        <strong>Billing Address:</strong> {selectedParty.party_billing_address}
+                        <strong>Billing Address:</strong>{" "}
+                        {selectedParty.party_billing_address}
                       </div>
                     )}
                   </Form.Item>
 
-                  <Form.Item  label={
-                    <span>
-                      Third Party Name <span className="text-red-500">*</span>
-                    </span>
-                  }
-                  required>
+                  <Form.Item
+                    label={
+                      <span>
+                        Third Party Name <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    required
+                  >
                     <Select
                       placeholder="Select Third Party Name"
                       loading={thirdPartiesLoading}
@@ -185,7 +205,9 @@ const AuthReport = () => {
                       allowClear
                       showSearch
                       filterOption={(input, option) =>
-                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        option.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
                       }
                       value={selectedThirdParty?.id}
                     >
@@ -197,22 +219,27 @@ const AuthReport = () => {
                     </Select>
                     {selectedThirdParty && (
                       <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
-                        <strong>Delivery Address:</strong> {selectedThirdParty.party_delivery_address}
+                        <strong>Delivery Address:</strong>{" "}
+                        {selectedThirdParty.party_delivery_address}
                       </div>
                     )}
                   </Form.Item>
                 </div>
 
-    
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-800">Invoice Details</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                    Invoice Details
+                  </h3>
                   <Row gutter={16}>
                     <Col span={24}>
-                      <Form.Item label={
-                    <span>
-                     Invoice No <span className="text-red-500">*</span>
-                    </span>
-                  }  required>
+                      <Form.Item
+                        label={
+                          <span>
+                            Invoice No <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        required
+                      >
                         <Input
                           value={invoiceNo}
                           onChange={handleInvoiceNoChange}
@@ -223,25 +250,35 @@ const AuthReport = () => {
                   </Row>
                   <Row gutter={16}>
                     <Col span={12}>
-                      <Form.Item  label={
-                    <span>
-                      Date <span className="text-red-500">*</span>
-                    </span>
-                  } required>
-                        <Input
-                          type="date"
+                      <Form.Item
+                        label={
+                          <span>
+                            Date <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        required
+                      >
+                        <DatePicker
+                          style={{ width: "100%" }}
                           value={date}
                           onChange={handleDateChange}
+                          format="DD-MM-YYYY"
+                          placeholder="Select To Date"
                         />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
-                      <Form.Item label={
-                    <span>
-                      Amount <span className="text-red-500">*</span>
-                    </span>
-                  }  required>
-                        <Input
+                      <Form.Item
+                        label={
+                          <span>
+                            Amount <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        required
+                      >
+                        <InputNumber
+                          style={{ width: "100%" }}
+                          min={1}
                           type="number"
                           value={amount}
                           onChange={handleAmountChange}
@@ -253,20 +290,20 @@ const AuthReport = () => {
                   </Row>
                 </div>
 
-        
                 <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <Button 
-                    onClick={handleReset}
-                    size="large"
-                  >
-                    Reset
-                  </Button>
-                  <Button 
-                    type="primary" 
+                
+                  <Button
+                    type="primary"
                     onClick={handleGenerate}
                     size="large"
                     className="bg-blue-600 hover:bg-blue-700"
-                    disabled={!selectedParty || !selectedThirdParty || !invoiceNo || !date || !amount}
+                    disabled={
+                      !selectedParty ||
+                      !selectedThirdParty ||
+                      !invoiceNo ||
+                      !date ||
+                      !amount
+                    }
                   >
                     Generate Preview
                   </Button>
@@ -275,14 +312,15 @@ const AuthReport = () => {
             </Card>
           </div>
 
-        
           <div className="w-full lg:w-4/6">
-            <Card 
-              title="Authorization Letter Preview" 
+            <Card
+              title="Authorization Letter Preview"
               className="shadow-lg min-h-[800px]"
               extra={
                 <div className="text-sm text-gray-500">
-                  {showAuthInvoice ? 'Live Preview' : 'Fill the form to see preview'}
+                  {showAuthInvoice
+                    ? "Live Preview"
+                    : "Fill the form to see preview"}
                 </div>
               }
             >
@@ -295,17 +333,22 @@ const AuthReport = () => {
                       invoiceData={{
                         invoiceNo,
                         date,
-                        amount
+                        amount,
                       }}
-                      onClose={() => {}} 
-                      showControls={false} 
+                      onClose={() => {}}
+                      showControls={false}
                     />
                   </div>
                 ) : (
                   <div className="text-center py-20 text-gray-400">
                     <div className="text-6xl mb-4">📄</div>
-                    <h3 className="text-xl font-semibold mb-2">No Preview Available</h3>
-                    <p>Please fill in all the required fields to generate the authorization letter preview.</p>
+                    <h3 className="text-xl font-semibold mb-2">
+                      No Preview Available
+                    </h3>
+                    <p>
+                      Please fill in all the required fields to generate the
+                      authorization letter preview.
+                    </p>
                   </div>
                 )}
               </div>

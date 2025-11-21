@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { Button, Card, message } from 'antd';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import useToken from '../../../api/usetoken';
-import Loader from '../../../components/common/Loader';
-import { Download, FileSpreadsheet, Printer } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
-import dayjs from 'dayjs';
-import html2pdf from 'html2pdf.js';
-import * as ExcelJS from 'exceljs';
+import React, { useState, useRef } from "react";
+import { Button, Card, message, Spin } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import useToken from "../../../api/usetoken";
+import Loader from "../../../components/common/Loader";
+import { Download, FileSpreadsheet, Printer } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
+import dayjs from "dayjs";
+import html2pdf from "html2pdf.js";
+import * as ExcelJS from "exceljs";
 
 const PartyReport = () => {
   const [reportData, setReportData] = useState([]);
@@ -16,15 +16,15 @@ const PartyReport = () => {
   const token = useToken();
 
   const { isFetching } = useQuery({
-    queryKey: ['partyReport'],
+    queryKey: ["partyReport"],
     queryFn: async () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}partyReport`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       setReportData(response.data.data || []);
@@ -43,18 +43,18 @@ const PartyReport = () => {
   }, {});
 
   const handleDownload = () => {
-    const element = containerRef?.current; 
+    const element = containerRef?.current;
 
     if (!element) {
-      message.error('Failed to generate PDF');
+      message.error("Failed to generate PDF");
       return;
     }
 
     const elementForPdf = element.cloneNode(true);
-    const printHideElements = elementForPdf.querySelectorAll('.print-hide');
-    printHideElements.forEach(el => el.remove());
+    const printHideElements = elementForPdf.querySelectorAll(".print-hide");
+    printHideElements.forEach((el) => el.remove());
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       * {
         color: #000000 !important;
@@ -101,14 +101,14 @@ const PartyReport = () => {
 
     const options = {
       margin: [10, 10, 10, 10],
-      filename: `Party-Report-${dayjs().format('DD-MM-YYYY')}.pdf`,
+      filename: `Party-Report-${dayjs().format("DD-MM-YYYY")}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
         scale: 2,
         useCORS: true,
         scrollY: 0,
         windowHeight: elementForPdf.scrollHeight,
-        backgroundColor: '#FFFFFF'
+        backgroundColor: "#FFFFFF",
       },
       jsPDF: {
         unit: "mm",
@@ -123,17 +123,17 @@ const PartyReport = () => {
       .set(options)
       .save()
       .then(() => {
-        message.success('PDF downloaded successfully');
+        message.success("PDF downloaded successfully");
       })
       .catch((error) => {
-        console.error('PDF download error:', error);
-        message.error('Failed to download PDF');
+        console.error("PDF download error:", error);
+        message.error("Failed to download PDF");
       });
   };
 
   const handlePrint = useReactToPrint({
     content: () => containerRef.current,
-    documentTitle: `Party-Report-${dayjs().format('DD-MM-YYYY')}`,
+    documentTitle: `Party-Report-${dayjs().format("DD-MM-YYYY")}`,
     removeAfterPrint: true,
     pageStyle: `
       @page {
@@ -195,125 +195,131 @@ const PartyReport = () => {
 
   const handleExcelExport = async () => {
     if (reportData.length === 0) {
-      message.error('No data to export');
+      message.error("No data to export");
       return;
     }
 
     try {
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Party Report');
+      const worksheet = workbook.addWorksheet("Party Report");
 
-  
-      worksheet.mergeCells('A1:C1');
-      worksheet.getCell('A1').value = 'Party Information';
-      worksheet.getCell('A1').font = { bold: true, size: 14 };
-      worksheet.getCell('A1').alignment = { horizontal: 'center' };
+      worksheet.mergeCells("A1:C1");
+      worksheet.getCell("A1").value = "Party Information";
+      worksheet.getCell("A1").font = { bold: true, size: 14 };
+      worksheet.getCell("A1").alignment = { horizontal: "center" };
 
-   
-      worksheet.getCell('A2').value = 'Billing Address';
-      worksheet.getCell('B2').value = 'Delivery Address';
-      worksheet.getCell('C2').value = 'Contact Details';
+      worksheet.getCell("A2").value = "Billing Address";
+      worksheet.getCell("B2").value = "Delivery Address";
+      worksheet.getCell("C2").value = "Contact Details";
 
-   
-      ['A2', 'B2', 'C2'].forEach(cell => {
+      ["A2", "B2", "C2"].forEach((cell) => {
         worksheet.getCell(cell).font = { bold: true };
         worksheet.getCell(cell).fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFD3D3D3' }
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFD3D3D3" },
         };
-        worksheet.getCell(cell).alignment = { horizontal: 'center' };
+        worksheet.getCell(cell).alignment = { horizontal: "center" };
         worksheet.getCell(cell).border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
       });
 
       let currentRow = 3;
 
       reportData.forEach((party) => {
-     
         worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
-        worksheet.getCell(`A${currentRow}`).value = `${party.party_name} - ${party.party_state}`;
+        worksheet.getCell(
+          `A${currentRow}`
+        ).value = `${party.party_name} - ${party.party_state}`;
         worksheet.getCell(`A${currentRow}`).font = { bold: true };
         worksheet.getCell(`A${currentRow}`).fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFE5E7EB' }
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE5E7EB" },
         };
-        worksheet.getCell(`A${currentRow}`).alignment = { horizontal: 'center' };
+        worksheet.getCell(`A${currentRow}`).alignment = {
+          horizontal: "center",
+        };
         worksheet.getCell(`A${currentRow}`).border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
 
         currentRow++;
 
-
         worksheet.getCell(`A${currentRow}`).value = party.party_billing_address;
-        worksheet.getCell(`A${currentRow}`).alignment = { wrapText: true, vertical: 'top' };
+        worksheet.getCell(`A${currentRow}`).alignment = {
+          wrapText: true,
+          vertical: "top",
+        };
 
-  
-        worksheet.getCell(`B${currentRow}`).value = party.party_delivery_address;
-        worksheet.getCell(`B${currentRow}`).alignment = { wrapText: true, vertical: 'top' };
+        worksheet.getCell(`B${currentRow}`).value =
+          party.party_delivery_address;
+        worksheet.getCell(`B${currentRow}`).alignment = {
+          wrapText: true,
+          vertical: "top",
+        };
 
-     
         const contactDetails = [
-          `Name: ${party.party_cp_name || '-'}`,
-          `Mobile: ${party.party_cp_mobile || '-'}`,
+          `Name: ${party.party_cp_name || "-"}`,
+          `Mobile: ${party.party_cp_mobile || "-"}`,
           `Due: ${party.party_due_days} days`,
-          `GSTIN: ${party.party_gstin}`
-        ].join('\n');
-        
-        worksheet.getCell(`C${currentRow}`).value = contactDetails;
-        worksheet.getCell(`C${currentRow}`).alignment = { wrapText: true, vertical: 'top' };
+          `GSTIN: ${party.party_gstin}`,
+        ].join("\n");
 
-    
+        worksheet.getCell(`C${currentRow}`).value = contactDetails;
+        worksheet.getCell(`C${currentRow}`).alignment = {
+          wrapText: true,
+          vertical: "top",
+        };
+
         for (let col = 1; col <= 3; col++) {
           const cell = worksheet.getCell(currentRow, col);
           cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
           };
         }
 
-
         worksheet.getRow(currentRow).height = 80;
 
-        currentRow += 2; 
+        currentRow += 2;
       });
 
-  
-      worksheet.columns = [
-        { width: 40 }, 
-        { width: 40 }, 
-        { width: 30 } 
-      ];
+      worksheet.columns = [{ width: 40 }, { width: 40 }, { width: 30 }];
 
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `Party-Report-${dayjs().format('DD-MM-YYYY')}.xlsx`;
+      link.download = `Party-Report-${dayjs().format("DD-MM-YYYY")}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
-      message.success('Excel file downloaded successfully');
+      message.success("Excel file downloaded successfully");
     } catch (error) {
-      console.error('Excel export error:', error);
-      message.error('Failed to export Excel file');
+      console.error("Excel export error:", error);
+      message.error("Failed to export Excel file");
     }
   };
 
-  if(isFetching){
-    return <Loader msg="Party Report"/>
+  if (isFetching) {
+    return (
+      <div className="flex justify-center py-20">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   return (
@@ -329,15 +335,17 @@ const PartyReport = () => {
 
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full">
-            <Card 
-              title="Party Report" 
+            <Card
+              title="Party Report"
               className="shadow-lg min-h-[800px]"
               extra={
                 <>
                   {reportData.length > 0 && (
                     <div className="print-hide flex justify-between items-center">
                       <div className="flex flex-row items-center gap-1 font-bold">
-                        {reportData.length > 0 ? `${reportData.length} records found` : 'No data to display'}
+                        {reportData.length > 0
+                          ? `${reportData.length} records found`
+                          : "No data to display"}
                         <Button
                           className="ml-2 bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={handleDownload}
@@ -366,75 +374,95 @@ const PartyReport = () => {
                 <div>
                   <div ref={containerRef} className="">
                     <div className="p-4">
-                      <h1 className="text-2xl font-bold text-center">Party Report</h1>
+                      <h1 className="text-2xl font-bold text-center">
+                        Party Report
+                      </h1>
                     </div>
 
                     <div>
-                      {Object.entries(groupedReportData).map(([partyName, partyData]) => {
-                        const party = partyData[0];
-                        
-                        return (
-                          <div
-                            key={partyName}
-                            className="mb-6 border border-black text-[13px]"
-                          >
-                            <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
-                              <span>{partyName}</span>
-                              <span className="text-sm font-normal">{party.party_state}</span>
-                            </div>
-                            
-                            <div className="flex flex-col md:flex-row">
-                 
-                              <div className="flex-1 border-r border-black min-h-[120px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Billing Address
-                                </div>
-                                <div className="p-3 h-full flex items-start">
-                                  <div className="whitespace-pre-line break-words">
-                                    {party.party_billing_address}
-                                  </div>
-                                </div>
+                      {Object.entries(groupedReportData).map(
+                        ([partyName, partyData]) => {
+                          const party = partyData[0];
+
+                          return (
+                            <div
+                              key={partyName}
+                              className="mb-6 border border-black text-[13px]"
+                            >
+                              <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
+                                <span>{partyName}</span>
+                                <span className="text-sm font-normal">
+                                  {party.party_state}
+                                </span>
                               </div>
 
-                         
-                              <div className="flex-1 border-r border-black min-h-[120px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Delivery Address
-                                </div>
-                                <div className="p-3 h-full flex items-start">
-                                  <div className="whitespace-pre-line break-words">
-                                    {party.party_delivery_address}
+                              <div className="flex flex-col md:flex-row">
+                                <div className="flex-1 border-r border-black min-h-[120px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Billing Address
+                                  </div>
+                                  <div className="p-3 h-full flex items-start">
+                                    <div className="whitespace-pre-line break-words">
+                                      {party.party_billing_address}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              <div className="flex-1 min-h-[120px]">
-                                <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
-                                  Contact Details
+                                <div className="flex-1 border-r border-black min-h-[120px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Delivery Address
+                                  </div>
+                                  <div className="p-3 h-full flex items-start">
+                                    <div className="whitespace-pre-line break-words">
+                                      {party.party_delivery_address}
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="h-full">
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Name:</span>
-                                    <span className="text-right">{party.party_cp_name || '-'}</span>
+
+                                <div className="flex-1 min-h-[120px]">
+                                  <div className="p-2 font-bold border-b border-black text-center bg-gray-100">
+                                    Contact Details
                                   </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Mobile:</span>
-                                    <span className="text-right">{party.party_cp_mobile || '-'}</span>
-                                  </div>
-                                  <div className="p-2 border-b border-gray-300 flex justify-between">
-                                    <span className="font-semibold">Due:</span>
-                                    <span className="text-right">{party.party_due_days} days</span>
-                                  </div>
-                                  <div className="p-2 flex justify-between">
-                                    <span className="font-semibold">GSTIN:</span>
-                                    <span className="text-right break-all">{party.party_gstin}</span>
+                                  <div className="h-full">
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Name:
+                                      </span>
+                                      <span className="text-right">
+                                        {party.party_cp_name || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Mobile:
+                                      </span>
+                                      <span className="text-right">
+                                        {party.party_cp_mobile || "-"}
+                                      </span>
+                                    </div>
+                                    <div className="p-2 border-b border-gray-300 flex justify-between">
+                                      <span className="font-semibold">
+                                        Due:
+                                      </span>
+                                      <span className="text-right">
+                                        {party.party_due_days} days
+                                      </span>
+                                    </div>
+                                    <div className="p-2 flex justify-between">
+                                      <span className="font-semibold">
+                                        GSTIN:
+                                      </span>
+                                      <span className="text-right break-all">
+                                        {party.party_gstin}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        }
+                      )}
                     </div>
                   </div>
                 </div>

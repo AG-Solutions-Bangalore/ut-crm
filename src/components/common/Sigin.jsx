@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
 
-const useFinalUserImage = () => {
+const companyFinalSiginImage = () => {
   const imageUrls = useSelector((state) => state?.company?.companyImage);
-  const userImagePath = useSelector(
-    (state) => state?.company?.companyDetails?.company_image
+  const userSiginPath = useSelector(
+    (state) => state?.company?.companyDetails?.company_sign
   );
   const userBaseUrl = imageUrls?.find(
     (img) => img.image_for == "Company"
@@ -12,10 +12,10 @@ const useFinalUserImage = () => {
     (img) => img.image_for === "No Image"
   )?.image_url;
   const cacheBuster = `?v=${Date.now()}`;
-  const finalUserImage = userImagePath
-    ? `${userBaseUrl}${userImagePath}${cacheBuster}`
+  const SiginImagePath = userSiginPath
+    ? `${userBaseUrl}${userSiginPath}${cacheBuster}`
     : noImageUrl;
-  return finalUserImage;
+  return SiginImagePath;
 };
 
-export default useFinalUserImage;
+export default companyFinalSiginImage;

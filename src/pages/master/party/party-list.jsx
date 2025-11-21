@@ -76,19 +76,19 @@ const PartyList = () => {
   };
   const columns = [
     {
-      title: "Party Name",
-      dataIndex: "party_name",
-      key: "party_name",
-      render: (_, record) => (
-        <HighlightText text={record.party_name} match={debouncedSearch} />
-      ),
-    },
-    {
       title: "Short Name",
       dataIndex: "party_short",
       key: "party_short",
       render: (_, record) => (
         <HighlightText text={record.party_short} match={debouncedSearch} />
+      ),
+    },
+    {
+      title: "Party Name",
+      dataIndex: "party_name",
+      key: "party_name",
+      render: (_, record) => (
+        <HighlightText text={record.party_name} match={debouncedSearch} />
       ),
     },
 

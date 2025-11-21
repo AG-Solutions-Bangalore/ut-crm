@@ -407,7 +407,7 @@ const UnifiedLedger = () => {
           {/* Header Section */}
           <div className="sticky top-0 z-10 border border-gray-200 rounded-lg bg-blue-50 shadow-sm p-3 mb-2">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div className="w-[30%] shrink-0">
+              <div className="w-[20%] shrink-0">
                 <h1 className="text-xl font-bold text-gray-800 truncate">{getTitle()}</h1>
                 {searchParams && currentConfig && (
                   <p className="text-md text-gray-500 truncate">
@@ -416,12 +416,12 @@ const UnifiedLedger = () => {
                 )}
               </div>
 
-              <div className="bg-white w-full lg:w-[70%] p-3 rounded-md shadow-xs">
+              <div className="bg-white w-full lg:w-[80%] p-3 rounded-md shadow-xs">
                 <div className="flex flex-col lg:flex-row lg:items-end gap-3">
                   <Form 
                     form={form}
                     onFinish={handleGenerateReport}
-                    className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full"
+                    className="grid grid-cols-1 md:grid-cols-5 gap-3 w-full"
                   >
                     {/* Ledger Type Selection */}
                     <div className="space-y-1">
@@ -481,7 +481,7 @@ const UnifiedLedger = () => {
                             style={{ width: '100%', height: '32px' }}
                             value={fromDate}
                             onChange={setFromDate}
-                            format="YYYY-MM-DD"
+                            format="DD-MM-YYYY"
                             className="text-xs"
                           />
                         </div>
@@ -495,7 +495,7 @@ const UnifiedLedger = () => {
                             style={{ width: '100%', height: '32px' }}
                             value={toDate}
                             onChange={setToDate}
-                            format="YYYY-MM-DD"
+                            format="DD-MM-YYYY"
                             className="text-xs"
                           />
                         </div>
@@ -504,7 +504,7 @@ const UnifiedLedger = () => {
 
                     {/* Generate Button */}
                     {selectedLedgerType && (
-                      <div className="md:col-span-4 flex justify-end">
+                      <div className=" mt-5">
                         <Button
                           type="primary"
                           htmlType="submit"
@@ -514,7 +514,6 @@ const UnifiedLedger = () => {
                         >
                           {isLoading ? (
                             <div className='flex flex-row items-center gap-1'>
-                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
                               <span>Generating...</span>
                             </div>
                           ) : (

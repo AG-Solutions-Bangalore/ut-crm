@@ -31,11 +31,6 @@ import useFinalUserImage from "./common/Logo";
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
     { key: "/home", icon: <HomeOutlined />, label: "Dashboard" },
-    // {
-    //   key: "/report-format",
-    //   icon: <FileTextOutlined />,
-    //   label: "Report Format",
-    // },
   ];
 
   const managementChildren = [
@@ -72,11 +67,7 @@ const getMenuItems = (collapsed) => {
       icon: <ReconciliationOutlined />,
       label: "Balance Order",
     },
-    // {
-    //   key: "/report/balance-close-order",
-    //   icon: <FileDoneOutlined />,
-    //   label: "Balance Close Order",
-    // },
+
     {
       key: "/report/price-rate",
       icon: <BarChartOutlined />,
@@ -102,26 +93,7 @@ const getMenuItems = (collapsed) => {
       icon: <WalletOutlined />,
       label: "Balance Report",
     },
-    // {
-    //   key: "/report/balance-payable",
-    //   icon: <WalletOutlined />,
-    //   label: "Balance Payable",
-    // },
-    // {
-    //   key: "/report/balance-receivable",
-    //   icon: <DollarCircleOutlined />,
-    //   label: "Balance Receivable",
-    // },
-    // {
-    //   key: "/report/party",
-    //   icon: <TeamOutlined />,
-    //   label: "Party",
-    // },
-    // {
-    //   key: "/report/mill",
-    //   icon: <BankOutlined />,
-    //   label: "Mill",
-    // },
+
     {
       key: "/report/ledger-report",
       icon: <BankOutlined />,
@@ -138,7 +110,7 @@ const getMenuItems = (collapsed) => {
         label: "Management",
         children: managementChildren,
       },
-      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
       { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
       {
@@ -176,7 +148,7 @@ const getMenuItems = (collapsed) => {
         },
       ],
     },
-    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "Purchase" },
+    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
     { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
     { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
@@ -277,7 +249,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
     >
       <div className="flex items-center justify-center h-14 px-4 bg-gray-100">
         <motion.img
-          src={collapsed ? logo1 : logo1}
+          src={collapsed ? logo1 : finalUserImage}
           alt="Header Logo"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -370,7 +342,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 14-11-2025
+                    Updated on: 20-11-2025
                   </div>
                 </div>
               }

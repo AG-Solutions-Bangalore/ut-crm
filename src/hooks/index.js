@@ -12,6 +12,7 @@ import {
   PAYMENT_MODE,
   PURCHASE_ORDER_REF,
   QUOTATION_REF,
+  STATE_LIST,
   TAX_INVOICE_REF,
   TRADE_INVOICE_REF,
 } from "../api/index";
@@ -32,6 +33,7 @@ export const useMasterData = ({
   subject = false,
   gsm = false,
   delivery = false,
+  state = false,
   // purchaseorderref = false,
 } = {}) => {
   // const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
@@ -67,7 +69,6 @@ export const useMasterData = ({
     "purchaseorderrefdata",
     // formattedDateTime,
   ]);
-
 
   const {
     data: QuotationOrderRef,
@@ -148,6 +149,12 @@ export const useMasterData = ({
     refetch: refetchDelivery,
     error: deliveryError,
   } = createApi(delivery, ACTIVE_DELIVERY, ["activedeliverydata"]);
+  const {
+    data: StateData,
+    isLoading: stateLoading,
+    refetch: refetchState,
+    error: stateError,
+  } = createApi(state, STATE_LIST, ["statedata"]);
 
   return {
     mill: {
@@ -233,6 +240,13 @@ export const useMasterData = ({
       loading: deliveryLoading,
       refetch: refetchDelivery,
       error: deliveryError,
+    },
+
+    state: {
+      data: StateData,
+      loading: stateLoading,
+      refetch: refetchState,
+      error: stateError,
     },
     // purchaseorderref: {
     //   data: ActivePurchaseOrderRef,

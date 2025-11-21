@@ -52,7 +52,7 @@ const TaxInvoiceForm = () => {
   });
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
       mill_state: item.mill_state,
     })) || [];
@@ -227,6 +227,7 @@ const TaxInvoiceForm = () => {
       if (res.code == 201) {
         message.success(res.message || "Tax data saved successfully!");
         await queryClient.invalidateQueries({ queryKey: ["taxinvoicedata"] });
+        await queryClient.invalidateQueries({ queryKey: ["billingdata"] });
         navigate("/tax-invoice");
       } else {
         message.error(res.message || "Failed to save Tax data.");
@@ -425,7 +426,7 @@ const TaxInvoiceForm = () => {
                 >
                   <Select
                     placeholder="Select Type"
-                    options={["COM", "COD"].map((item) => ({
+                    options={["Commission", "Commission Discount"].map((item) => ({
                       label: item,
                       value: item,
                     }))}

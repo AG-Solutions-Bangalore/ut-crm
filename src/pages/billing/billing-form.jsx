@@ -19,6 +19,11 @@ import {
   BILLING_LIST,
   GET_PURCHASE_ORDER_REF_DETAILS,
 } from "../../api";
+import {
+  DeleteOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useGetApiMutation } from "../../hooks/useGetApiMutation";
@@ -37,28 +42,23 @@ const BillingForm = () => {
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { mill, party, item, purchaseorderref } = useMasterData({
+  const { mill, party, item } = useMasterData({
     mill: true,
     party: true,
     item: true,
-    purchaseorderref: true,
   });
 
   const [initialData, setInitialData] = useState({
-    purchase_date: dayjs(),
     billing_no: "",
     billing_mill_id: null,
-    billing_tones: "",
-    purchase_rate: "",
-    billing_bf: null,
-    purchase_amount: "",
-    sale_date: null,
-    sale_rate: "",
-    billing_party_id: null,
+    billing_total_tones: "",
+    billing_party_id: "",
     purchase_orders_ref: null,
+    billing_total_commn: "",
+    billing_total_sale_amount: null,
     billing_type: null,
     billing_payment_type: null,
-    billing_due_days: "",
+    billing_note: "",
     billing_status: false,
   });
   const [selectedMillId, setSelectedMillId] = useState(null);
@@ -94,13 +94,13 @@ const BillingForm = () => {
     })) || [];
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
     })) || [];
 
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
     })) || [];
 
@@ -145,30 +145,62 @@ const BillingForm = () => {
     setSelectetReflId(value);
   };
 
+  // const handleValueChange = (_, allValues) => {
+  //   const { purchase_rate, sale_rate, sale_date } = allValues;
+  //   const pRate = parseFloat(purchase_rate) || 0;
+  //   const sRate = parseFloat(sale_rate) || 0;
+  //   const total = sRate - pRate;
+  //   setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
+
+  //   if (sale_date) {
+  //     const diff = dayjs()
+  //       .startOf("day")
+  //       .diff(dayjs(sale_date).startOf("day"), "day");
+
+  //     setDaysDifference(diff);
+
+  //     form.setFieldsValue({
+  //       billing_due_days: diff,
+  //     });
+  //   } else {
+  //     setDaysDifference(null);
+  //     form.setFieldsValue({
+  //       billing_due_days: "",
+  //     });
+  //   }
+  // };
+  
   const handleValueChange = (_, allValues) => {
-    const { purchase_rate, sale_rate, sale_date } = allValues;
-    const pRate = parseFloat(purchase_rate) || 0;
-    const sRate = parseFloat(sale_rate) || 0;
-    const total = sRate - pRate;
-    setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
+  const { purchase_rate, sale_rate, sale_date, subs } = allValues;
 
-    if (sale_date) {
-      const diff = dayjs()
-        .startOf("day")
-        .diff(dayjs(sale_date).startOf("day"), "day");
+  // Existing logic
+  const pRate = parseFloat(purchase_rate) || 0;
+  const sRate = parseFloat(sale_rate) || 0;
+  const total = sRate - pRate;
+  setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
 
-      setDaysDifference(diff);
+  if (sale_date) {
+    const diff = dayjs().startOf("day").diff(dayjs(sale_date).startOf("day"), "day");
+    setDaysDifference(diff);
+    form.setFieldsValue({ billing_due_days: diff });
+  }
 
-      form.setFieldsValue({
-        billing_due_days: diff,
-      });
-    } else {
-      setDaysDifference(null);
-      form.setFieldsValue({
-        billing_due_days: "",
-      });
-    }
-  };
+  if (Array.isArray(subs)) {
+    const totalTones = subs.reduce((sum, row) => {
+      return sum + (parseFloat(row?.billing_sub_tones) || 0);
+    }, 0);
+
+    const totalComm = subs.reduce((sum, row) => {
+      return sum + (parseFloat(row?.billing_commn) || 0);
+    }, 0);
+
+    form.setFieldsValue({
+      billing_total_tones: totalTones,
+      billing_total_commn: totalComm,
+    });
+  }
+};
+
   const handleSubmit = async (values) => {
     const payload = {
       ...values,
@@ -301,24 +333,6 @@ const BillingForm = () => {
                 <div className="col-span-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Form.Item
-                      name="purchase_date"
-                      label={
-                        <span>
-                          Purchase Date <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Select Purchase Date" },
-                      ]}
-                    >
-                      <DatePicker
-                        autoFocus
-                        className="w-full"
-                        format="DD-MM-YYYY"
-                      />
-                    </Form.Item>
-
-                    <Form.Item
                       label={
                         <span>
                           Mill Name <span className="text-red-500">*</span>
@@ -348,7 +362,6 @@ const BillingForm = () => {
                         { required: true, message: "Select PO Reference" },
                       ]}
                     >
-                      {/* <Input placeholder="Enter PO Reference" /> */}
                       <Select
                         placeholder="Select PO Reference"
                         options={poRefOptions}
@@ -379,82 +392,6 @@ const BillingForm = () => {
                     </Form.Item>
 
                     <Form.Item
-                      name="billing_bf"
-                      label={
-                        <span>
-                          Item <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[{ required: true, message: "Select Item" }]}
-                    >
-                      <Select
-                        placeholder="Select Item"
-                        options={
-                          item?.data?.data?.map((i) => ({
-                            label: i.bf,
-                            value: i.bf,
-                          })) || []
-                        }
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="billing_tones"
-                      label={
-                        <span>
-                          Tones <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[{ required: true, message: "Enter Tones" }]}
-                    >
-                      <Input placeholder="Enter Tones" />
-                    </Form.Item>
-
-                    <Form.Item name="purchase_amount" label="Purchase Amount">
-                      <Input placeholder="Enter Amount" />
-                    </Form.Item>
-
-                    <Form.Item
-                      name="purchase_rate"
-                      label={
-                        <span>
-                          Purchase Rate <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      rules={[
-                        { required: true, message: "Enter Purchase Rate" },
-                      ]}
-                    >
-                      <InputNumber
-                        type="number"
-                        placeholder="Enter Rate"
-                        className="!w-full"
-                        min={1}
-                      />
-                    </Form.Item>
-                    {/* </div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4"> */}
-                    <Form.Item name="sale_rate" label="Sale Rate">
-                      <InputNumber
-                        type="number"
-                        placeholder="Enter Rate"
-                        className="!w-full"
-                        min={1}
-                      />
-                    </Form.Item>
-
-                    <Form.Item name="sale_date" label="Sale Date">
-                      <DatePicker className="w-full" format="DD-MM-YYYY" />
-                    </Form.Item>
-
-                    <Form.Item
                       name="billing_party_id"
                       label={
                         <span>
@@ -475,7 +412,6 @@ const BillingForm = () => {
                         allowClear
                       />
                     </Form.Item>
-
                     <Form.Item
                       name="billing_type"
                       label={
@@ -519,101 +455,71 @@ const BillingForm = () => {
                         allowClear
                       />
                     </Form.Item>
+                    <Form.Item
+                      name="billing_total_tones"
+                      label={
+                        <span>
+                          Tones <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Enter Tones" }]}
+                      styles={{ width: "100%" }}
+                    >
+                      <InputNumber
+                        placeholder="Enter Tones"
+                        className="!w-full"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="billing_total_commn"
+                      label={
+                        <span>
+                          Comm <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Enter Comm" }]}
+                      styles={{ width: "100%" }}
+                    >
+                      <InputNumber
+                        placeholder="Enter Comm"
+                        className="!w-full"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="billing_total_sale_amount"
+                      label={
+                        <span>
+                          Sale Amount <span className="text-red-500">*</span>
+                        </span>
+                      }
+                      rules={[{ required: true, message: "Enter Sale Amount" }]}
+                      styles={{ width: "100%" }}
+                    >
+                      <InputNumber
+                        placeholder="Enter Sale Amount"
+                        className="!w-full"
+                      />
+                    </Form.Item>
                   </div>
+                  <Form.Item
+                    name="billing_note"
+                    label={
+                      <span>
+                        Note <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    rules={[{ required: true, message: "Enter Note" }]}
+                  >
+                    <Input.TextArea
+                      placeholder="Enter Note"
+                    />
+                  </Form.Item>
                 </div>
-                {/* <div className="w-full max-w-4xl mx-auto p-4 space-y-4 min-h-[340px] max-h-[400px] overflow-y-auto">
+
+                <div className="w-full max-w-4xl mx-auto p-4 space-y-4 min-h-[340px] max-h-[350px] overflow-y-auto">
                   <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
-                    <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
-                      Latest Purchase Details
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="font-semibold">Mill: </span>
-                        {main?.mill_name}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Party: </span>
-                        {main?.party_name}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 ">
-                    {subs.map((item, index) => (
-                      <Card
-                        key={index}
-                        size="small"
-                        title={item.purchase_orders_sub_ref || "Item Details"}
-                        className="shadow-sm border"
-                      >
-                        <div className="border border-gray-100 rounded-md p-2 shadow-sm">
-                          <div className="grid grid-cols-2 text-xs gap-1">
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                GSM:
-                              </span>{" "}
-                              {item.gsm ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                BF:
-                              </span>{" "}
-                              {item.bf ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Size:
-                              </span>{" "}
-                              {item.size ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Shade:
-                              </span>{" "}
-                              {item.shade ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Qty:
-                              </span>{" "}
-                              {item.qnty ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Unit:
-                              </span>{" "}
-                              {item.unit ?? "-"}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Bill Rate:
-                              </span>{" "}
-                              ₹{item.bill_rate}
-                            </p>
-
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Agreed Rate:
-                              </span>{" "}
-                              ₹{item.agreed_rate}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div> */}
-                <div className="w-full max-w-4xl mx-auto p-4 space-y-4 min-h-[340px] max-h-[400px] overflow-y-auto">
-                  {/* MAIN CARD */}
-                  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
-                    <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
-                       Purchase Details
+                    <h4 className="text-base font-semibold mb-2 text-gray-800 border-b ">
+                      Purchase Details
                     </h4>
                     {loadingrefdetails ? (
                       <div className="flex justify-center items-center py-4">
@@ -621,7 +527,7 @@ const BillingForm = () => {
                       </div>
                     ) : main && Object.keys(main).length > 0 ? (
                       <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-2">
                           <p>
                             <span className="font-semibold">Mill:</span>{" "}
                             {main?.mill_name}
@@ -632,15 +538,14 @@ const BillingForm = () => {
                           </p>
                         </div>
 
-                        {/* SUB CARDS */}
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 gap-2">
                           {subs.map((item, index) => (
                             <Card
                               key={index}
                               size="small"
-                              className="shadow-sm border"
+                              className="shadow-sm border "
                             >
-                              <div className="rounded-md p-2 text-xs grid grid-cols-2 gap-1">
+                              <div className="rounded-md  text-xs grid grid-cols-3 gap-1">
                                 <p>
                                   <span className="font-medium text-gray-500">
                                     GSM:
@@ -659,12 +564,6 @@ const BillingForm = () => {
                                     Size:
                                   </span>{" "}
                                   {item.size ?? "-"}
-                                </p>
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Shade:
-                                  </span>{" "}
-                                  {item.shade ?? "-"}
                                 </p>
 
                                 <p>
@@ -692,6 +591,12 @@ const BillingForm = () => {
                                   </span>{" "}
                                   ₹{item.agreed_rate}
                                 </p>
+                                <p className="col-span-2">
+                                  <span className="font-medium text-gray-500">
+                                    Shade:
+                                  </span>{" "}
+                                  {item.shade ?? "-"}
+                                </p>
                               </div>
                             </Card>
                           ))}
@@ -705,6 +610,259 @@ const BillingForm = () => {
                   </div>
                 </div>
               </div>
+              <Form.List
+                name="subs"
+                initialValue={[{}]}
+                rules={[
+                  {
+                    validator: async (_, subs) => {
+                      if (!Array.isArray(subs) || subs.length === 0) {
+                        return Promise.reject(
+                          new Error("Please add at least one sub item.")
+                        );
+                      }
+
+                      const nonEmptyRows = subs.filter((row) =>
+                        Object.values(row || {}).some(
+                          (val) => val !== undefined && val !== ""
+                        )
+                      );
+
+                      if (nonEmptyRows.length === 0) {
+                        return Promise.reject(
+                          new Error(
+                            "Please fill at least one sub item before submitting."
+                          )
+                        );
+                      }
+
+                      const emptyRows = subs.filter((row) =>
+                        Object.values(row || {}).every(
+                          (val) => val === undefined || val === ""
+                        )
+                      );
+
+                      if (emptyRows.length > 0) {
+                        return Promise.reject(
+                          new Error(
+                            "Empty sub items are not allowed — please fill or remove them."
+                          )
+                        );
+                      }
+
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+                validateTrigger={["onSubmit"]}
+              >
+                {(fields, { add, remove }, { errors }) => (
+                  <>
+                    <div className="flex justify-between mb-2">
+                      <div className="font-semibold text-lg mb-2">
+                        Sub Details
+                      </div>
+                      <Button
+                        type="dashed"
+                        htmlType="button"
+                        onClick={() => add()}
+                        icon={<PlusOutlined />}
+                      >
+                        Add Item
+                      </Button>
+                    </div>
+                    <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-10 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
+                        <div>Pur Date</div>
+                        <div>Pur Rate</div>
+                        <div>Sale Date</div>
+                        <div>Sale Rate</div>
+                        <div className="col-span-2">Item</div>
+                        <div>Tones</div>
+                        <div>Comm</div>
+                        {/* <div>Sales Amo</div>
+
+                        <div>Rate Diff</div>
+                        <div>Due Days</div> */}
+                      </div>
+
+                      <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+                        {fields.map(({ key, name, ...restField }) => {
+                          const subItem = form.getFieldValue(["subs", name]);
+                          const hasId = subItem?.id;
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-10 gap-2 mt-2 p-2 transition relative">
+                              {fields.length > 1 &&
+                                (hasId ? (
+                                  <Popconfirm
+                                    title="Are you sure you want to delete this sub-item?"
+                                    onConfirm={() => handleDelete(subItem?.id)}
+                                    okText="Yes"
+                                    cancelText="No"
+                                  >
+                                    <Button
+                                      type="text"
+                                      danger
+                                      icon={<DeleteOutlined />}
+                                      className="!absolute top-0 right-0 z-10 text-red-500"
+                                    />
+                                  </Popconfirm>
+                                ) : (
+                                  <Button
+                                    type="text"
+                                    danger
+                                    icon={<MinusCircleOutlined />}
+                                    className="!absolute top-0 right-0 z-10 text-red-500"
+                                    onClick={() => remove(name)}
+                                  />
+                                ))}
+                              <Form.Item
+                                {...restField}
+                                name={[name, "purchase_date"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <DatePicker size="medium" format="DD-MM-YYYY" />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "purchase_rate"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <InputNumber
+                                  placeholder="Rate"
+                                  size="medium"
+                                  type="number"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "sale_date"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <DatePicker size="medium" format="DD-MM-YYYY" />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "sale_rate"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <InputNumber
+                                  placeholder="Sale Rate"
+                                  size="medium"
+                                  type="number"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "billing_sub_bf"]}
+                                noStyle
+                              >
+                                <Select
+                                  placeholder="Select Item"
+                                  options={
+                                    item?.data?.data?.map((i) => ({
+                                      label: i.bf,
+                                      value: i.bf,
+                                    })) || []
+                                  }
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                  showSearch
+                                  allowClear
+                                  className="col-span-2 w-full"
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "billing_sub_tones"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <InputNumber
+                                  placeholder="Tones"
+                                  size="medium"
+                                  type="number"
+                                  min={1}
+                                />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "billing_commn"]}
+                                noStyle
+                                className="mb-0"
+                              >
+                                <InputNumber
+                                  placeholder="Enter Comm"
+                                  size="medium"
+                                  type="number"
+                                  min={1}
+                                />
+                              </Form.Item>
+
+                              <div className="flex gap-1 col-span-2">
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, "sales_amount"]}
+                                  noStyle
+                                  className="mb-0"
+                                >
+                                  <InputNumber
+                                    size="medium"
+                                    type="number"
+                                    min={1}
+                                    disabled
+                                    className="!w-24"
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, "rate_diff"]}
+                                  noStyle
+                                  className="mb-0"
+                                >
+                                  <InputNumber
+                                    size="medium"
+                                    type="number"
+                                    min={1}
+                                    disabled
+                                    className="!w-24"
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, "billing_due_days"]}
+                                  noStyle
+                                  className="mb-0"
+                                >
+                                  <InputNumber
+                                    size="medium"
+                                    disabled
+                                    className="!w-24"
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {errors.length > 0 && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {errors[0]}
+                      </div>
+                    )}{" "}
+                  </>
+                )}
+              </Form.List>
             </Card>
           </Card>
         </Form>

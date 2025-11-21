@@ -66,9 +66,9 @@ const PaymentList = () => {
       ? [
           {
             title: "Party Name",
-            dataIndex: "party_name",
-            key: "party_name",
-            render: (text, record) => <span>{record.party_name}</span>,
+            dataIndex: "party_short",
+            key: "party_short",
+            render: (text, record) => <span>{record.party_short}</span>,
           },
         ]
       : []),
@@ -76,9 +76,9 @@ const PaymentList = () => {
       ? [
           {
             title: "Mill Name",
-            dataIndex: "mill_name",
-            key: "mill_name",
-            render: (text, record) => <span>{record.mill_name}</span>,
+            dataIndex: "mill_short",
+            key: "mill_shorte",
+            render: (text, record) => <span>{record.mill_short}</span>,
           },
         ]
       : []),

@@ -91,8 +91,8 @@ const TradeInvoiceList = () => {
     },
     {
       title: "Party Name",
-      dataIndex: "party_name",
-      key: "party_name",
+      dataIndex: "party_short",
+      key: "party_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {

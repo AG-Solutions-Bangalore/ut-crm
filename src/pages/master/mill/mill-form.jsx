@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MILL_LIST } from "../../../api";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useMasterData } from "../../../hooks";
 
 const millTypes = [
   { label: "Mill", value: "Mill" },
@@ -20,7 +21,9 @@ const MillForm = () => {
   const navigate = useNavigate();
   const [initialData, setInitialData] = useState({});
   const queryClient = useQueryClient();
-
+  const { state } = useMasterData({
+    state: true,
+  });
   const resetForm = () => {
     form.resetFields();
   };
@@ -83,10 +86,10 @@ const MillForm = () => {
       );
     }
   };
-
+  const loading = fetchLoading || state.loading;
   return (
     <>
-      {fetchLoading ? (
+      {loading ? (
         <div className="flex justify-center py-20">
           <Spin size="large" />
         </div>
@@ -197,8 +200,30 @@ const MillForm = () => {
                     />
                   </Form.Item>
 
-                  <Form.Item label="State" name="mill_state">
-                    <Input placeholder="Enter Enter" />
+                  <Form.Item
+                    name="mill_state"
+                    label={
+                      <span>
+                        State<span className="text-red-500">*</span>
+                      </span>
+                    }
+                    rules={[{ required: true, message: "State is required" }]}
+                  >
+                    {/* <Input placeholder="Enter Enter" /> */}
+                    <Select
+                      placeholder="Select State"
+                      options={state?.data?.data.map((item) => ({
+                        value: item.state_name,
+                        label: item.state_name,
+                      }))}
+                      filterOption={(input, option) =>
+                        (option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      showSearch
+                      allowClear
+                    />
                   </Form.Item>
 
                   <Form.Item label="GSTIN" name="mill_gstin">
