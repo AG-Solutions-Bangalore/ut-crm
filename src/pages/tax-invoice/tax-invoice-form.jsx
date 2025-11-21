@@ -426,7 +426,7 @@ const TaxInvoiceForm = () => {
                 >
                   <Select
                     placeholder="Select Type"
-                    options={["COM", "COD"].map((item) => ({
+                    options={["Commission", "Commission Discount"].map((item) => ({
                       label: item,
                       value: item,
                     }))}
