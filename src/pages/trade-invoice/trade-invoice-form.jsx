@@ -21,19 +21,24 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DELETE_QUOTATION_SUB, DELETE_TRADE_INVOICE_SUB, PURCHASE_ORDER_LIST, TRADE_INVOICE_LIST } from "../../api";
+import {
+  DELETE_QUOTATION_SUB,
+  DELETE_TRADE_INVOICE_SUB,
+  PURCHASE_ORDER_LIST,
+  TRADE_INVOICE_LIST,
+} from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useSelector } from "react-redux";
 import useToken from "../../api/usetoken";
-
+import axiosInstance from "../../api/axios";
 
 const TradeInvoiceForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const { id } = useParams();
   const isEditMode = Boolean(id);
-  const company = useSelector(state => state.company.companyDetails);
+  const company = useSelector((state) => state.company.companyDetails);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const token = useToken();
@@ -53,22 +58,35 @@ const TradeInvoiceForm = () => {
     trade_invoice_remarks: "",
   });
 
+  // const { party, tradeinvoice, item } = useMasterData({
+  //   party: true,
+  //   tradeinvoice: true,
+  //   item: true,
+  // });
+  const [gsmOptions, setGsmOptions] = useState([]);
+  const [bfOptions, setBfOptions] = useState([]);
+  const [shadeOptions, setShadeOptions] = useState([]);
+  const [unitOptions, setUnitOptions] = useState([]);
 
-
-  const { party, tradeinvoice, item } = useMasterData({
+  const { gsm, purchaseRef, shade, unit, party, tradeinvoice } = useMasterData({
+    mill: true,
+    party: true,
+    item: true,
+    gsm: true,
+    purchaseRef: true,
+    shade: true,
+    unit: true,
     party: true,
     tradeinvoice: true,
-    item: true,
   });
+  const partyOptions =
+    party?.data?.data?.map((item) => ({
+      label: item.party_name,
+      value: item.id,
+      party_delivery_address: item.party_delivery_address,
+      party_state: item.party_state,
+    })) || [];
 
-  const partyOptions = party?.data?.data?.map((item) => ({
-    label: item.party_name,
-    value: item.id,
-    party_delivery_address: item.party_delivery_address,
-    party_state: item.party_state,
-  })) || [];
-
- 
   const handlePartyChange = (id) => {
     const selectedParty = partyOptions.find((m) => m.value == id);
 
@@ -78,12 +96,11 @@ const TradeInvoiceForm = () => {
         trade_invoice_cgst: 0,
         trade_invoice_igst: 0,
       });
-     
+
       return;
     }
-    tradeinvoice.refetch()
-form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
- 
+    tradeinvoice.refetch();
+    form.setFieldValue("trade_invoice_ref", tradeinvoice?.data?.data);
 
     const partyState = selectedParty.party_state?.toLowerCase() || "";
     const companyState = company?.company_state?.toLowerCase() || "";
@@ -103,53 +120,59 @@ form.setFieldValue("trade_invoice_ref",tradeinvoice?.data?.data)
     }
   };
 
-  const [gsmOptions, setGsmOptions] = useState([]);
-  const [bfOptions, setBfOptions] = useState([]);
-  const [shadeOptions, setShadeOptions] = useState([]);
-  const [unitOptions, setUnitOptions] = useState([]);
-
+  console.log(gsm, "gsm");
   const fetchWithToken = async (url) => {
-    const response = await fetch(url, {
+    const response = await axiosInstance.get(url, {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.json();
   };
 
-  useEffect(() => {
-    const fetchMasterData = async () => {
-      try {
-        const [gsmRes, bfRes, shadeRes, unitRes] = await Promise.all([
-          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activegsms'),
-          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeBFs'),
-          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeShades'),
-          fetchWithToken('https://theunitedtraders.co.in/crmapi/public/api/activeUnits')
-        ]);
+  // useEffect(() => {
+  //   const fetchMasterData = async () => {
+  //     try {
+  //       const [gsmRes, bfRes, shadeRes, unitRes] = await Promise.all([
+  //         fetchWithToken("activegsms"),
+  //         fetchWithToken("activeBFs"),
+  //         fetchWithToken("activeShades"),
+  //         fetchWithToken("activeUnits"),
+  //       ]);
 
-        setGsmOptions(gsmRes.data?.map(item => ({ label: item.gsm, value: item.gsm })) || []);
-        setBfOptions(bfRes.data?.map(item => ({ label: item.bf, value: item.bf })) || []);
-        setShadeOptions(shadeRes.data?.map(item => ({ label: item.shade, value: item.shade })) || []);
-     
+  //       setGsmOptions(
+  //         gsmRes.data?.map((item) => ({ label: item.gsm, value: item.gsm })) ||
+  //           []
+  //       );
+  //       setBfOptions(
+  //         bfRes.data?.map((item) => ({ label: item.bf, value: item.bf })) || []
+  //       );
+  //       setShadeOptions(
+  //         shadeRes.data?.map((item) => ({
+  //           label: item.shade,
+  //           value: item.shade,
+  //         })) || []
+  //       );
 
-        setUnitOptions(unitRes.data?.map(item => ({ label: item.unit, value: item.unit })) || []);
-      } catch (error) {
-        console.error("Error fetching master data:", error);
-      }
-    };
+  //       setUnitOptions(
+  //         unitRes.data?.map((item) => ({
+  //           label: item.unit,
+  //           value: item.unit,
+  //         })) || []
+  //       );
+  //     } catch (error) {
+  //       console.error("Error fetching master data:", error);
+  //     }
+  //   };
 
-    fetchMasterData();
-
-
-  }, [token]);
+  //   fetchMasterData();
+  // }, [token]);
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const { trigger: deleteTrigger } = useApiMutation();
-  
-  
-const fetchQuotation = async () => {
+
+  const fetchQuotation = async () => {
     try {
       const res = await fetchTrigger({
         url: `${TRADE_INVOICE_LIST}/${id}`,
@@ -157,7 +180,7 @@ const fetchQuotation = async () => {
       if (res?.data) {
         const formattedData = {
           ...res.data,
-        
+
           trade_invoice_date: res.data.trade_invoice_date
             ? dayjs(res.data.trade_invoice_date)
             : null,
@@ -175,35 +198,37 @@ const fetchQuotation = async () => {
     if (id) fetchQuotation();
     else form.resetFields();
   }, [id]);
- 
+
   const handleSubmit = async (values) => {
     try {
-    
       const refetchResult = await tradeinvoice.refetch();
-      const latestRef = refetchResult?.data?.data || tradeinvoice?.data?.data || initialData.trade_invoice_ref || "";
-  
-    const payload = {
-      ...values,
-      trade_invoice_ref: latestRef,
-      trade_invoice_date: values.trade_invoice_date
-        ? dayjs(values.trade_invoice_date).format("YYYY-MM-DD")
-        : null,
-      
-      subs: (values.subs || []).map((sub) => ({
-        id: sub?.id || "",
-        trade_invoice_sub_description: sub?.trade_invoice_sub_description || "",
-        trade_invoice_sub_gsm: sub?.trade_invoice_sub_gsm || "",
-        trade_invoice_sub_bf: sub?.trade_invoice_sub_bf || "",
-        trade_invoice_sub_size: sub?.trade_invoice_sub_size || "",
-        trade_invoice_sub_shade: sub?.trade_invoice_sub_shade || "",
-        trade_invoice_sub_unit: sub?.trade_invoice_sub_unit || "",
-        trade_invoice_sub_reel: sub?.trade_invoice_sub_reel || "",
-        trade_invoice_sub_qnty: sub?.trade_invoice_sub_qnty || "",
-        trade_invoice_sub_rate: sub?.trade_invoice_sub_rate || "",
-      })),
-    };
+      const latestRef =
+        refetchResult?.data?.data ||
+        tradeinvoice?.data?.data ||
+        initialData.trade_invoice_ref ||
+        "";
 
- 
+      const payload = {
+        ...values,
+        trade_invoice_ref: latestRef,
+        trade_invoice_date: values.trade_invoice_date
+          ? dayjs(values.trade_invoice_date).format("YYYY-MM-DD")
+          : null,
+
+        subs: (values.subs || []).map((sub) => ({
+          id: sub?.id || "",
+          trade_invoice_sub_description:
+            sub?.trade_invoice_sub_description || "",
+          trade_invoice_sub_gsm: sub?.trade_invoice_sub_gsm || "",
+          trade_invoice_sub_bf: sub?.trade_invoice_sub_bf || "",
+          trade_invoice_sub_size: sub?.trade_invoice_sub_size || "",
+          trade_invoice_sub_shade: sub?.trade_invoice_sub_shade || "",
+          trade_invoice_sub_unit: sub?.trade_invoice_sub_unit || "",
+          trade_invoice_sub_reel: sub?.trade_invoice_sub_reel || "",
+          trade_invoice_sub_qnty: sub?.trade_invoice_sub_qnty || "",
+          trade_invoice_sub_rate: sub?.trade_invoice_sub_rate || "",
+        })),
+      };
 
       const res = await submitTrigger({
         url: isEditMode ? `${TRADE_INVOICE_LIST}/${id}` : TRADE_INVOICE_LIST,
@@ -249,7 +274,7 @@ const fetchQuotation = async () => {
   };
 
   const loading = fetchLoading || party?.loading;
-  
+
   return (
     <>
       {loading ? (
@@ -269,8 +294,14 @@ const fetchQuotation = async () => {
             title={<h2 className="text-2xl font-bold">Create Trade Invoice</h2>}
             extra={
               <div className="flex items-center">
-                <Button type="primary" htmlType="submit" loading={submitLoading}>
-                {isEditMode ? "Update Trade Invoice" : "Create  Trade Invoice"}
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitLoading}
+                >
+                  {isEditMode
+                    ? "Update Trade Invoice"
+                    : "Create  Trade Invoice"}
                 </Button>
               </div>
             }
@@ -279,7 +310,11 @@ const fetchQuotation = async () => {
             {/* First Row - Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2 ">
               <Form.Item
-                label={<span>Party <span className="text-red-500">*</span></span>}
+                label={
+                  <span>
+                    Party <span className="text-red-500">*</span>
+                  </span>
+                }
                 name="trade_invoice_party_id"
                 rules={[{ required: true, message: "Select party" }]}
               >
@@ -288,7 +323,9 @@ const fetchQuotation = async () => {
                   options={partyOptions}
                   onChange={handlePartyChange}
                   filterOption={(input, option) =>
-                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
                   }
                   showSearch
                   allowClear
@@ -296,7 +333,11 @@ const fetchQuotation = async () => {
               </Form.Item>
 
               <Form.Item
-                label={<span>Invoice Date <span className="text-red-500">*</span></span>}
+                label={
+                  <span>
+                    Invoice Date <span className="text-red-500">*</span>
+                  </span>
+                }
                 name="trade_invoice_date"
                 rules={[{ required: true, message: "Please select date" }]}
               >
@@ -304,29 +345,32 @@ const fetchQuotation = async () => {
               </Form.Item>
 
               <Form.Item
-                label={<span>Invoice Ref No <span className="text-red-500">*</span></span>}
+                label={
+                  <span>
+                    Invoice Ref No <span className="text-red-500">*</span>
+                  </span>
+                }
                 name="trade_invoice_ref"
                 rules={[{ required: true, message: "Enter reference number" }]}
               >
                 <Input placeholder="Auto-generated" readOnly />
               </Form.Item>
               <div className="grid grid-cols-3 gap-0 ">
-              <Form.Item label="SGST(%)" name="trade_invoice_sgst">
-                <Input type="number" placeholder="SGST" />
-              </Form.Item>
+                <Form.Item label="SGST(%)" name="trade_invoice_sgst">
+                  <Input type="number" placeholder="SGST" />
+                </Form.Item>
 
-              <Form.Item label="CGST(%)" name="trade_invoice_cgst">
-                <Input type="number" placeholder="CGST" />
-              </Form.Item>
+                <Form.Item label="CGST(%)" name="trade_invoice_cgst">
+                  <Input type="number" placeholder="CGST" />
+                </Form.Item>
 
-              <Form.Item label="IGST(%)" name="trade_invoice_igst">
-                <Input type="number" placeholder="IGST" />
-              </Form.Item>
-            </div>
+                <Form.Item label="IGST(%)" name="trade_invoice_igst">
+                  <Input type="number" placeholder="IGST" />
+                </Form.Item>
+              </div>
             </div>
 
             {/* Second Row - GST */}
-          
 
             {/* Third Row - Discount, Freight, Insurance, HSN, E-Way Bill */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
@@ -354,7 +398,10 @@ const fetchQuotation = async () => {
             {/* Fourth Row - Payment Terms and Remarks */}
             <div className="flex flex-col md:flex-row gap-2 ">
               <div className="flex-1">
-                <Form.Item label="Payment Terms" name="trade_invoice_payment_terms">
+                <Form.Item
+                  label="Payment Terms"
+                  name="trade_invoice_payment_terms"
+                >
                   <Input.TextArea placeholder="Payment Terms" rows={2} />
                 </Form.Item>
               </div>
@@ -373,7 +420,9 @@ const fetchQuotation = async () => {
                   {
                     validator: async (_, subs) => {
                       if (!subs || subs.length < 1)
-                        return Promise.reject(new Error("Please add at least one sub item."));
+                        return Promise.reject(
+                          new Error("Please add at least one sub item.")
+                        );
 
                       const hasAnyFilledRow = subs.some((row) =>
                         Object.values(row || {}).some(
@@ -383,7 +432,9 @@ const fetchQuotation = async () => {
 
                       if (!hasAnyFilledRow)
                         return Promise.reject(
-                          new Error("Please fill at least one sub item before submitting.")
+                          new Error(
+                            "Please fill at least one sub item before submitting."
+                          )
                         );
 
                       return Promise.resolve();
@@ -394,8 +445,14 @@ const fetchQuotation = async () => {
                 {(fields, { add, remove }, { errors }) => (
                   <>
                     <div className="flex justify-between mb-2">
-                      <div className="font-semibold text-lg mb-2">Item Details</div>
-                      <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
+                      <div className="font-semibold text-lg mb-2">
+                        Item Details
+                      </div>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        icon={<PlusOutlined />}
+                      >
                         Add Item
                       </Button>
                     </div>
@@ -416,29 +473,22 @@ const fetchQuotation = async () => {
                                 okText="Yes"
                                 cancelText="No"
                               >
-                               
-
-<button
-                                type="button"
-                               
-                                className="absolute z-10 right-2  p-1 rounded-md hover:cursor-pointer bg-red-100"
-                            
-                              >
-
-                                <DeleteOutlined className="!text-red-400 "/>
-                              </button>
+                                <button
+                                  type="button"
+                                  className="absolute z-10 right-2  p-1 rounded-md hover:cursor-pointer bg-red-100"
+                                >
+                                  <DeleteOutlined className="!text-red-400 " />
+                                </button>
                               </Popconfirm>
                             ) : (
                               <button
                                 type="button"
-                               
                                 className="absolute z-10 right-2  p-1 rounded-md hover:cursor-pointer bg-red-100"
                                 onClick={() => remove(name)}
                               >
-
-                                <MinusCircleOutlined className="!text-red-400 "/>
+                                <MinusCircleOutlined className="!text-red-400 " />
                               </button>
-                     ) )}
+                            ))}
 
                           {/* All 9 sub-table fields in one compact row using grid */}
                           <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-9 gap-2 mt-2">
@@ -459,7 +509,10 @@ const fetchQuotation = async () => {
                             >
                               <Select
                                 placeholder="GSM"
-                                options={gsmOptions}
+                                options={gsm?.data?.data?.map((item) => ({
+                                  label: item.gsm,
+                                  value: item.gsm,
+                                }))}
                                 size="medium"
                                 showSearch
                               />
@@ -522,7 +575,11 @@ const fetchQuotation = async () => {
                               label="Reel"
                               className="mb-0"
                             >
-                              <Input type="number" placeholder="Reel" size="medium" />
+                              <Input
+                                type="number"
+                                placeholder="Reel"
+                                size="medium"
+                              />
                             </Form.Item>
 
                             <Form.Item
@@ -531,7 +588,11 @@ const fetchQuotation = async () => {
                               label="Qty"
                               className="mb-0"
                             >
-                              <Input type="number" placeholder="Qty" size="medium" />
+                              <Input
+                                type="number"
+                                placeholder="Qty"
+                                size="medium"
+                              />
                             </Form.Item>
 
                             <Form.Item
@@ -540,14 +601,20 @@ const fetchQuotation = async () => {
                               label="Rate"
                               className="mb-0"
                             >
-                              <Input type="number" placeholder="Rate" size="medium" />
+                              <Input
+                                type="number"
+                                placeholder="Rate"
+                                size="medium"
+                              />
                             </Form.Item>
                           </div>
                         </div>
                       );
                     })}
                     {errors.length > 0 && (
-                      <div className="text-red-500 text-sm mt-2">{errors[0]}</div>
+                      <div className="text-red-500 text-sm mt-2">
+                        {errors[0]}
+                      </div>
                     )}
                   </>
                 )}

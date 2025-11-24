@@ -569,7 +569,7 @@ const MillWiseReport = () => {
                                       {item.billing_no}
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-center">
-                                      {item.billing_bf}
+                                      {item.billing_sub_bf}
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-right">
                                       {parseFloat(item.billing_tones).toFixed(

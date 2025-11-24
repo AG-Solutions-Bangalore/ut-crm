@@ -1,4 +1,4 @@
-import { App, Button, Space, Spin, Tooltip } from "antd";
+import { App, Button, Card, Space, Spin, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -61,6 +61,7 @@ const BillingView = () => {
   });
   const billing = billingdata?.data || [];
   const purchase = billingdata?.purchase || [];
+  const subRows = billingdata?.subs || [];
 
   const profit = useMemo(() => {
     const p =
@@ -212,134 +213,114 @@ const BillingView = () => {
 
       {/* Metrics */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-2.5 mb-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           <Stat
             label="Bill Ref"
             value={billing.billing_ref ? `${billing.billing_ref}` : "-"}
           />
           <Stat
-            label="Rate Diff"
-            value={profit !== null ? `₹${profit.toFixed(2)}` : "-"}
-            variant={profitVariant}
-          />
-          <Stat
-            label="Due Days"
+            label="Bill Tones"
             value={
-              billing.billing_due_days ? `${billing.billing_due_days}` : "-"
+              billing.billing_total_tones
+                ? `${billing.billing_total_tones}`
+                : "-"
             }
-            variant={dueVariant}
           />
 
           <Stat
-            label="Tones"
-            value={billing.billing_tones ? `${billing.billing_tones}` : "-"}
+            label="Total Sale Amount"
+            value={
+              billing.billing_total_sale_amount
+                ? `₹${billing.billing_total_sale_amount}`
+                : "-"
+            }
           />
           <Stat
-            label="Commission"
-            value={billing.billing_commn ? `₹${billing.billing_commn}` : "-"}
+            label="Total Commission"
+            value={
+              billing.billing_total_commn
+                ? `₹${billing.billing_total_commn}`
+                : "-"
+            }
           />
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Stat label="Item" value={billing.billing_bf || "-"} />
-          </div>
         </div>
       </div>
 
-      {/* Details Cards */}
-      <div className="grid lg:grid-cols-2 gap-3 mb-3">
-        {/* Purchase */}
-        <div className="bg-white rounded-xl border-l-4 border-l-blue-500 border-t border-r border-b border-gray-200 shadow-sm p-3">
-          <div className="flex items-center gap-2 mb-2.5">
-            <div className="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-3.5 h-3.5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wide">
-              Purchase
-            </h3>
+      <div className="bg-white rounded-xl border-l-4 border-l-blue-500 border-t border-r border-b border-gray-200 shadow-sm p-3 my-1">
+        <div className="flex items-center gap-2 mb-2.5">
+          <div className="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-3.5 h-3.5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Stat label="Mill" value={billing.mill_name || "-"} />
-            <Stat label="PO Ref" value={billing.purchase_orders_ref || "-"} />
-            <Stat
-              label="Date"
-              value={
-                billing.purchase_date
-                  ? dayjs(billing.purchase_date).format("DD MMM YY")
-                  : "-"
-              }
-            />
-            <Stat
-              label="Rate"
-              value={
-                billing.purchase_rate
-                  ? `₹${Number(billing.purchase_rate).toFixed(2)}`
-                  : "-"
-              }
-            />
+          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wide">
+            Purchase
+          </h3>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <Stat label="Mill" value={billing.mill_name || "-"} />
+          <Stat label="PO Ref" value={billing.purchase_orders_ref || "-"} />
+          <Stat label="Party" value={billing.party_name || "-"} />
+
+          <div className="md:col-span-3">
+            <Stat label="Note" value={billing.billing_note || "-"} />
           </div>
         </div>
+      </div>
+      <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm my-2">
+        {/* Header Row */}
+        <div className="grid grid-cols-12 gap-2 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
+          <div className="col-span-1">#</div>
+          <div className="col-span-1">Pur Date</div>
+          <div className="col-span-1">Pur Rate</div>
+          <div className="col-span-1">Sale Date</div>
+          <div className="col-span-1">Sale Rate</div>
+          <div className="col-span-2">Item</div>
+          <div className="col-span-1">Tones</div>
+          <div className="col-span-1">Comm</div>
+          <div className="col-span-1">Sales Amount</div>
+          <div className="col-span-1">Rate Diff</div>
+          <div className="col-span-1">Due Days</div>
+        </div>
 
-        {/* Sale */}
-        <div className="bg-white rounded-xl border-l-4 border-l-emerald-500 border-t border-r border-b border-gray-200 shadow-sm p-3">
-          <div className="flex items-center gap-2 mb-2.5">
-            <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-3.5 h-3.5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+        {/* Data Rows */}
+        <div className="divide-y divide-gray-100">
+          {subRows.map((sub, index) => (
+            <div
+              key={sub.id || index}
+              className="grid grid-cols-12 gap-2 p-2 text-sm text-gray-600 items-center"
+            >
+              <div className="col-span-1">{index + 1}</div>
+              <div className="col-span-1">
+                {sub.purchase_date
+                  ? dayjs(sub.purchase_date).format("DD-MM-YYYY")
+                  : "-"}
+              </div>
+              <div className="col-span-1">₹{sub.purchase_rate || "-"}</div>
+              <div className="col-span-1">
+                {sub.sale_date
+                  ? dayjs(sub.sale_date).format("DD-MM-YYYY")
+                  : "-"}
+              </div>
+              <div className="col-span-1">₹{sub.sale_rate || "-"}</div>
+              <div className="col-span-2">{sub.billing_sub_bf || "-"}</div>
+              <div className="col-span-1">{sub.billing_sub_tones || "-"}</div>
+              <div className="col-span-1">{sub.billing_commn || "-"}</div>
+              <div className="col-span-1">₹{sub.sales_amount || "-"}</div>
+              <div className="col-span-1">₹{sub.rate_diff || "-"}</div>
+              <div className="col-span-1">{sub.billing_due_days || "-"}</div>
             </div>
-            <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wide">
-              Sale
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Stat label="Party" value={billing.party_name || "-"} />
-            <Stat
-              label="Date"
-              value={
-                billing.sale_date
-                  ? dayjs(billing.sale_date).format("DD MMM YY")
-                  : "-"
-              }
-            />
-
-            <Stat
-              label="Rate"
-              value={
-                billing.sale_rate
-                  ? `₹${Number(billing.sale_rate).toFixed(2)}`
-                  : "-"
-              }
-            />
-            <Stat
-              label="Amount"
-              value={
-                billing.purchase_amount
-                  ? `₹${Number(billing.purchase_amount).toLocaleString()}`
-                  : "-"
-              }
-            />
-          </div>
+          ))}
         </div>
       </div>
 

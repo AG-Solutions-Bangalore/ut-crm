@@ -9,6 +9,7 @@ import { Download, Printer, FileSpreadsheet, Search, Loader2 } from 'lucide-reac
 import { useReactToPrint } from 'react-to-print';
 import html2pdf from 'html2pdf.js';
 import * as ExcelJS from 'exceljs';
+import axiosInstance from '../../../api/axios';
 
 const { Option } = Select;
 
@@ -93,8 +94,8 @@ const UnifiedLedger = () => {
         type: selectedLedgerType
       };
 
-      const response = await axios.post(
-        'https://theunitedtraders.co.in/crmapi/public/api/ledgerReport',
+      const response = await axiosInstance.post(
+        'ledgerReport',
         payload,
         {
           headers: {
@@ -119,7 +120,7 @@ const UnifiedLedger = () => {
   const calculateTotalReceived = () => {
     if (!ledgerData?.received) return 0;
     return ledgerData.received.reduce(
-      (total, item) => total + (Number(item.purchase_amount) || 0),
+      (total, item) => total + (Number(item.sales_amount) || 0),
       0
     );
   };
@@ -340,7 +341,7 @@ const UnifiedLedger = () => {
       let creditRowIndex = rowIndex;
       ledgerData?.received?.forEach((item) => {
         worksheet.getCell(`D${creditRowIndex}`).value = dayjs(item.sale_date).format('DD-MM-YYYY');
-        worksheet.getCell(`E${creditRowIndex}`).value = Number(item.purchase_amount);
+        worksheet.getCell(`E${creditRowIndex}`).value = Number(item.sales_amount);
         creditRowIndex++;
       });
 
@@ -655,7 +656,7 @@ const UnifiedLedger = () => {
                                   {dayjs(item.sale_date).format("DD-MM-YYYY")}
                                 </td>
                                 <td className="text-center border p-2">
-                                  {item.purchase_amount}
+                                  {item.sales_amount}
                                 </td>
                               </tr>
                             ))

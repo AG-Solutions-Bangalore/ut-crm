@@ -572,14 +572,14 @@ const PartyWiseReport = () => {
                                       )}
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-center">
-                                      {item.billing_party_id}
+                                      {item.billing_due_days}
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-center">
                                       {calculateOverdueDays(item.purchase_date)}{" "}
                                       days
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-center">
-                                      {item.billing_bf}
+                                      {item.billing_sub_bf}
                                     </div>
                                     <div className="p-2 border-b border-r border-black text-right">
                                       {parseFloat(item.billing_tones).toFixed(

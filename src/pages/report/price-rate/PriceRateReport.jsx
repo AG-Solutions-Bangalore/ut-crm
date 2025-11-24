@@ -328,7 +328,7 @@ const PriceRateReport = () => {
                               {item.party_name}
                             </div>
                             <div className="p-2 border-b border-r border-black text-center">
-                              {item.billing_bf}
+                              {item.billing_sub_bf}
                             </div>
                             <div className="p-2 border-b border-r border-black text-center">
                               {dayjs(item.purchase_date).format('DD-MM-YYYY')}
