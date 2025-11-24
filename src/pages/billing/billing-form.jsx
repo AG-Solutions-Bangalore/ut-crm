@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Popconfirm,
   Select,
   Spin,
   Switch,
@@ -52,19 +53,18 @@ const BillingForm = () => {
     billing_no: "",
     billing_mill_id: null,
     billing_total_tones: "",
-    billing_party_id: "",
+    billing_party_id: null,
     purchase_orders_ref: null,
     billing_total_commn: "",
-    billing_total_sale_amount: null,
+    billing_total_sale_amount: "",
     billing_type: null,
-    billing_payment_type: null,
     billing_note: "",
-    billing_status: false,
+    billing_payment_type: null,
   });
   const [selectedMillId, setSelectedMillId] = useState(null);
   const [selectedRefId, setSelectetReflId] = useState(null);
-  const [totalRate, setTotalRate] = useState(null);
-  const [daysDifference, setDaysDifference] = useState(null);
+  // const [totalRate, setTotalRate] = useState(null);
+  // const [daysDifference, setDaysDifference] = useState(null);
   const { data: purchaserefdata, isLoading } = useGetApiMutation({
     url: `${ACTIVE_PURCHASE_ORDER_REF}/${selectedMillId}`,
     queryKey: ["purchasereforderdata", selectedMillId],
@@ -80,11 +80,8 @@ const BillingForm = () => {
         enabled: !!selectedRefId,
       },
     });
-  console.log(getpurchaserefdetails);
   const resetForm = () => {
     form.resetFields();
-    setTotalRate(null);
-    setDaysDifference(null);
   };
 
   const poRefOptions =
@@ -103,29 +100,50 @@ const BillingForm = () => {
       label: item.party_short,
       value: item.id,
     })) || [];
+  const itemOptions =
+    item?.data?.data?.map((item) => ({
+      label: item.bf,
+      value: item.bf,
+    })) || [];
 
   const fetchBilling = async () => {
     try {
       const res = await fetchTrigger({ url: `${BILLING_LIST}/${id}` });
+
       if (res?.data) {
+        console.log(res.data.subs, "res.data.subs");
+        const formattedSubs =
+          Array.isArray(res.subs) &&
+          res.subs.map((row) => ({
+            ...row,
+            purchase_date: row.purchase_date ? dayjs(row.purchase_date) : null,
+            sale_date: row.sale_date ? dayjs(row.sale_date) : null,
+            purchase_rate: row.purchase_rate ? Number(row.purchase_rate) : "",
+            sale_rate: row.sale_rate ? Number(row.sale_rate) : "",
+            billing_sub_tones: row.billing_sub_tones
+              ? Number(row.billing_sub_tones)
+              : "",
+            billing_commn: row.billing_commn ? Number(row.billing_commn) : "",
+            sales_amount: row.sales_amount ? Number(row.sales_amount) : "",
+            rate_diff: row.rate_diff ? Number(row.rate_diff) : "",
+            billing_due_days: row.billing_due_days
+              ? Number(row.billing_due_days)
+              : "",
+          }));
+        console.log(formattedSubs, "formattedSubs");
         const formattedData = {
           ...res.data,
           purchase_date: res.data.purchase_date
             ? dayjs(res.data.purchase_date)
             : null,
           sale_date: res.data.sale_date ? dayjs(res.data.sale_date) : null,
-          billing_status: res.data.billing_status == "Open" ? true : false,
+          billing_status: res.data.billing_status === "Open",
+          subs: formattedSubs || [],
         };
-        const diff = dayjs()
-          .startOf("day")
-          .diff(dayjs(formattedData?.sale_date).startOf("day"), "day");
-        const total =
-          Number(formattedData?.sale_rate) -
-          Number(formattedData?.purchase_rate);
-        setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
-        setDaysDifference(diff);
+
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
+        setSubRows(formattedData.subs || []);
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -143,80 +161,110 @@ const BillingForm = () => {
   };
   const handleChangeRef = (value) => {
     setSelectetReflId(value);
+
+    form.resetFields(["subs"]);
   };
 
-  // const handleValueChange = (_, allValues) => {
-  //   const { purchase_rate, sale_rate, sale_date } = allValues;
-  //   const pRate = parseFloat(purchase_rate) || 0;
-  //   const sRate = parseFloat(sale_rate) || 0;
-  //   const total = sRate - pRate;
-  //   setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
-
-  //   if (sale_date) {
-  //     const diff = dayjs()
-  //       .startOf("day")
-  //       .diff(dayjs(sale_date).startOf("day"), "day");
-
-  //     setDaysDifference(diff);
-
-  //     form.setFieldsValue({
-  //       billing_due_days: diff,
-  //     });
-  //   } else {
-  //     setDaysDifference(null);
-  //     form.setFieldsValue({
-  //       billing_due_days: "",
-  //     });
-  //   }
-  // };
-  
   const handleValueChange = (_, allValues) => {
-  const { purchase_rate, sale_rate, sale_date, subs } = allValues;
+    const { subs } = allValues;
 
-  // Existing logic
-  const pRate = parseFloat(purchase_rate) || 0;
-  const sRate = parseFloat(sale_rate) || 0;
-  const total = sRate - pRate;
-  setTotalRate(total ? parseFloat(total.toFixed(2)) : 0);
+    if (Array.isArray(subs)) {
+      const updatedSubs = subs.map((row) => {
+        const pRate = parseFloat(row?.purchase_rate) || 0;
+        const sRate = parseFloat(row?.sale_rate) || 0;
+        const tones = parseFloat(row?.billing_sub_tones) || 0;
 
-  if (sale_date) {
-    const diff = dayjs().startOf("day").diff(dayjs(sale_date).startOf("day"), "day");
-    setDaysDifference(diff);
-    form.setFieldsValue({ billing_due_days: diff });
-  }
+        // Calculate rate difference
+        const rateDiff = sRate - pRate;
 
-  if (Array.isArray(subs)) {
-    const totalTones = subs.reduce((sum, row) => {
-      return sum + (parseFloat(row?.billing_sub_tones) || 0);
-    }, 0);
+        // Sales amount
+        const salesAmount = tones * sRate;
 
-    const totalComm = subs.reduce((sum, row) => {
-      return sum + (parseFloat(row?.billing_commn) || 0);
-    }, 0);
+        // Due days calculation
+        let dueDays = 0;
+        if (row?.sale_date) {
+          dueDays = dayjs()
+            .startOf("day")
+            .diff(dayjs(row.sale_date).startOf("day"), "day");
+        }
 
-    form.setFieldsValue({
-      billing_total_tones: totalTones,
-      billing_total_commn: totalComm,
-    });
-  }
-};
+        return {
+          ...row,
+
+          rate_diff: parseFloat(rateDiff.toFixed(2)),
+          sales_amount: parseFloat(salesAmount.toFixed(2)),
+          billing_due_days: dueDays,
+        };
+      });
+
+      // update row values back to form
+      form.setFieldsValue({ subs: updatedSubs });
+
+      // Calculate totals
+      const totalTones = updatedSubs.reduce(
+        (sum, row) => sum + (parseFloat(row.billing_sub_tones) || 0),
+        0
+      );
+      const totalComm = updatedSubs.reduce(
+        (sum, row) => sum + (parseFloat(row.billing_commn) || 0),
+        0
+      );
+
+      form.setFieldsValue({
+        billing_total_tones: totalTones,
+        billing_total_commn: totalComm,
+      });
+    }
+  };
 
   const handleSubmit = async (values) => {
-    const payload = {
-      ...values,
-      billing_due_days: daysDifference ? daysDifference : 0,
-      billing_tones: values.billing_tones ? Number(values.billing_tones) : 0,
-      purchase_rate: values.purchase_rate ? Number(values.purchase_rate) : 0,
-      purchase_amount: values.purchase_amount
-        ? Number(values.purchase_amount)
+    const formattedSubs = (values.subs || []).map((item) => ({
+      id: item.id || null,
+      purchase_date: item.purchase_date
+        ? dayjs(item.purchase_date).format("YYYY-MM-DD")
+        : null,
+      sale_date: item.sale_date
+        ? dayjs(item.sale_date).format("YYYY-MM-DD")
+        : null,
+
+      purchase_rate: item.purchase_rate ? Number(item.purchase_rate) : 0,
+      sale_rate: item.sale_rate ? Number(item.sale_rate) : 0,
+      billing_sub_bf: item.billing_sub_bf || "",
+      billing_sub_tones: item.billing_sub_tones
+        ? Number(item.billing_sub_tones)
         : 0,
-      sale_rate: values.sale_rate ? Number(values.sale_rate) : 0,
-      purchase_date: values.purchase_date
-        ? dayjs(values.purchase_date).format("YYYY-MM-DD")
-        : null,
-      sale_date: values.sale_date
-        ? dayjs(values.sale_date).format("YYYY-MM-DD")
-        : null,
+
+      billing_commn: item.billing_commn ? Number(item.billing_commn) : 0,
+      rate_diff: item.rate_diff ? Number(item.rate_diff) : 0,
+      sales_amount: item.sales_amount ? Number(item.sales_amount) : 0,
+      billing_due_days: item.billing_due_days
+        ? Number(item.billing_due_days)
+        : 0,
+    }));
+    const payload = {
+      // billing_due_days: daysDifference ? daysDifference : 0,
+      billing_no: values.billing_no ? values.billing_no : "",
+      billing_mill_id: values.billing_mill_id ? values.billing_mill_id : "",
+      billing_party_id: values.billing_party_id ? values.billing_party_id : "",
+      purchase_orders_ref: values.purchase_orders_ref
+        ? values.purchase_orders_ref
+        : "",
+      billing_total_commn: values.billing_total_commn
+        ? values.billing_total_commn
+        : "",
+      billing_total_sale_amount: values.billing_total_sale_amount
+        ? values.billing_total_sale_amount
+        : "",
+      billing_type: values.billing_type ? values.billing_type : "",
+      billing_note: values.billing_note ? values.billing_note : "",
+      billing_payment_type: values.billing_payment_type
+        ? values.billing_payment_type
+        : "",
+
+      billing_total_tones: values.billing_total_tones
+        ? Number(values.billing_total_tones)
+        : 0,
+      subs: formattedSubs,
       ...(isEditMode && {
         billing_status: values?.billing_status === true ? "Open" : "Close",
       }),
@@ -224,7 +272,7 @@ const BillingForm = () => {
 
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${BILLING_LIST}/${id}` : BILLING_LIST,
+        url: isEditMode ? `${BILLING_LIST}/${id}` : `${BILLING_LIST}`,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
@@ -241,6 +289,31 @@ const BillingForm = () => {
       message.error(error?.message || "Error while saving billing.");
     }
   };
+  const [subRows, setSubRows] = useState([]);
+
+  const handleInsertSub = (mainItem, subItem) => {
+    const currentSubs = form.getFieldValue("subs") || [];
+
+    const newRow = {
+      purchase_date: mainItem?.purchase_orders_date
+        ? dayjs(mainItem.purchase_orders_date)
+        : dayjs(),
+      purchase_rate: subItem.agreed_rate || "",
+      sale_date: null,
+      sale_rate: subItem.bill_rate || "",
+      billing_sub_bf: subItem.bf || "",
+      billing_sub_tones: subItem.qnty || "",
+      billing_commn: "",
+    };
+
+    const updatedSubs = [newRow, ...currentSubs];
+
+    form.setFieldsValue({ subs: updatedSubs });
+    setSubRows(updatedSubs); // <-- re-render trigger
+
+    handleValueChange(null, { subs: updatedSubs });
+  };
+
   const main = getpurchaserefdetails?.data || {};
   const subs = main?.subs || [];
   const loadingdata =
@@ -256,7 +329,11 @@ const BillingForm = () => {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          onValuesChange={handleValueChange}
+          // onValuesChange={() => setSubRows(form.getFieldValue("subs") || [])}
+          onValuesChange={(_, allValues) => {
+            setSubRows(allValues.subs || []);
+            handleValueChange(_, allValues); // <-- Important
+          }}
           initialValues={initialData}
           className="mt-4"
           requiredMark={false}
@@ -300,7 +377,7 @@ const BillingForm = () => {
               className="!mt-2 !bg-gray-50"
               extra={
                 <div className="flex">
-                  {daysDifference !== null && (
+                  {/* {daysDifference !== null && (
                     <div className="flex">
                       <span
                         className={`mt-1 w-40 text-center px-1 py-1.5 ${
@@ -312,10 +389,9 @@ const BillingForm = () => {
                         Due Days: {daysDifference || 0}
                       </span>
                     </div>
-                  )}
+                  )} */}
 
-                  {/* PR - SR */}
-                  {totalRate !== null && (
+                  {/* {totalRate !== null && (
                     <div className="flex items-center justify-center">
                       <span
                         className={`px-1 py-1.5 rounded-md text-sm font-medium ${
@@ -325,7 +401,7 @@ const BillingForm = () => {
                         PR - SR: {totalRate || 0}
                       </span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               }
             >
@@ -452,6 +528,12 @@ const BillingForm = () => {
                           { label: "Payables", value: "Payables" },
                           { label: "Receivables", value: "Receivables" },
                         ]}
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        showSearch
                         allowClear
                       />
                     </Form.Item>
@@ -510,9 +592,7 @@ const BillingForm = () => {
                     }
                     rules={[{ required: true, message: "Enter Note" }]}
                   >
-                    <Input.TextArea
-                      placeholder="Enter Note"
-                    />
+                    <Input.TextArea placeholder="Enter Note" />
                   </Form.Item>
                 </div>
 
@@ -543,8 +623,34 @@ const BillingForm = () => {
                             <Card
                               key={index}
                               size="small"
-                              className="shadow-sm border "
+                              className="shadow-sm border relative"
                             >
+                              <Button
+                                type="primary"
+                                size="small"
+                                className="!absolute top-1 right-1 z-20 !p-1"
+                                disabled={subRows.some(
+                                  (s) =>
+                                    s.billing_sub_bf == item.bf &&
+                                    s.billing_sub_tones == item.qnty &&
+                                    s.purchase_rate == item.agreed_rate &&
+                                    s.sale_rate == item.bill_rate
+                                )}
+                                onClick={() => handleInsertSub(main, item)}
+                              >
+                                {form
+                                  .getFieldValue("subs")
+                                  ?.some(
+                                    (s) =>
+                                      s.billing_sub_bf == item.bf &&
+                                      s.billing_sub_tones == item.qnty &&
+                                      s.purchase_rate == item.agreed_rate &&
+                                      s.sale_rate == item.bill_rate
+                                  )
+                                  ? "✓"
+                                  : "+"}
+                              </Button>
+
                               <div className="rounded-md  text-xs grid grid-cols-3 gap-1">
                                 <p>
                                   <span className="font-medium text-gray-500">
@@ -680,10 +786,12 @@ const BillingForm = () => {
                         <div className="col-span-2">Item</div>
                         <div>Tones</div>
                         <div>Comm</div>
-                        {/* <div>Sales Amo</div>
 
-                        <div>Rate Diff</div>
-                        <div>Due Days</div> */}
+                        <div className="flex gap-3 col-span-2">
+                          <span>Sales Amo</span>
+                          <span>Rate Diff</span>
+                          <span>Due Days</span>
+                        </div>
                       </div>
 
                       <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
@@ -716,94 +824,93 @@ const BillingForm = () => {
                                     onClick={() => remove(name)}
                                   />
                                 ))}
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "purchase_date"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <DatePicker size="medium" format="DD-MM-YYYY" />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "purchase_rate"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <InputNumber
                                   placeholder="Rate"
                                   size="medium"
-                                  type="number"
                                   min={1}
                                 />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "sale_date"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <DatePicker size="medium" format="DD-MM-YYYY" />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "sale_rate"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <InputNumber
                                   placeholder="Sale Rate"
                                   size="medium"
-                                  type="number"
                                   min={1}
                                 />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "billing_sub_bf"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
                               >
                                 <Select
                                   placeholder="Select Item"
-                                  options={
-                                    item?.data?.data?.map((i) => ({
-                                      label: i.bf,
-                                      value: i.bf,
-                                    })) || []
-                                  }
+                                  className="col-span-2"
                                   filterOption={(input, option) =>
                                     (option?.label ?? "")
                                       .toLowerCase()
                                       .includes(input.toLowerCase())
                                   }
+                                  options={itemOptions}
                                   showSearch
                                   allowClear
-                                  className="col-span-2 w-full"
                                 />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "billing_sub_tones"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <InputNumber
                                   placeholder="Tones"
                                   size="medium"
-                                  type="number"
                                   min={1}
                                 />
                               </Form.Item>
+
                               <Form.Item
                                 {...restField}
                                 name={[name, "billing_commn"]}
+                                rules={[{ required: true, message: "" }]}
                                 noStyle
-                                className="mb-0"
                               >
                                 <InputNumber
                                   placeholder="Enter Comm"
                                   size="medium"
-                                  type="number"
                                   min={1}
                                 />
                               </Form.Item>

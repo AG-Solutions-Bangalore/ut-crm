@@ -82,7 +82,7 @@ const BalancePayableReport = () => {
   const calculateMonthTotals = (monthData) => {
     return monthData.reduce(
       (acc, item) => {
-        acc.amount += parseFloat(item.purchase_amount) || 0;
+        acc.amount += parseFloat(item.sales_amount) || 0;
         acc.balance += parseFloat(item.balance) || 0;
         return acc;
       },
@@ -270,7 +270,7 @@ const BalancePayableReport = () => {
         { header: "Date", key: "sale_date", width: 12 },
         { header: "Credit", key: "days_since_sale", width: 10 },
         { header: "Days Over", key: "billing_due_days", width: 10 },
-        { header: "Amount", key: "purchase_amount", width: 12 },
+        { header: "Amount", key: "sales_amount", width: 12 },
         { header: "Balance", key: "balance", width: 12 },
       ];
 
@@ -302,7 +302,7 @@ const BalancePayableReport = () => {
               sale_date: dayjs(item.sale_date).format("DD-MM-YYYY"),
               days_since_sale: item.days_since_sale,
               billing_due_days: item.billing_due_days,
-              purchase_amount: parseFloat(item.purchase_amount).toFixed(2),
+              sales_amount: parseFloat(item.sales_amount).toFixed(2),
               balance: parseFloat(item.balance).toFixed(2),
             });
             currentRow++;
@@ -310,7 +310,7 @@ const BalancePayableReport = () => {
 
           const monthTotalRow = worksheet.addRow({
             mill_name: `${millName} - ${month} Total`,
-            purchase_amount: monthTotals.amount.toFixed(2),
+            sales_amount: monthTotals.amount.toFixed(2),
             balance: monthTotals.balance.toFixed(2),
           });
           monthTotalRow.font = { bold: true };
@@ -324,7 +324,7 @@ const BalancePayableReport = () => {
 
         const millTotalRow = worksheet.addRow({
           mill_name: `${millName} - Grand Total`,
-          purchase_amount: millTotals.amount.toFixed(2),
+          sales_amount: millTotals.amount.toFixed(2),
           balance: millTotals.balance.toFixed(2),
         });
         millTotalRow.font = { bold: true, size: 12 };
@@ -338,7 +338,7 @@ const BalancePayableReport = () => {
 
       const grandTotalRow = worksheet.addRow({
         mill_name: "OVERALL GRAND TOTAL",
-        purchase_amount: overallTotals.amount.toFixed(2),
+        sales_amount: overallTotals.amount.toFixed(2),
         balance: overallTotals.balance.toFixed(2),
       });
       grandTotalRow.font = { bold: true, size: 14 };
@@ -621,7 +621,7 @@ const BalancePayableReport = () => {
                                               </div>
                                               <div className="p-2 border-b border-r border-black text-right">
                                                 {parseFloat(
-                                                  item.purchase_amount
+                                                  item.sales_amount
                                                 ).toFixed(2)}
                                               </div>
                                               <div className="p-2 border-b border-black text-right">
