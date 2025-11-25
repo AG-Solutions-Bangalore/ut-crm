@@ -57,31 +57,32 @@ const TradeInvoiceForm = () => {
     trade_invoice_payment_terms: "",
     trade_invoice_remarks: "",
   });
-
-  // const { party, tradeinvoice, item } = useMasterData({
-  //   party: true,
-  //   tradeinvoice: true,
-  //   item: true,
-  // });
-  const [gsmOptions, setGsmOptions] = useState([]);
-  const [bfOptions, setBfOptions] = useState([]);
-  const [shadeOptions, setShadeOptions] = useState([]);
-  const [unitOptions, setUnitOptions] = useState([]);
-
-  const { gsm, purchaseRef, shade, unit, party, tradeinvoice } = useMasterData({
-    mill: true,
+  const { gsm, shade, unit, party, tradeinvoice, item } = useMasterData({
     party: true,
     item: true,
     gsm: true,
-    purchaseRef: true,
     shade: true,
     unit: true,
-    party: true,
     tradeinvoice: true,
   });
+  const unitOptions =
+    unit?.data?.data?.map((item) => ({
+      label: item.unit,
+      value: item.unit,
+    })) || [];
+  const shadeOptions =
+    shade?.data?.data?.map((item) => ({
+      label: item.shade,
+      value: item.shade,
+    })) || [];
+  const bfOptions =
+    item?.data?.data?.map((item) => ({
+      label: item.bf,
+      value: item.bf,
+    })) || [];
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
       party_delivery_address: item.party_delivery_address,
       party_state: item.party_state,
@@ -120,7 +121,6 @@ const TradeInvoiceForm = () => {
     }
   };
 
-  console.log(gsm, "gsm");
   const fetchWithToken = async (url) => {
     const response = await axiosInstance.get(url, {
       headers: {
@@ -130,43 +130,6 @@ const TradeInvoiceForm = () => {
     return response.json();
   };
 
-  // useEffect(() => {
-  //   const fetchMasterData = async () => {
-  //     try {
-  //       const [gsmRes, bfRes, shadeRes, unitRes] = await Promise.all([
-  //         fetchWithToken("activegsms"),
-  //         fetchWithToken("activeBFs"),
-  //         fetchWithToken("activeShades"),
-  //         fetchWithToken("activeUnits"),
-  //       ]);
-
-  //       setGsmOptions(
-  //         gsmRes.data?.map((item) => ({ label: item.gsm, value: item.gsm })) ||
-  //           []
-  //       );
-  //       setBfOptions(
-  //         bfRes.data?.map((item) => ({ label: item.bf, value: item.bf })) || []
-  //       );
-  //       setShadeOptions(
-  //         shadeRes.data?.map((item) => ({
-  //           label: item.shade,
-  //           value: item.shade,
-  //         })) || []
-  //       );
-
-  //       setUnitOptions(
-  //         unitRes.data?.map((item) => ({
-  //           label: item.unit,
-  //           value: item.unit,
-  //         })) || []
-  //       );
-  //     } catch (error) {
-  //       console.error("Error fetching master data:", error);
-  //     }
-  //   };
-
-  //   fetchMasterData();
-  // }, [token]);
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
@@ -291,7 +254,12 @@ const TradeInvoiceForm = () => {
           requiredMark={false}
         >
           <Card
-            title={<h2 className="text-2xl font-bold">Create Trade Invoice</h2>}
+            title={
+              <h2 className="text-2xl font-bold">
+                {" "}
+                {isEditMode ? "Update Trade Invoice" : "Create  Trade Invoice"}
+              </h2>
+            }
             extra={
               <div className="flex items-center">
                 <Button

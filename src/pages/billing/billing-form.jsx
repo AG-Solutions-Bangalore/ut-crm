@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ACTIVE_PURCHASE_ORDER_REF,
   BILLING_LIST,
+  BILLING_SUB,
   GET_PURCHASE_ORDER_REF_DETAILS,
 } from "../../api";
 import {
@@ -63,8 +64,7 @@ const BillingForm = () => {
   });
   const [selectedMillId, setSelectedMillId] = useState(null);
   const [selectedRefId, setSelectetReflId] = useState(null);
-  // const [totalRate, setTotalRate] = useState(null);
-  // const [daysDifference, setDaysDifference] = useState(null);
+  const { trigger: deleteTrigger } = useApiMutation();
   const { data: purchaserefdata, isLoading } = useGetApiMutation({
     url: `${ACTIVE_PURCHASE_ORDER_REF}/${selectedMillId}`,
     queryKey: ["purchasereforderdata", selectedMillId],
@@ -309,11 +309,34 @@ const BillingForm = () => {
     const updatedSubs = [newRow, ...currentSubs];
 
     form.setFieldsValue({ subs: updatedSubs });
-    setSubRows(updatedSubs); // <-- re-render trigger
+    setSubRows(updatedSubs);
 
     handleValueChange(null, { subs: updatedSubs });
   };
 
+  const handleDelete = async (subId) => {
+    if (!subId) {
+      message.error("Invalid sub-item ID.");
+      return;
+    }
+
+    try {
+      const res = await deleteTrigger({
+        url: `${BILLING_SUB}/${subId}`,
+        method: "delete",
+      });
+
+      if (res?.code == 201) {
+        message.success(res?.message || "Sub-item deleted successfully!");
+        if (id) fetchBilling();
+      } else {
+        message.error(res?.message || "Failed to delete sub-item.");
+      }
+    } catch (error) {
+      console.error("Delete Error:", error);
+      message.error(error?.message || "Error while deleting sub-item.");
+    }
+  };
   const main = getpurchaserefdetails?.data || {};
   const subs = main?.subs || [];
   const loadingdata =
@@ -352,9 +375,7 @@ const BillingForm = () => {
                     valuePropName="checked"
                     className="!mb-0"
                   >
-                    {/* <Tooltip title="Status" placement="top"> */}
                     <Switch checkedChildren="Open" unCheckedChildren="Close" />
-                    {/* </Tooltip> */}
                   </Form.Item>
                 )}
 
@@ -375,35 +396,6 @@ const BillingForm = () => {
               size="small"
               title={<span className="font-semibold">Purchase Info</span>}
               className="!mt-2 !bg-gray-50"
-              extra={
-                <div className="flex">
-                  {/* {daysDifference !== null && (
-                    <div className="flex">
-                      <span
-                        className={`mt-1 w-40 text-center px-1 py-1.5 ${
-                          daysDifference < 0
-                            ? "text-red-600 font-semibold"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        Due Days: {daysDifference || 0}
-                      </span>
-                    </div>
-                  )} */}
-
-                  {/* {totalRate !== null && (
-                    <div className="flex items-center justify-center">
-                      <span
-                        className={`px-1 py-1.5 rounded-md text-sm font-medium ${
-                          totalRate < 0 ? "text-red-600" : "text-gray-800"
-                        }`}
-                      >
-                        PR - SR: {totalRate || 0}
-                      </span>
-                    </div>
-                  )} */}
-                </div>
-              }
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="col-span-2">

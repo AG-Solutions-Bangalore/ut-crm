@@ -342,7 +342,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 20-11-2025
+                    Updated on: 25-11-2025
                   </div>
                 </div>
               }

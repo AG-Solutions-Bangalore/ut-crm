@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { BILLING_LIST, PAYMENT_BILLING_REF, PAYMENT_LIST } from "../../api";
+import { PAYMENT_BILLING_REF, PAYMENT_LIST } from "../../api";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 
@@ -57,18 +57,14 @@ const PaymentForm = () => {
 
   const millOptions =
     mill?.data?.data?.map((item) => ({
-      label: item.mill_name,
+      label: item.mill_short,
       value: item.id,
     })) || [];
-  console.log(mill?.data?.data, "mill?.data?.data");
-  console.log(millOptions, "millOptions");
   const partyOptions =
     party?.data?.data?.map((item) => ({
-      label: item.party_name,
+      label: item.party_short,
       value: item.id,
     })) || [];
-  console.log(party?.data?.data, "party?.data?.data?");
-  console.log(partyOptions, "partyOptions");
   const billingOptions =
     billingData?.map((item) => ({
       label: `B No : ${item.billing_no} Amt : ${item.balance}`,
@@ -78,7 +74,6 @@ const PaymentForm = () => {
   const handleChange = (bill_no) => {
     if (bill_no) {
       const Ref = billingData.find((m) => m.billing_no == bill_no);
-      console.log(Ref.billing_ref, "billing_ref");
       form.setFieldValue("payment_billing_ref", Ref?.billing_ref || "");
       form.setFieldValue("payment_amount", Ref?.balance || "");
     }
@@ -119,7 +114,6 @@ const PaymentForm = () => {
             ? dayjs(res.data.payment_date)
             : null,
         };
-        console.log(formattedData, "formattedData");
         setInitialData(formattedData);
         form.setFieldsValue(formattedData);
       }
