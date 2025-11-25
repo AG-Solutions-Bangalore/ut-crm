@@ -63,7 +63,6 @@ export const QUOTATION_LIST = `/quotation`;
 export const QUOTATION_REF = `/quotation-ref`;
 export const UPDATE_STATUS_QUOTATION_ORDER = `/quotations`;
 export const DELETE_QUOTATION_SUB = `/quotation-sub`;
-
 // ------------BILLING-------------------
 export const BILLING_LIST = `/billing`;
 export const BILLING_SUB = `/billing-sub`;
