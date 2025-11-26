@@ -10,7 +10,6 @@ import { TAX_INVOICE_EMAIL, TAX_INVOICE_LIST } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import mockdata from "../../constants/mockdata.json";
 
 const TaxInvoice = () => {
   const componentRef = useRef(null);
