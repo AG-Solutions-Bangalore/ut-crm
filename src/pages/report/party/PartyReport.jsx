@@ -308,8 +308,6 @@ const PartyReport = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-      
-
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full">
             <Card
@@ -360,6 +358,7 @@ const PartyReport = () => {
                       {Object.entries(groupedReportData).map(
                         ([partyName, partyData]) => {
                           const party = partyData[0];
+                          const partyShort = party.party_short;
 
                           return (
                             <div
@@ -367,7 +366,10 @@ const PartyReport = () => {
                               className="mb-6 border border-black text-[13px]"
                             >
                               <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
-                                <span>{partyName}</span>
+                                <span>
+                                  {partyShort} - {partyName}
+                                </span>
+
                                 <span className="text-sm font-normal">
                                   {party.party_state}
                                 </span>

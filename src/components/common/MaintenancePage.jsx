@@ -44,7 +44,7 @@ const MaintenancePage = () => {
               Under Maintenance
             </h1>
             <p className="text-white/70 text-sm mb-1">
-              We're upgrading our systems{dots}
+              We're upgrading your systems{dots}
             </p>
             <p className="text-white/50 text-xs">
               Estimated time: 15-30 minutes
@@ -61,7 +61,7 @@ const MaintenancePage = () => {
           {/* Button */}
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold text-white text-sm shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group"
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 cursor-pointer rounded-lg font-semibold text-white text-sm shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group"
           >
             <svg
               className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"

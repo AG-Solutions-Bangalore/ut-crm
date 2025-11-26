@@ -70,7 +70,7 @@ const AppInitializer = ({ children }) => {
         dispatch(logout());
         setTimeout(() => persistor.purge(), 1000);
 
-        message.error(error.message || "Environment Error");
+        // message.error(error.message || "Environment Error");
 
         if (location.pathname !== "/maintenance") {
           navigate("/maintenance");

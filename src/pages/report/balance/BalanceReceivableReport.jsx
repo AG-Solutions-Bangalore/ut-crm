@@ -341,116 +341,16 @@ const BalanceReceivableReport = () => {
                 </Button>
               }
             >
-              {/* <Form
-                form={form}
-                requiredMark={false}
-                layout="vertical"
-                className="p-2"
-                onFinish={handleGenerateReport}
-              >
-                <div className="mb-6">
-                  <Form.Item
-                    label={
-                      <span>
-                        From Date <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    required
-                  >
-                    <DatePicker
-                      style={{ width: "100%" }}
-                      value={fromDate}
-                      onChange={setFromDate}
-                      format="DD-MM-YYYY"
-                      placeholder="Select From Date"
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    label={
-                      <span>
-                        To Date <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    required
-                  >
-                    <DatePicker
-                      style={{ width: "100%" }}
-                      value={toDate}
-                      onChange={setToDate}
-                      format="DD-MM-YYYY"
-                      placeholder="Select To Date"
-                    />
-                  </Form.Item>
-                </div>
-
-                <div className="mb-6">
-                  <Form.Item label="Mill">
-                    <Select
-                      placeholder="Select Mill"
-                      loading={millsLoading}
-                      onChange={setSelectedMill}
-                      allowClear
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      value={selectedMill}
-                    >
-                      {millsData?.data?.map((mill) => (
-                        <Option key={mill.id} value={mill.id}>
-                          {mill.mill_short}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-
-                <div className="mb-6">
-                  <Form.Item label="Party">
-                    <Select
-                      placeholder="Select Party"
-                      loading={partiesLoading}
-                      onChange={setSelectedParty}
-                      allowClear
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      value={selectedParty}
-                    >
-                      {partiesData?.data?.map((party) => (
-                        <Option key={party.id} value={party.id}>
-                          {party.party_short}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <Button
-                    type="primary"
-                    onClick={handleGenerateReport}
-                    size="large"
-                    className="bg-blue-600 hover:bg-blue-700"
-                    loading={loading}
-                    disabled={!fromDate || !toDate}
-                  >
-                    Generate Report
-                  </Button>
-                </div>
-              </Form> */}
               <Form
                 form={form}
                 requiredMark={false}
                 layout="vertical"
                 className="p-2"
                 onFinish={handleGenerateReport}
+                initialValues={{
+                  from_date: dayjs().startOf("month"),
+                  to_date: dayjs(),
+                }}
               >
                 <div className="mb-6">
                   <Form.Item

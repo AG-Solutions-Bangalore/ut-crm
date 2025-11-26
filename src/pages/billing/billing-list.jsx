@@ -3,7 +3,6 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
   MinusCircleOutlined,
-  MinusOutlined,
   PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
@@ -275,7 +274,7 @@ const BillingList = () => {
                 const isEmpty = !hasInvoice && !hasPayments;
 
                 const iconStyle = {
-                  color: isEmpty ? "#dc2626" : "#16a34a", 
+                  color: isEmpty ? "#dc2626" : "#16a34a",
                   fontSize: 16,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
@@ -326,8 +325,7 @@ const BillingList = () => {
                               value: invoice.tax_invoice_no,
                             },
                             { label: "Ref No", value: invoice.tax_invoice_ref },
-                            { label: "Mill Name", value: invoice.mill_name },
-                            { label: "Type", value: invoice.tax_invoice_type },
+                            { label: "Mill ", value: invoice.mill_short },
                             {
                               label: "Discount",
                               value: `${invoice.tax_invoice_discount}%`,
@@ -336,6 +334,7 @@ const BillingList = () => {
                               label: "Total Comm",
                               value: `₹${invoice.total_comm}`,
                             },
+                            { label: "Type", value: invoice.tax_invoice_type },
                           ].map((item) => (
                             <div key={item.label}>
                               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -410,7 +409,7 @@ const BillingList = () => {
                 );
               },
             }}
-            rowKey="id" 
+            rowKey="id"
             className="custom-purchase-table"
           />
         ) : (
