@@ -5,10 +5,10 @@ import {
   ACTIVE_ITEM,
   ACTIVE_MILL,
   ACTIVE_PARTY,
-  ACTIVE_PURCHASE_ORDER_REF,
   ACTIVE_SHADE,
   ACTIVE_SUBJECT,
   ACTIVE_UNIT,
+  GET_MONTHS,
   PAYMENT_MODE,
   PURCHASE_ORDER_REF,
   QUOTATION_REF,
@@ -34,6 +34,7 @@ export const useMasterData = ({
   gsm = false,
   delivery = false,
   state = false,
+  months = false,
   // purchaseorderref = false,
 } = {}) => {
   // const formattedDateTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
@@ -155,6 +156,12 @@ export const useMasterData = ({
     refetch: refetchState,
     error: stateError,
   } = createApi(state, STATE_LIST, ["statedata"]);
+  const {
+    data: MonthData,
+    isLoading: MonthLoading,
+    refetch: refetchMonth,
+    error: stateMonth,
+  } = createApi(months, GET_MONTHS, ["months"]);
 
   return {
     mill: {
@@ -247,6 +254,13 @@ export const useMasterData = ({
       loading: stateLoading,
       refetch: refetchState,
       error: stateError,
+    },
+
+    months: {
+      data: MonthData,
+      loading: MonthLoading,
+      refetch: refetchMonth,
+      error: stateMonth,
     },
     // purchaseorderref: {
     //   data: ActivePurchaseOrderRef,

@@ -17,7 +17,6 @@ import {
   Spin,
   Switch,
 } from "antd";
-import { useWatch } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -26,9 +25,9 @@ import {
   PURCHASE_LATEST_DATA,
   PURCHASE_ORDER_LIST,
 } from "../../api";
+import orderOptions from "../../constants/orderTypes.json";
 import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import orderOptions from "../../components/json/orderTypes.json";
 const PurchaseForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -44,13 +43,8 @@ const PurchaseForm = () => {
     shade: true,
     unit: true,
   });
-  const milllatestId = useWatch("purchase_orders_mill_id", form);
-  console.log(milllatestId, "millId");
-  const partylatestId = useWatch("purchase_orders_party_id", form);
-  console.log(partylatestId, "partyId");
 
   const [latestPurchaseData, setLatestPurchaseData] = useState([]);
-  console.log(latestPurchaseData, "latestPurchaseData");
   const [selectedMill, setSelectedMill] = useState(null);
   const [selectedParty, setSelectedParty] = useState(null);
   const millOptions =
@@ -127,7 +121,6 @@ const PurchaseForm = () => {
             ? dayjs(res.data.purchase_orders_date)
             : null,
         };
-        console.log(res, "sdfdf");
         setSelectedMill(res?.mill || null);
         setLatestPurchaseData(res?.billing || []);
         setSelectedParty(res?.party || null);

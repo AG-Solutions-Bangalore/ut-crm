@@ -31,7 +31,6 @@ import { useMasterData } from "../../hooks";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { useSelector } from "react-redux";
 import useToken from "../../api/usetoken";
-import axiosInstance from "../../api/axios";
 
 const TradeInvoiceForm = () => {
   const { message } = App.useApp();
@@ -120,16 +119,6 @@ const TradeInvoiceForm = () => {
       });
     }
   };
-
-  const fetchWithToken = async (url) => {
-    const response = await axiosInstance.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.json();
-  };
-
 
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();

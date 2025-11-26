@@ -158,7 +158,6 @@ const QuotationList = () => {
       key: "quotation_status",
       render: (_, order) => {
         const isOpen = order.quotation_status == "Open";
-        console.log(order, "order");
         return (
           <div className="flex justify-start">
             <Popconfirm

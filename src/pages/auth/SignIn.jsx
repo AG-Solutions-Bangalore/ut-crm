@@ -6,7 +6,6 @@ import { PANEL_LOGIN } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import { useApiMutation } from "../../hooks/useApiMutation";
 import { setCredentials } from "../../store/auth/authSlice";
-// import logo from "../../assets/logo-1.png";
 import bgSignin from "../../assets/bg-sigin.png";
 
 const { Title, Text } = Typography;

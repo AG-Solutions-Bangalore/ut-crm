@@ -70,7 +70,6 @@ const PartyForm = () => {
         });
         navigate("/master/party");
       } else {
-        console.log(res);
         message.error(res.message || "Failed to save Party.");
       }
     } catch (error) {

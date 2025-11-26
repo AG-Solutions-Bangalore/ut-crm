@@ -19,7 +19,6 @@ const TaxInvoice = () => {
   const finalUserImage = useFinalUserImage();
   const { id } = useParams();
   const company = useSelector((state) => state.company.companyDetails);
-  console.log(company, "company");
 
   const { trigger: emailTrigger, loading: loadingemail } = useApiMutation();
   const [selectedMill, setSelectedMill] = useState(null);
@@ -101,7 +100,6 @@ const TaxInvoice = () => {
 
     if (num === 0) return "Zero Only";
 
-    // 👉 Handle negative numbers
     if (num < 0) {
       return "Minus " + numberToWords(Math.abs(num));
     }
@@ -131,19 +129,16 @@ const TaxInvoice = () => {
       return str;
     };
 
-    // Crores
     if (num >= 10000000) {
       words += numberToWords(Math.floor(num / 10000000)) + " Crore ";
       num %= 10000000;
     }
 
-    // Lakhs
     if (num >= 100000) {
       words += numberToWords(Math.floor(num / 100000)) + " Lakh ";
       num %= 100000;
     }
 
-    // Thousands
     if (num >= 1000) {
       words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
       num %= 1000;
@@ -302,7 +297,6 @@ const TaxInvoice = () => {
         }
         .page-content {
           margin-top: 156px;
-          // margin-bottom: 180px;
         }
         .first-page-summary-table {
           display: table !important;

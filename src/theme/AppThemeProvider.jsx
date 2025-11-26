@@ -1,33 +1,3 @@
-// import { ConfigProvider, App as AntdApp } from "antd";
-
-// const AppThemeProvider = ({ children }) => {
-//   return (
-//     <ConfigProvider
-//       theme={{
-//         token: {
-//           colorPrimary: "#1677ff", // Main blue color
-//         },
-//         components: {
-//           Menu: {
-//             itemSelectedBg: "#1677ff", // Blue background when selected
-//             itemSelectedColor: "#ffffff", // White text
-//             itemHoverBg: "#4096ff", // Lighter blue on hover
-//             itemHoverColor: "#ffffff", // White text on hover
-//           },
-//           Button: {
-//             colorPrimary: "#1677ff",
-//             colorPrimaryHover: "#4096ff",
-//             colorPrimaryActive: "#0958d9",
-//           },
-//         },
-//       }}
-//     >
-//       <AntdApp>{children}</AntdApp>
-//     </ConfigProvider>
-//   );
-// };
-
-// export default AppThemeProvider;
 import { ConfigProvider, App as AntdApp } from "antd";
 
 const AppThemeProvider = ({ children }) => {
@@ -37,7 +7,7 @@ const AppThemeProvider = ({ children }) => {
   return (
     <ConfigProvider
       theme={{
-        cssVar: true, // 👈 enables CSS variable generation
+        cssVar: true, 
         token: {
           colorPrimary: primaryColor,
           colorPrimaryBg: primaryBg,

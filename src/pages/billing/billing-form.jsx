@@ -111,7 +111,6 @@ const BillingForm = () => {
       const res = await fetchTrigger({ url: `${BILLING_LIST}/${id}` });
 
       if (res?.data) {
-        console.log(res.data.subs, "res.data.subs");
         const formattedSubs =
           Array.isArray(res.subs) &&
           res.subs.map((row) => ({
@@ -130,7 +129,6 @@ const BillingForm = () => {
               ? Number(row.billing_due_days)
               : "",
           }));
-        console.log(formattedSubs, "formattedSubs");
         const formattedData = {
           ...res.data,
           purchase_date: res.data.purchase_date
@@ -174,13 +172,10 @@ const BillingForm = () => {
         const sRate = parseFloat(row?.sale_rate) || 0;
         const tones = parseFloat(row?.billing_sub_tones) || 0;
 
-        // Calculate rate difference
         const rateDiff = sRate - pRate;
 
-        // Sales amount
         const salesAmount = tones * sRate;
 
-        // Due days calculation
         let dueDays = 0;
         if (row?.sale_date) {
           dueDays = dayjs()
@@ -197,10 +192,8 @@ const BillingForm = () => {
         };
       });
 
-      // update row values back to form
       form.setFieldsValue({ subs: updatedSubs });
 
-      // Calculate totals
       const totalTones = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_sub_tones) || 0),
         0
@@ -242,7 +235,6 @@ const BillingForm = () => {
         : 0,
     }));
     const payload = {
-      // billing_due_days: daysDifference ? daysDifference : 0,
       billing_no: values.billing_no ? values.billing_no : "",
       billing_mill_id: values.billing_mill_id ? values.billing_mill_id : "",
       billing_party_id: values.billing_party_id ? values.billing_party_id : "",
@@ -352,10 +344,9 @@ const BillingForm = () => {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          // onValuesChange={() => setSubRows(form.getFieldValue("subs") || [])}
           onValuesChange={(_, allValues) => {
             setSubRows(allValues.subs || []);
-            handleValueChange(_, allValues); // <-- Important
+            handleValueChange(_, allValues); 
           }}
           initialValues={initialData}
           className="mt-4"

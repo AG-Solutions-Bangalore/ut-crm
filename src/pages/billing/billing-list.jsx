@@ -66,9 +66,7 @@ const BillingList = () => {
           res.message ||
             `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
         );
-        console.log(newStatus, "newStatus");
         setActiveTab(newStatus);
-        // refetch();
         queryClient.invalidateQueries([
           "billingdata",
           debouncedSearch,
@@ -277,7 +275,7 @@ const BillingList = () => {
                 const isEmpty = !hasInvoice && !hasPayments;
 
                 const iconStyle = {
-                  color: isEmpty ? "#dc2626" : "#16a34a", // red if both empty else green
+                  color: isEmpty ? "#dc2626" : "#16a34a", 
                   fontSize: 16,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
@@ -299,7 +297,6 @@ const BillingList = () => {
                 const invoice = record.tax_invoice;
                 const payments = record.payments || [];
 
-                // If both are empty
                 if (!invoice && payments.length === 0) {
                   return (
                     <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
@@ -310,7 +307,6 @@ const BillingList = () => {
 
                 return (
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 space-y-4 transition-all duration-300 ease-in-out">
-                    {/* ✅ Tax Invoice Section */}
                     {invoice && (
                       <div>
                         <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">
@@ -414,7 +410,7 @@ const BillingList = () => {
                 );
               },
             }}
-            rowKey="id" // ✅ Important
+            rowKey="id" 
             className="custom-purchase-table"
           />
         ) : (

@@ -75,7 +75,6 @@ const MillForm = () => {
         });
         navigate("/master/mill");
       } else {
-        console.log(res);
         message.error(res.message || "Failed to save mill.");
       }
     } catch (error) {

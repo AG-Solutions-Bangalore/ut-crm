@@ -1,37 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
 import { Button, Card, message, Spin } from "antd";
-import axios from "axios";
 import dayjs from "dayjs";
 import * as ExcelJS from "exceljs";
 import html2pdf from "html2pdf.js";
 import { Download, FileSpreadsheet, Printer } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import useToken from "../../../api/usetoken";
+import { MILL_REPORT } from "../../../api";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
 
 const MillReport = () => {
-  const [reportData, setReportData] = useState([]);
   const containerRef = useRef(null);
-  const token = useToken();
-
-  const { isFetching } = useQuery({
+  const { data: result, isLoading } = useGetApiMutation({
+    url: MILL_REPORT,
     queryKey: ["millReport"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}millReport`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setReportData(response.data.data || []);
-      return response.data;
-    },
-    enabled: !!token,
   });
-
+  const reportData = result?.data || [];
   const groupedReportData = reportData.reduce((acc, item) => {
     const millName = item.mill_name;
     if (!acc[millName]) {
@@ -313,7 +296,7 @@ const MillReport = () => {
     }
   };
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Spin size="large" />
