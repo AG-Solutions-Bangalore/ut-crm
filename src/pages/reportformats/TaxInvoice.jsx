@@ -411,6 +411,7 @@ const TaxInvoice = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-white text-center">
+                    
                     <img
                       src={finalUserImage}
                       alt="Company Logo"
