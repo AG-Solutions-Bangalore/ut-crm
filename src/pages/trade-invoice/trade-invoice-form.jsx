@@ -1,6 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-
 import {
   DeleteOutlined,
   MinusCircleOutlined,
@@ -304,13 +301,13 @@ const TradeInvoiceForm = () => {
               <Form.Item
                 label={
                   <span>
-                    Invoice Ref No <span className="text-red-500">*</span>
+                    Invoice Ref  <span className="text-red-500">*</span>
                   </span>
                 }
                 name="trade_invoice_ref"
                 rules={[{ required: true, message: "Enter reference number" }]}
               >
-                <Input placeholder="Auto-generated" readOnly />
+                <Input placeholder="Auto-generated" disabled />
               </Form.Item>
               <div className="grid grid-cols-3 gap-0 ">
                 <Form.Item label="SGST(%)" name="trade_invoice_sgst">

@@ -10,7 +10,6 @@ import { PARTY_WISE_REPORT } from "../../../api";
 import { useMasterData } from "../../../hooks";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 
-
 const PartyWiseReport = () => {
   const [form] = Form.useForm();
   const [reportData, setReportData] = useState([]);
@@ -305,6 +304,10 @@ const PartyWiseReport = () => {
                 layout="vertical"
                 onFinish={handleGenerateReport}
                 className="p-2"
+                initialValues={{
+                  from_date: dayjs().startOf("month"),
+                  to_date: dayjs(),
+                }}
               >
                 <div className="mb-6">
                   <Form.Item

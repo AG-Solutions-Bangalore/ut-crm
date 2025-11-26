@@ -15,6 +15,7 @@ const MillReport = () => {
     queryKey: ["millReport"],
   });
   const reportData = result?.data || [];
+
   const groupedReportData = reportData.reduce((acc, item) => {
     const millName = item.mill_name;
     if (!acc[millName]) {
@@ -357,14 +358,18 @@ const MillReport = () => {
                       {Object.entries(groupedReportData).map(
                         ([millName, millData]) => {
                           const mill = millData[0];
-
+                          const millShort = mill.mill_short;
                           return (
                             <div
                               key={millName}
                               className="mb-6 border border-black text-[13px]"
                             >
                               <div className="p-2 bg-gray-200 font-bold border-b border-black flex justify-between items-center">
-                                <span>{millName}</span>
+                                <div className="flex gap-2">
+                                  <span>{millShort}</span>
+
+                                  <span> - {millName}</span>
+                                </div>
                                 <span className="text-sm font-normal">
                                   {mill.mill_state}
                                 </span>

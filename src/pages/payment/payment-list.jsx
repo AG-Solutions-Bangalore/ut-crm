@@ -17,8 +17,8 @@ import { useNavigate } from "react-router-dom";
 import { PAYMENT_LIST } from "../../api";
 import { useDebounce } from "../../components/common/useDebounce";
 import DataTable from "../../components/DataTable/DataTable";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { useGetApiMutation } from "../../hooks/useGetApiMutation";
 
 const { Search } = Input;
 
@@ -83,17 +83,7 @@ const PaymentList = () => {
         ]
       : []),
 
-    {
-      title: "Sale Date",
-      key: "sale_date",
-      render: (_, record) => (
-        <div className="flex flex-col">
-          {record.sale_date
-            ? dayjs(record.sale_date).format("DD-MM-YYYY")
-            : "-"}
-        </div>
-      ),
-    },
+ 
 
     {
       title: "Bill No",
@@ -103,8 +93,8 @@ const PaymentList = () => {
     },
     {
       title: "Sale Amount",
-      dataIndex: "purchase_amount",
-      key: "purchase_amount",
+      dataIndex: "billing_total_sale_amount",
+      key: "billing_total_sale_amount",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
 

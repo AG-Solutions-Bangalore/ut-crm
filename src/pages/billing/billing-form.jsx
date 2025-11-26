@@ -346,7 +346,7 @@ const BillingForm = () => {
           onFinish={handleSubmit}
           onValuesChange={(_, allValues) => {
             setSubRows(allValues.subs || []);
-            handleValueChange(_, allValues); 
+            handleValueChange(_, allValues);
           }}
           initialValues={initialData}
           className="mt-4"
@@ -533,6 +533,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Tones"
                         className="!w-full"
+                        disabled
                       />
                     </Form.Item>
                     <Form.Item
@@ -548,6 +549,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Comm"
                         className="!w-full"
+                        disabled
                       />
                     </Form.Item>
                     <Form.Item
@@ -563,18 +565,11 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Sale Amount"
                         className="!w-full"
+                        disabled
                       />
                     </Form.Item>
                   </div>
-                  <Form.Item
-                    name="billing_note"
-                    label={
-                      <span>
-                        Note <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    rules={[{ required: true, message: "Enter Note" }]}
-                  >
+                  <Form.Item name="billing_note" label="  Note">
                     <Input.TextArea placeholder="Enter Note" />
                   </Form.Item>
                 </div>

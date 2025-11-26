@@ -322,39 +322,37 @@ const PurchaseList = () => {
                           Billing Details
                         </h4>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center">
                           {[
                             {
                               label: "Bill No",
                               value: invoice.billing_no,
                             },
 
-                            { label: "Tones", value: invoice.billing_tones },
                             {
-                              label: "Pur Date",
-                              value: dayjs(invoice.purchase_date).format(
-                                "DD-MM-YYYY"
-                              ),
+                              label: "Tones",
+                              value: invoice.billing_total_tones,
                             },
-                            {
-                              label: "Pur Rate",
-                              value: invoice.purchase_rate,
-                            },
-                            { label: "Item", value: invoice.billing_bf },
 
                             {
-                              label: "Sale Date",
-                              value: dayjs(invoice.sale_date).format(
-                                "DD-MM-YYYY"
-                              ),
-                            },
-                            {
-                              label: "Sale Rate",
-                              value: invoice.sale_rate,
-                            },
-                            {
                               label: "Sale Amount",
-                              value: `₹${invoice.purchase_amount}`,
+                              value: `₹${invoice.billing_total_sale_amount}`,
+                            },
+                            {
+                              label: "Comm",
+                              value: `₹${invoice.billing_total_commn}`,
+                            },
+                            {
+                              label: "Bill Type",
+                              value: invoice.billing_type,
+                            },
+                            {
+                              label: "Payment Type",
+                              value: invoice.billing_payment_type,
+                            },
+                            {
+                              label: "Status",
+                              value: invoice.billing_status,
                             },
                           ].map((item) => (
                             <div key={item.label}>

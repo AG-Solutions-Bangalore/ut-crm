@@ -9,6 +9,8 @@ import { TRADE_INVOICE_EMAIL, TRADE_INVOICE_LIST } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
+import { amountToWords } from "../../components/common/amountToWords";
+
 const TradeInvoiceView = () => {
   const componentRef = useRef(null);
   const [showSignature, setShowSignature] = useState(true);
@@ -48,72 +50,6 @@ const TradeInvoiceView = () => {
     return date.toLocaleDateString("en-GB");
   };
 
-  const numberToWords = (num) => {
-    const ones = [
-      "",
-      "One",
-      "Two",
-      "Three",
-      "Four",
-      "Five",
-      "Six",
-      "Seven",
-      "Eight",
-      "Nine",
-    ];
-    const teens = [
-      "Ten",
-      "Eleven",
-      "Twelve",
-      "Thirteen",
-      "Fourteen",
-      "Fifteen",
-      "Sixteen",
-      "Seventeen",
-      "Eighteen",
-      "Nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "Twenty",
-      "Thirty",
-      "Forty",
-      "Fifty",
-      "Sixty",
-      "Seventy",
-      "Eighty",
-      "Ninety",
-    ];
-
-    if (num === 0) return "Zero";
-
-    let words = "";
-
-    if (num >= 1000) {
-      words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
-      num %= 1000;
-    }
-
-    if (num >= 100) {
-      words += ones[Math.floor(num / 100)] + " Hundred ";
-      num %= 100;
-    }
-
-    if (num >= 20) {
-      words += tens[Math.floor(num / 10)] + " ";
-      num %= 10;
-    } else if (num >= 10) {
-      words += teens[num - 10] + " ";
-      num = 0;
-    }
-
-    if (num > 0) {
-      words += ones[num] + " ";
-    }
-
-    return words.trim();
-  };
   const subtotal =
     data?.subs?.reduce((total, item) => {
       const quantity = parseFloat(item.trade_invoice_sub_qnty) || 0;
@@ -130,6 +66,7 @@ const TradeInvoiceView = () => {
   const igstAmount = (subtotal * igst) / 100;
 
   const totalAmount = subtotal + sgstAmount + cgstAmount + igstAmount;
+
   const handleDownload = () => {
     const element = componentRef?.current;
 
@@ -447,10 +384,9 @@ const TradeInvoiceView = () => {
                   <div className="text-xs">
                     <span className="font-bold">(Net in Words) : </span>
                     <span className="font-bold">
-                      {numberToWords(Math.round(totalAmount))}
+                      {amountToWords(totalAmount)}
                     </span>
                   </div>
-                  <div className="text-xs font-bold">Only .....</div>
                 </div>
 
                 <div className="w-64">

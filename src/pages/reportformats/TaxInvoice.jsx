@@ -10,7 +10,7 @@ import { TAX_INVOICE_EMAIL, TAX_INVOICE_LIST } from "../../api";
 import useFinalUserImage from "../../components/common/Logo";
 import companyFinalSiginImage from "../../components/common/Sigin";
 import { useApiMutation } from "../../hooks/useApiMutation";
-import mockdata from "../../constants/mockdata.json";
+import { amountToWords } from "../../components/common/amountToWords";
 
 const TaxInvoice = () => {
   const componentRef = useRef(null);
@@ -58,95 +58,6 @@ const TaxInvoice = () => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB");
-  };
-
-  const numberToWords = (num) => {
-    const ones = [
-      "",
-      "One",
-      "Two",
-      "Three",
-      "Four",
-      "Five",
-      "Six",
-      "Seven",
-      "Eight",
-      "Nine",
-    ];
-    const teens = [
-      "Ten",
-      "Eleven",
-      "Twelve",
-      "Thirteen",
-      "Fourteen",
-      "Fifteen",
-      "Sixteen",
-      "Seventeen",
-      "Eighteen",
-      "Nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "Twenty",
-      "Thirty",
-      "Forty",
-      "Fifty",
-      "Sixty",
-      "Seventy",
-      "Eighty",
-      "Ninety",
-    ];
-
-    if (num === 0) return "Zero Only";
-
-    if (num < 0) {
-      return "Minus " + numberToWords(Math.abs(num));
-    }
-
-    let words = "";
-
-    const getHundredPart = (n) => {
-      let str = "";
-
-      if (n >= 100) {
-        str += ones[Math.floor(n / 100)] + " Hundred ";
-        n %= 100;
-      }
-
-      if (n >= 20) {
-        str += tens[Math.floor(n / 10)] + " ";
-        n %= 10;
-      } else if (n >= 10) {
-        str += teens[n - 10] + " ";
-        return str;
-      }
-
-      if (n > 0) {
-        str += ones[n] + " ";
-      }
-
-      return str;
-    };
-
-    if (num >= 10000000) {
-      words += numberToWords(Math.floor(num / 10000000)) + " Crore ";
-      num %= 10000000;
-    }
-
-    if (num >= 100000) {
-      words += numberToWords(Math.floor(num / 100000)) + " Lakh ";
-      num %= 100000;
-    }
-
-    if (num >= 1000) {
-      words += numberToWords(Math.floor(num / 1000)) + " Thousand ";
-      num %= 1000;
-    }
-
-    words += getHundredPart(num);
-
-    return words.trim();
   };
 
   const grossTotal = totalCommission;
@@ -593,46 +504,13 @@ const TaxInvoice = () => {
                     Total Amount (INR IN WORDS) :
                   </p>
                   <p className="text-sm font-semibold">
-                    {numberToWords(Math.round(totalAmount))}
+                    {amountToWords(totalAmount)}
                   </p>
                   <p className="text-xs text-gray-600 mt-2">
                     Note : Any dispute is Subject to Bangalore Jurisdiction.
                   </p>
                 </div>
-                {/* <div className="flex-1 text-right text-xs">
-                  <div className="flex justify-between mb-1">
-                    <span>Discount (if any)</span>
-                    <span className="font-semibold">
-                      {data?.tax_invoice_discount || "0.00"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-1 font-bold border-b-2 border-blue-900 pb-1">
-                    <span>Gross Total :</span>
-                    <span>Rs. {grossTotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span>ADD - CGST {data?.tax_invoice_cgst || 9}% :</span>
-                    <span>
-                      {cgstAmount > 0 ? `Rs. ${cgstAmount.toFixed(2)}` : "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span>ADD - SGST {data?.tax_invoice_sgst || 9}% :</span>
-                    <span>
-                      {sgstAmount > 0 ? `Rs. ${sgstAmount.toFixed(2)}` : "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span>ADD - IGST {data?.tax_invoice_igst || 0}% :</span>
-                    <span className="font-semibold">
-                      {igstAmount > 0 ? `Rs. ${igstAmount.toFixed(2)}` : "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-bold text-blue-900 border-t-2 border-blue-900 pt-1">
-                    <span>Total Amount :</span>
-                    <span>Rs. {totalAmount.toFixed(2)}</span>
-                  </div>
-                </div> */}
+
                 <div className="flex-1 text-right text-xs">
                   <div className="flex justify-between mb-1">
                     <span>Discount (if any)</span>

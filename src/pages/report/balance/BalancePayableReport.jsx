@@ -346,6 +346,10 @@ const BalancePayableReport = () => {
                 layout="vertical"
                 className="p-2"
                 onFinish={handleGenerateReport}
+                initialValues={{
+                  from_date: dayjs().startOf("month"),
+                  to_date: dayjs(),
+                }}
               >
                 <div className="mb-6">
                   <Form.Item

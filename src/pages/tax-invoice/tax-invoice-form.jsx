@@ -257,7 +257,7 @@ const TaxInvoiceForm = () => {
         const resRefetch = await fetchTriggerBilling({
           url: `${TAX_INVOICE_PENDING_BILLING}/${selectedMillId}`,
         });
-      
+
         const updatedFetched = resRefetch?.data || [];
         const filtered = updatedFetched.filter(
           (bill) =>
@@ -384,7 +384,11 @@ const TaxInvoiceForm = () => {
                   name="tax_invoice_date"
                   rules={[{ required: true, message: "Please select date" }]}
                 >
-                  <DatePicker className="w-full" format="DD-MM-YYYY" autoFocus/>
+                  <DatePicker
+                    className="w-full"
+                    format="DD-MM-YYYY"
+                    autoFocus
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -420,10 +424,12 @@ const TaxInvoiceForm = () => {
                 >
                   <Select
                     placeholder="Select Type"
-                    options={["Commission", "Commission Discount"].map((item) => ({
-                      label: item,
-                      value: item,
-                    }))}
+                    options={["Commission", "Commission Discount"].map(
+                      (item) => ({
+                        label: item,
+                        value: item,
+                      })
+                    )}
                     onChange={handleTypeChange}
                     filterOption={(input, option) =>
                       (option?.label ?? "")
@@ -445,7 +451,7 @@ const TaxInvoiceForm = () => {
                     { required: true, message: "Enter reference number" },
                   ]}
                 >
-                  <Input readOnly value={taxinvoice?.data?.data} />
+                  <Input readOnly value={taxinvoice?.data?.data} disabled />
                 </Form.Item>
                 <div className="flex gap-2">
                   <Form.Item label="Discount " name="tax_invoice_discount">
