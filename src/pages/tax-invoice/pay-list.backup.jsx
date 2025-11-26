@@ -32,7 +32,6 @@ const PendingBillsModal = ({
       });
       const data = res?.data || [];
 
-      // Remove already selected bills (existing + temp)
       const filtered = data.filter(
         (bill) =>
           !selectedBills.some((sel) => sel.billing_ref === bill.billing_ref)
@@ -40,7 +39,7 @@ const PendingBillsModal = ({
 
       setFetchedBills(data);
       setBills(filtered);
-      setTempSelectedBills(selectedBills); // preload selected bills when modal opens
+      setTempSelectedBills(selectedBills); 
     } catch (err) {
       console.error("Failed to fetch bills", err);
     }
@@ -79,10 +78,8 @@ const PendingBillsModal = ({
 
     message.success("Bills saved successfully!");
 
-    // Update parent state only on save
     setSelectedBills(tempSelectedBills);
 
-    // Remove saved bills from available list
     setBills((prev) =>
       prev.filter(
         (b) =>
@@ -94,7 +91,6 @@ const PendingBillsModal = ({
   };
 
   const handleCancel = () => {
-    // Move temporary bills back to available list if they exist in fetched bills
     const toRestore = tempSelectedBills.filter((b) =>
       fetchedBills.some((fb) => fb.billing_ref === b.billing_ref)
     );

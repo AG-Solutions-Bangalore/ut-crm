@@ -20,10 +20,6 @@ const PendingBillsModal = ({
   setTempSelectedBills,
   loading,
 }) => {
-  // console.log(tempSelectedBills, "RightSideData");
-  // console.log(fetchedBills, "RealData");
-  // console.log(bills, "LeftSideData");
-
   const handleAdd = (bill) => {
     setTempSelectedBills((prev) => {
       const exists = prev.some((b) => b.billing_ref == bill.billing_ref);
@@ -55,12 +51,9 @@ const PendingBillsModal = ({
       return;
     }
 
-    // message.success("Bills saved successfully!");
 
-    // Update parent state only on save
     setSelectedBills(tempSelectedBills);
 
-    // Remove saved bills from available list
     setBills((prev) =>
       prev.filter(
         (b) =>
@@ -72,7 +65,6 @@ const PendingBillsModal = ({
   };
 
   const handleCancel = () => {
-    // Move temporary bills back to available list if they exist in fetched bills
     const toRestore = tempSelectedBills.filter((b) =>
       fetchedBills.some((fb) => fb.billing_ref === b.billing_ref)
     );

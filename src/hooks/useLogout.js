@@ -12,7 +12,6 @@ const useLogout = () => {
   const handleLogout = async () => {
     try {
       await persistor.flush();
-      // localStorage.clear();
       dispatch(logout());
       navigate("/");
       setTimeout(() => persistor.purge(), 1000);

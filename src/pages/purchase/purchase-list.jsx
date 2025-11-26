@@ -306,7 +306,6 @@ const PurchaseList = () => {
               expandedRowRender: (record) => {
                 const invoice = record.billing;
 
-                // If both are empty
                 if (!invoice) {
                   return (
                     <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
@@ -317,7 +316,6 @@ const PurchaseList = () => {
 
                 return (
                   <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 space-y-4 transition-all duration-300 ease-in-out">
-                    {/* ✅ Tax Invoice Section */}
                     {invoice && (
                       <div>
                         <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">

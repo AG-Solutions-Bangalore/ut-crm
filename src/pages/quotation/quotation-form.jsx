@@ -133,10 +133,8 @@ const QuotationForm = () => {
 
   const handleSubmit = async (values) => {
     quotationRef.refetch();
-    console.log(values.quotation_ref, "quotation_ref");
     const payload = {
       ...values,
-      // quotation_ref: initialData.quotation_ref || "",
       quotation_date: values.quotation_date
         ? dayjs(values.quotation_date).format("YYYY-MM-DD")
         : null,
@@ -538,7 +536,6 @@ const QuotationForm = () => {
                       <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
                         {fields.map(({ key, name, ...restField }) => {
                           const subItem = form.getFieldValue(["subs", name]);
-                          console.log(subItem, "subItem");
                           const hasId = subItem?.id;
                           return (
                             <div

@@ -1,317 +1,194 @@
-import React, { useState } from "react";
 import {
-  Select,
-  Input,
   Button,
-  Form,
-  message,
-  Row,
-  Col,
   Card,
+  Col,
   DatePicker,
+  Form,
+  Input,
   InputNumber,
+  Row,
+  Select,
 } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import useToken from "../../api/usetoken";
+import { useMasterData } from "../../hooks";
 import AuthInvoice from "../reportformats/AuthInvoice";
 
-const { Option } = Select;
-
 const AuthReport = () => {
-  const [selectedParty, setSelectedParty] = useState(null);
-  const [selectedThirdParty, setSelectedThirdParty] = useState(null);
-  const [invoiceNo, setInvoiceNo] = useState("");
-  const [date, setDate] = useState("");
-  const [amount, setAmount] = useState("");
   const [form] = Form.useForm();
 
-  const token = useToken();
-
-  const { data: partiesData, isLoading: partiesLoading } = useQuery({
-    queryKey: ["activeParties"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activePartys`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-    enabled: !!token,
+  const { party } = useMasterData({
+    party: true,
   });
 
-  const { data: thirdPartiesData, isLoading: thirdPartiesLoading } = useQuery({
-    queryKey: ["thirdParties"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activePartys`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-    enabled: !!token,
-  });
+  const partyOptions =
+    party?.data?.data?.map((item) => ({
+      label: item.party_short,
+      value: item.id,
+      fullData: item,
+    })) || [];
 
-  const [showAuthInvoice, setShowAuthInvoice] = useState(false);
+  const selectedPartyId = Form.useWatch("selectedParty", form);
+  const selectedThirdPartyId = Form.useWatch("selectedThirdParty", form);
+  const invoiceNo = Form.useWatch("invoiceNo", form);
+  const date = Form.useWatch("date", form);
+  const amount = Form.useWatch("amount", form);
 
-  const handlePartyChange = (value) => {
-    const party = partiesData?.data?.find((p) => p.id === value);
-    setSelectedParty(party);
-    updateAuthInvoice();
-  };
+  const selectedParty =
+    partyOptions.find((p) => p.value === selectedPartyId)?.fullData || null;
 
-  const handleThirdPartyChange = (value) => {
-    const thirdParty = thirdPartiesData?.data?.find((p) => p.id === value);
-    setSelectedThirdParty(thirdParty);
-    updateAuthInvoice();
-  };
+  const selectedThirdParty =
+    partyOptions.find((p) => p.value === selectedThirdPartyId)?.fullData ||
+    null;
 
-  const handleInvoiceNoChange = (e) => {
-    setInvoiceNo(e.target.value);
-    updateAuthInvoice();
-  };
-
-  // const handleDateChange = (e) => {
-  //   setDate(e.target.value);
-  //   updateAuthInvoice();
-  // };
-  const handleDateChange = (date, dateString) => {
-    setDate(date); // or setDate(dateString) depending on what you want
-    updateAuthInvoice();
-  };
-  const handleAmountChange = (e) => {
-    setAmount(e.target.value);
-    updateAuthInvoice();
-  };
-
-  const updateAuthInvoice = () => {
-    if (selectedParty && selectedThirdParty && invoiceNo && date && amount) {
-      setShowAuthInvoice(true);
-    } else {
-      setShowAuthInvoice(false);
-    }
-  };
-
-  const handleGenerate = () => {
-    if (!selectedParty || !selectedThirdParty) {
-      message.error("Please select both Party and Third Party");
-      return;
-    }
-
-    if (!invoiceNo || !date || !amount) {
-      message.error("Please fill all invoice fields");
-      return;
-    }
-
-    setShowAuthInvoice(true);
-  };
+  const showAuthInvoice =
+    selectedParty && selectedThirdParty && invoiceNo && date && amount;
 
   const handleReset = () => {
-    setSelectedParty(null);
-    setSelectedThirdParty(null);
-    setInvoiceNo("");
-    setDate("");
-    setAmount("");
-    setShowAuthInvoice(false);
     form.resetFields();
   };
 
   return (
-    <div className="min-h-screen  ">
+    <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-        <div className="text-center ">
-          {!token && (
-            <div className="text-red-500 text-sm mt-2">
-              Please log in to access this feature
-            </div>
-          )}
-        </div>
-
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full lg:w-2/6">
             <Card
               title="Authorization Details"
-              className="shadow-lg sticky "
+              className="shadow-lg sticky"
               extra={
-                <Button type="link" onClick={handleReset} size="small">
+                <Button type="link" size="small" onClick={handleReset}>
                   Reset
                 </Button>
               }
             >
+              <p className="mb-4 text-gray-700 text-sm bg-blue-50 border border-blue-200 py-1 px-3 rounded">
+                Fill out the details below, and the authorization letter will be
+                generated automatically based on the information you provide.
+              </p>
               <Form
                 form={form}
-                requiredMark={false}
                 layout="vertical"
+                requiredMark={false}
                 className="p-2"
               >
-                <div className="mb-6">
-                  <Form.Item
-                    label={
-                      <span>
-                        Party Name <span className="text-red-500">*</span>
-                      </span>
+                <Form.Item
+                  name="selectedParty"
+                  label={
+                    <span>
+                      Party Name <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Select
+                    placeholder="Select Party Name"
+                    options={partyOptions}
+                    loading={party.loading}
+                    showSearch
+                    allowClear
+                    filterOption={(input, option) =>
+                      option?.label
+                        ?.toLowerCase()
+                        ?.includes(input.toLowerCase())
                     }
-                    required
-                  >
-                    <Select
-                      placeholder="Select Party Name"
-                      loading={partiesLoading}
-                      onChange={handlePartyChange}
-                      allowClear
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
+                  />
+                </Form.Item>
+
+                {selectedParty && (
+                  <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                    <strong>Billing Address:</strong>{" "}
+                    {selectedParty.party_billing_address}
+                  </div>
+                )}
+
+                {/* Third Party Select */}
+                <Form.Item
+                  name="selectedThirdParty"
+                  label={
+                    <span>
+                      Third Party Name <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Select
+                    placeholder="Select Third Party"
+                    options={partyOptions}
+                    loading={party.loading}
+                    showSearch
+                    allowClear
+                    filterOption={(input, option) =>
+                      option?.label
+                        ?.toLowerCase()
+                        ?.includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+
+                {selectedThirdParty && (
+                  <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                    <strong>Delivery Address:</strong>{" "}
+                    {selectedThirdParty.party_delivery_address}
+                  </div>
+                )}
+
+                <h3 className="text-lg font-semibold mb-4 text-gray-800 mt-6">
+                  Invoice Details
+                </h3>
+
+                <Form.Item
+                  name="invoiceNo"
+                  label={
+                    <span>
+                      Invoice No <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter invoice number" />
+                </Form.Item>
+
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      name="date"
+                      label={
+                        <span>
+                          Date <span className="text-red-500">*</span>
+                        </span>
                       }
-                      value={selectedParty?.id}
+                      rules={[{ required: true }]}
                     >
-                      {partiesData?.data?.map((party) => (
-                        <Option key={party.id} value={party.id}>
-                          {party.party_short}
-                        </Option>
-                      ))}
-                    </Select>
-                    {selectedParty && (
-                      <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
-                        <strong>Billing Address:</strong>{" "}
-                        {selectedParty.party_billing_address}
-                      </div>
-                    )}
-                  </Form.Item>
-
-                  <Form.Item
-                    label={
-                      <span>
-                        Third Party Name <span className="text-red-500">*</span>
-                      </span>
-                    }
-                    required
-                  >
-                    <Select
-                      placeholder="Select Third Party Name"
-                      loading={thirdPartiesLoading}
-                      onChange={handleThirdPartyChange}
-                      allowClear
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format="DD-MM-YYYY"
+                        placeholder="Select Date"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="amount"
+                      label={
+                        <span>
+                          Amount <span className="text-red-500">*</span>
+                        </span>
                       }
-                      value={selectedThirdParty?.id}
+                      rules={[{ required: true }]}
                     >
-                      {thirdPartiesData?.data?.map((party) => (
-                        <Option key={party.id} value={party.id}>
-                          {party.party_name}
-                        </Option>
-                      ))}
-                    </Select>
-                    {selectedThirdParty && (
-                      <div className="mt-2 text-xs text-gray-600 p-2 bg-gray-50 rounded">
-                        <strong>Delivery Address:</strong>{" "}
-                        {selectedThirdParty.party_delivery_address}
-                      </div>
-                    )}
-                  </Form.Item>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                    Invoice Details
-                  </h3>
-                  <Row gutter={16}>
-                    <Col span={24}>
-                      <Form.Item
-                        label={
-                          <span>
-                            Invoice No <span className="text-red-500">*</span>
-                          </span>
-                        }
-                        required
-                      >
-                        <Input
-                          value={invoiceNo}
-                          onChange={handleInvoiceNoChange}
-                          placeholder="Enter invoice number"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        label={
-                          <span>
-                            Date <span className="text-red-500">*</span>
-                          </span>
-                        }
-                        required
-                      >
-                        <DatePicker
-                          style={{ width: "100%" }}
-                          value={date}
-                          onChange={handleDateChange}
-                          format="DD-MM-YYYY"
-                          placeholder="Select To Date"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        label={
-                          <span>
-                            Amount <span className="text-red-500">*</span>
-                          </span>
-                        }
-                        required
-                      >
-                        <InputNumber
-                          style={{ width: "100%" }}
-                          min={1}
-                          type="number"
-                          value={amount}
-                          onChange={handleAmountChange}
-                          placeholder="Enter amount"
-                          prefix="₹"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                
-                  <Button
-                    type="primary"
-                    onClick={handleGenerate}
-                    size="large"
-                    className="bg-blue-600 hover:bg-blue-700"
-                    disabled={
-                      !selectedParty ||
-                      !selectedThirdParty ||
-                      !invoiceNo ||
-                      !date ||
-                      !amount
-                    }
-                  >
-                    Generate Preview
-                  </Button>
-                </div>
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        min={1}
+                        placeholder="Amount"
+                        prefix="₹"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Form>
             </Card>
           </div>
 
+          {/* RIGHT SIDE - PREVIEW */}
           <div className="w-full lg:w-4/6">
             <Card
               title="Authorization Letter Preview"
@@ -335,7 +212,6 @@ const AuthReport = () => {
                         date,
                         amount,
                       }}
-                      onClose={() => {}}
                       showControls={false}
                     />
                   </div>
@@ -346,8 +222,7 @@ const AuthReport = () => {
                       No Preview Available
                     </h3>
                     <p>
-                      Please fill in all the required fields to generate the
-                      authorization letter preview.
+                      Please fill in all required fields to generate preview.
                     </p>
                   </div>
                 )}

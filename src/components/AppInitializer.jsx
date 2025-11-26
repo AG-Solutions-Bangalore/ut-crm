@@ -67,8 +67,6 @@ const AppInitializer = ({ children }) => {
         }
       } catch (error) {
         console.error("❌ App Initialization Error:", error.message);
-
-        // Logout();
         dispatch(logout());
         setTimeout(() => persistor.purge(), 1000);
 

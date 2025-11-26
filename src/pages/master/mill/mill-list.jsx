@@ -46,7 +46,6 @@ const MillList = () => {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    // refetch();
   };
   const handleToggleStatus = async (user) => {
     try {

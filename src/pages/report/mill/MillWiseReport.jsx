@@ -1,71 +1,33 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useRef } from "react";
-import {
-  Select,
-  DatePicker,
-  Button,
-  Form,
-  message,
-  Row,
-  Col,
-  Card,
-} from "antd";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { Button, Card, DatePicker, Form, message, Select } from "antd";
 import dayjs from "dayjs";
-import useToken from "../../../api/usetoken";
-import { Download, Printer, FileSpreadsheet } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
-import html2pdf from "html2pdf.js";
 import * as ExcelJS from "exceljs";
-
-const { Option } = Select;
+import html2pdf from "html2pdf.js";
+import { Download, FileSpreadsheet, Printer } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { MILL_WISE_REPORT } from "../../../api";
+import { useMasterData } from "../../../hooks";
+import { useApiMutation } from "../../../hooks/useApiMutation";
 
 const MillWiseReport = () => {
   const [form] = Form.useForm();
-  const [fromDate, setFromDate] = useState(dayjs().month(3).date(1));
-  const [toDate, setToDate] = useState(dayjs());
-  const [selectedMill, setSelectedMill] = useState(null);
-  const [selectedParty, setSelectedParty] = useState(null);
   const [reportData, setReportData] = useState([]);
-  const [loading, setLoading] = useState(false);
   const containerRef = useRef(null);
+  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
 
-  const token = useToken();
-
-  const { data: millsData, isLoading: millsLoading } = useQuery({
-    queryKey: ["activeMills"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activeMills`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-    enabled: !!token,
-  });
-
-  const { data: partiesData, isLoading: partiesLoading } = useQuery({
-    queryKey: ["activeParties"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}activePartys`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    },
-    enabled: !!token,
-  });
+  const { mill, party } = useMasterData({ mill: true, party: true });
+  const millOptions =
+    mill?.data?.data?.map((item) => ({
+      label: item.mill_short,
+      value: item.id,
+    })) || [];
+  const partyOptions =
+    party?.data?.data?.map((item) => ({
+      label: item.party_short,
+      value: item.id,
+      fullData: item,
+    })) || [];
 
   const groupedReportData = reportData.reduce((acc, item) => {
     const millName = item.mill_name;
@@ -98,36 +60,25 @@ const MillWiseReport = () => {
     );
   };
 
-  const handleGenerateReport = async () => {
-    if (!fromDate || !toDate) {
-      message.error("Please select both From Date and To Date");
-      return;
-    }
-
-    setLoading(true);
-
+  const handleGenerateReport = async (values) => {
     try {
+      const { from_date, to_date, selectedMill, selectedParty } = values;
+
       const payload = {
-        from_date: fromDate.format("YYYY-MM-DD"),
-        to_date: toDate.format("YYYY-MM-DD"),
-        mill_id: selectedMill,
+        from_date: from_date.format("YYYY-MM-DD"),
+        to_date: to_date.format("YYYY-MM-DD"),
+        mill_id: selectedMill || "",
         party_id: selectedParty || "",
       };
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}millwiseReport`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await submitTrigger({
+        url: MILL_WISE_REPORT,
+        method: "post",
+        data: payload,
+      });
+      setReportData(response.data || []);
 
-      setReportData(response.data.data || []);
-
-      if (response.data.data && response.data.data.length > 0) {
+      if (response.data && response.data.length > 0) {
         message.success("Report generated successfully");
       } else {
         message.info("No data found for the selected criteria");
@@ -135,17 +86,11 @@ const MillWiseReport = () => {
     } catch (error) {
       console.error("Error generating report:", error);
       message.error("Failed to generate report");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleReset = () => {
     form.resetFields();
-    setFromDate(dayjs().month(3).date(1));
-    setToDate(dayjs());
-    setSelectedMill(null);
-    setSelectedParty(null);
     setReportData([]);
   };
 
@@ -333,14 +278,6 @@ const MillWiseReport = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-        <div className="text-center">
-          {!token && (
-            <div className="text-red-500 text-sm mt-2">
-              Please log in to access this feature
-            </div>
-          )}
-        </div>
-
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full lg:w-2/6">
             <Card
@@ -355,39 +292,44 @@ const MillWiseReport = () => {
               <Form
                 form={form}
                 requiredMark={false}
+                onFinish={handleGenerateReport}
                 layout="vertical"
                 className="p-2"
               >
                 <div className="mb-6">
                   <Form.Item
+                    name="from_date"
                     label={
                       <span>
                         From Date <span className="text-red-500">*</span>
                       </span>
                     }
                     required
+                    rules={[
+                      { required: true, message: "From Date is Required" },
+                    ]}
                   >
                     <DatePicker
                       style={{ width: "100%" }}
-                      value={fromDate}
-                      onChange={setFromDate}
                       format="DD-MM-YYYY"
                       placeholder="Select From Date"
                     />
                   </Form.Item>
 
                   <Form.Item
+                    name="to_date"
                     label={
                       <span>
                         To Date <span className="text-red-500">*</span>
                       </span>
                     }
                     required
+                    rules={[
+                      { required: true, message: "To Date  is Required" },
+                    ]}
                   >
                     <DatePicker
                       style={{ width: "100%" }}
-                      value={toDate}
-                      onChange={setToDate}
                       format="DD-MM-YYYY"
                       placeholder="Select To Date"
                     />
@@ -395,62 +337,46 @@ const MillWiseReport = () => {
                 </div>
 
                 <div className="mb-6">
-                  <Form.Item label="Mill">
+                  <Form.Item label="Mill" name="selectedmill">
                     <Select
                       placeholder="Select Mill"
-                      loading={millsLoading}
-                      onChange={setSelectedMill}
-                      allowClear
+                      loading={mill.loading}
+                      options={millOptions}
                       showSearch
+                      allowClear
                       filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
+                        option?.label
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
                       }
-                      value={selectedMill}
-                    >
-                      {millsData?.data?.map((mill) => (
-                        <Option key={mill.id} value={mill.id}>
-                          {mill.mill_short}
-                        </Option>
-                      ))}
-                    </Select>
+                    />
                   </Form.Item>
                 </div>
 
                 <div className="mb-6">
-                  <Form.Item label="Party (Optional)">
+                  <Form.Item label="Party (Optional)" name="selectedParty">
                     <Select
                       placeholder="Select Party"
-                      loading={partiesLoading}
-                      onChange={setSelectedParty}
-                      allowClear
+                      options={partyOptions}
+                      loading={party.loading}
                       showSearch
+                      allowClear
                       filterOption={(input, option) =>
-                        option.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
+                        option?.label
+                          ?.toLowerCase()
+                          ?.includes(input.toLowerCase())
                       }
-                      value={selectedParty}
-                    >
-                      {partiesData?.data?.map((party) => (
-                        <Option key={party.id} value={party.id}>
-                          {party.party_short}
-                        </Option>
-                      ))}
-                    </Select>
+                    />
                   </Form.Item>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t">
-                 
                   <Button
                     type="primary"
-                    onClick={handleGenerateReport}
+                    htmlType="submit"
                     size="large"
                     className="bg-blue-600 hover:bg-blue-700"
-                    loading={loading}
-                    disabled={!fromDate || !toDate}
+                    loading={submitLoading}
                   >
                     Generate Report
                   </Button>
@@ -477,9 +403,19 @@ const MillWiseReport = () => {
                     <h1 className="text-xl font-bold">Mill Wise Report</h1>
                     <div className="flex flex-row items-center gap-4 font-bold">
                       <span className="mr-2">
-                        From - {dayjs(fromDate).format("DD-MMM-YYYY")}
+                        From -{" "}
+                        {form.getFieldValue("from_date")
+                          ? dayjs(form.getFieldValue("from_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}
                       </span>
-                      To - {dayjs(toDate).format("DD-MMM-YYYY")}
+                      To -{" "}
+                      {form.getFieldValue("to_date")
+                        ? dayjs(form.getFieldValue("to_date")).format(
+                            "DD-MMM-YYYY"
+                          )
+                        : "--"}
                       <Button
                         className="ml-2 bg-blue-600 hover:bg-blue-700 text-white"
                         onClick={handleDownload}
@@ -507,8 +443,18 @@ const MillWiseReport = () => {
                         Mill Wise Report
                       </h1>
                       <div className="text-center text-lg mt-2">
-                        Period: {dayjs(fromDate).format("DD-MMM-YYYY")} to{" "}
-                        {dayjs(toDate).format("DD-MMM-YYYY")}
+                        Period:{" "}
+                        {form.getFieldValue("from_date")
+                          ? dayjs(form.getFieldValue("from_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}{" "}
+                        to{" "}
+                        {form.getFieldValue("to_date")
+                          ? dayjs(form.getFieldValue("to_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}
                       </div>
                     </div>
 

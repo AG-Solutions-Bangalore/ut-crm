@@ -80,6 +80,21 @@ export const TAX_INVOICE_PENDING_BILLING = "/getPendingBill";
 export const PAYMENT_LIST = "/payment";
 export const PAYMENT_BILLING_REF = "/getpendingbillingamount";
 export const PAYMENT_MODE = "/panel-fetch-payment-mode";
+//
+
+export const GET_MONTHS = "/getMonth";
+export const SALES_REPORT = "/salesReport";
+export const MILL_WISE_REPORT = "/millwiseReport";
+export const PARTY_WISE_REPORT = "/partywiseReport";
+export const BALANCE_PAY_REPORT = "/balancePayableReport";
+export const BALANCE_RECEIVABLE_REPORT = "/balanceReceivablesReport";
+export const LEDGER_REPORT = "/ledgerReport";
+export const BALANCE_CLOSED_REPORT = "/balanceCloseReport";
+export const BALANCE_ORDER_REPORT = "/balanceOrderReport";
+export const PRICE_RATE_REPORT = "/priceRateReport";
+export const MILL_REPORT = "/millReport";
+export const PARTY_REPORT = "/partyReport";
+
 // -------------------EMAILS----------------------
 export const PURCHASE_ORDER_EMAIL = "/sendPurchaseOrderEmail";
 export const QUOTATION_EMAIL = "/sendQuotationEmail";

@@ -1,37 +1,20 @@
-import React, { useState, useRef } from "react";
 import { Button, Card, message, Spin } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import useToken from "../../../api/usetoken";
-import Loader from "../../../components/common/Loader";
-import { Download, FileSpreadsheet, Printer } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
 import dayjs from "dayjs";
-import html2pdf from "html2pdf.js";
 import * as ExcelJS from "exceljs";
+import html2pdf from "html2pdf.js";
+import { Download, FileSpreadsheet, Printer } from "lucide-react";
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import { PARTY_REPORT } from "../../../api";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
 
 const PartyReport = () => {
-  const [reportData, setReportData] = useState([]);
   const containerRef = useRef(null);
-  const token = useToken();
-
-  const { isFetching } = useQuery({
+  const { data: result, isLoading } = useGetApiMutation({
+    url: PARTY_REPORT,
     queryKey: ["partyReport"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}partyReport`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setReportData(response.data.data || []);
-      return response.data;
-    },
-    enabled: !!token,
   });
+  const reportData = result?.data || [];
 
   const groupedReportData = reportData.reduce((acc, item) => {
     const partyName = item.party_name;
@@ -314,7 +297,7 @@ const PartyReport = () => {
     }
   };
 
-  if (isFetching) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Spin size="large" />
@@ -325,13 +308,7 @@ const PartyReport = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-        <div className="text-center">
-          {!token && (
-            <div className="text-red-500 text-sm mt-2">
-              Please log in to access this feature
-            </div>
-          )}
-        </div>
+      
 
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full">

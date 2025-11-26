@@ -134,9 +134,7 @@ const TaxInvoiceForm = () => {
             ? dayjs(res.data.tax_invoice_date)
             : null,
         };
-        // setSelectedMill(res?.mill || null);
         setInitialData(formattedData);
-        // setSelectedBills(formattedData.subs || []);
         form.setFieldsValue(formattedData);
 
         if (formattedData.subs?.length) {
@@ -259,10 +257,7 @@ const TaxInvoiceForm = () => {
         const resRefetch = await fetchTriggerBilling({
           url: `${TAX_INVOICE_PENDING_BILLING}/${selectedMillId}`,
         });
-        console.log(
-          selectedBills,
-          "-----------selectedBills------------------------"
-        );
+      
         const updatedFetched = resRefetch?.data || [];
         const filtered = updatedFetched.filter(
           (bill) =>
@@ -277,7 +272,6 @@ const TaxInvoiceForm = () => {
             return selectedRef == bill.billing_ref;
           })
         );
-        console.log(filtered, "***************filtered********************");
 
         setFetchedBills(filtered);
         setBills(filtereddata);

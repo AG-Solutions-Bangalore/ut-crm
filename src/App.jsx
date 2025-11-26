@@ -1,51 +1,85 @@
+
+import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import AppInitializer from "./components/AppInitializer";
-import MaintenancePage from "./components/common/MaintenancePage";
-import NotFoundPage from "./components/common/NotFoundPage";
 import ProtectedLayout from "./components/ProtectedLayout";
 import VersionCheck from "./components/VersionCheck";
+import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
+
+import MaintenancePage from "./components/common/MaintenancePage";
+import NotFoundPage from "./components/common/NotFoundPage";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import SignIn from "./pages/auth/SignIn";
-import Dashboard from "./pages/home/Dashboard";
-import ItemList from "./pages/master/item/item-list";
-import MillList from "./pages/master/mill/mill-list";
-import PartyForm from "./pages/master/party/party-form";
-import PartyList from "./pages/master/party/party-list";
-// import DeliveryList from "./pages/master/delivery/delivery-list";
-import AuthReport from "./pages/auth-report/AuthReport";
-import BillingForm from "./pages/billing/billing-form";
-import BillingList from "./pages/billing/billing-list";
-import BillingView from "./pages/billing/billing-view";
-import MillForm from "./pages/master/mill/mill-form";
-import ShadeList from "./pages/master/shade/shade-list";
-import UnitList from "./pages/master/unit/unit-list";
-import PurchaseForm from "./pages/purchase/purchase-form";
-import PurchaseList from "./pages/purchase/purchase-list";
-import QuotationForm from "./pages/quotation/quotation-form";
-import QuotationList from "./pages/quotation/quotation-list";
-import PurchaseOrderTab from "./pages/reportformats/PurchaseOrderTab";
-import ReportFormat from "./pages/reportformats/ReportFormat";
-import TaxInvoiceForm from "./pages/tax-invoice/tax-invoice-form";
-import TaxInvoiceList from "./pages/tax-invoice/tax-invoice-list";
 
-import ErrorBoundry from "./components/errorBoundry/ErrorBoundry";
-import { DashboardNew } from "./features/dashboard";
-import PaymentForm from "./pages/payment/payment-form";
-import PaymentList from "./pages/payment/payment-list";
-import QuotationView from "./pages/quotation/quotation-view";
-import BalanceOrderTabs from "./pages/report/balance/BalanceOrderTabs";
-import BalanceOrderTabsOne from "./pages/report/balance/BalanceOrderTabsOne";
-import LedgerReport from "./pages/report/ledger/ledger-report";
-import MillReport from "./pages/report/mill/MillReport";
-import MillWiseReport from "./pages/report/mill/MillWiseReport";
-import PartyReport from "./pages/report/party/PartyReport";
-import PartyWiseReport from "./pages/report/party/PartyWiseReport";
-import PriceRateReport from "./pages/report/price-rate/PriceRateReport";
-import SalesReport from "./pages/report/sales/SalesReport";
-import TaxInvoice from "./pages/reportformats/TaxInvoice";
-import TradeInvoiceForm from "./pages/trade-invoice/trade-invoice-form";
-import TradeInvoiceList from "./pages/trade-invoice/trade-invoice-list";
-import TradeInvoiceView from "./pages/trade-invoice/trade-invoice-view";
+import LazyLoad from "./components/common/LazyLoad";
+
+// Lazy Imports
+const Dashboard = lazy(() => import("./pages/home/Dashboard"));
+const MillList = lazy(() => import("./pages/master/mill/mill-list"));
+const MillForm = lazy(() => import("./pages/master/mill/mill-form"));
+const MillReport = lazy(() => import("./pages/report/mill/MillReport"));
+
+const PartyList = lazy(() => import("./pages/master/party/party-list"));
+const PartyForm = lazy(() => import("./pages/master/party/party-form"));
+const PartyReport = lazy(() => import("./pages/report/party/PartyReport"));
+
+const ItemList = lazy(() => import("./pages/master/item/item-list"));
+const UnitList = lazy(() => import("./pages/master/unit/unit-list"));
+const ShadeList = lazy(() => import("./pages/master/shade/shade-list"));
+
+const PurchaseList = lazy(() => import("./pages/purchase/purchase-list"));
+const PurchaseForm = lazy(() => import("./pages/purchase/purchase-form"));
+const PurchaseView = lazy(() =>
+  import("./pages/reportformats/PurchaseOrderTab")
+);
+
+const QuotationList = lazy(() => import("./pages/quotation/quotation-list"));
+const QuotationForm = lazy(() => import("./pages/quotation/quotation-form"));
+const QuotationView = lazy(() => import("./pages/quotation/quotation-view"));
+
+const BillingList = lazy(() => import("./pages/billing/billing-list"));
+const BillingForm = lazy(() => import("./pages/billing/billing-form"));
+const BillingView = lazy(() => import("./pages/billing/billing-view"));
+
+const PaymentList = lazy(() => import("./pages/payment/payment-list"));
+const PaymentForm = lazy(() => import("./pages/payment/payment-form"));
+
+const TaxInvoiceList = lazy(() =>
+  import("./pages/tax-invoice/tax-invoice-list")
+);
+const TaxInvoiceForm = lazy(() =>
+  import("./pages/tax-invoice/tax-invoice-form")
+);
+const TaxInvoiceView = lazy(() => import("./pages/reportformats/TaxInvoice"));
+
+const TradeInvoiceList = lazy(() =>
+  import("./pages/trade-invoice/trade-invoice-list")
+);
+const TradeInvoiceForm = lazy(() =>
+  import("./pages/trade-invoice/trade-invoice-form")
+);
+const TradeInvoiceView = lazy(() =>
+  import("./pages/trade-invoice/trade-invoice-view")
+);
+const AuthReport = lazy(() => import("./pages/auth-report/AuthReport"));
+const ReportFormat = lazy(() => import("./pages/reportformats/ReportFormat"));
+
+const BalanceOrderTabs = lazy(() =>
+  import("./pages/report/balance/BalanceOrderTabs")
+);
+const BalanceOrderTabsOne = lazy(() =>
+  import("./pages/report/balance/BalanceOrderTabsOne")
+);
+
+const PriceRateReport = lazy(() =>
+  import("./pages/report/price-rate/PriceRateReport")
+);
+const SalesReport = lazy(() => import("./pages/report/sales/SalesReport"));
+const MillWiseReport = lazy(() => import("./pages/report/mill/MillWiseReport"));
+const PartyWiseReport = lazy(() =>
+  import("./pages/report/party/PartyWiseReport")
+);
+const LedgerReport = lazy(() => import("./pages/report/ledger/ledger-report"));
 
 function App() {
   return (
@@ -58,102 +92,386 @@ function App() {
           <Route path="/forget-password" element={<ForgotPassword />} />
           <Route path="/maintenance" element={<MaintenancePage />} />
 
-          {/* Protected routes inside layout */}
+          {/* Protected */}
           <Route element={<ProtectedLayout />}>
-            <Route path="/home" element={<Dashboard />} />
-            <Route path="/home1" element={<DashboardNew />} />
-            <Route path="/auth-report" element={<AuthReport />} />
-            <Route path="/master/mill" element={<MillList />} />
-            <Route path="/master/mill/create" element={<MillForm />} />
-            <Route path="/master/mill/:id" element={<MillForm />} />
-            <Route path="/master/mill/report" element={<MillReport />} />
+            <Route
+              path="/home"
+              element={
+                <LazyLoad>
+                  <Dashboard />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/master/party" element={<PartyList />} />
-            <Route path="/master/party/create" element={<PartyForm />} />
-            <Route path="/master/party/:id" element={<PartyForm />} />
-            <Route path="/master/party/report" element={<PartyReport />} />
+            {/* Mill */}
+            <Route
+              path="/master/mill"
+              element={
+                <LazyLoad>
+                  <MillList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/mill/create"
+              element={
+                <LazyLoad>
+                  <MillForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/mill/:id"
+              element={
+                <LazyLoad>
+                  <MillForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/mill/report"
+              element={
+                <LazyLoad>
+                  <MillReport />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/master/item" element={<ItemList />} />
-            {/* <Route path="/master/delivery" element={<DeliveryList />} /> */}
-            <Route path="/master/unit" element={<UnitList />} />
-            <Route path="/master/shade" element={<ShadeList />} />
+            {/* Party */}
+            <Route
+              path="/master/party"
+              element={
+                <LazyLoad>
+                  <PartyList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/party/create"
+              element={
+                <LazyLoad>
+                  <PartyForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/party/:id"
+              element={
+                <LazyLoad>
+                  <PartyForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/party/report"
+              element={
+                <LazyLoad>
+                  <PartyReport />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/purchase" element={<PurchaseList />} />
-            <Route path="/purchase/create" element={<PurchaseForm />} />
-            <Route path="/purchase/edit/:id" element={<PurchaseForm />} />
-            <Route path="/purchase/view/:id" element={<PurchaseOrderTab />} />
+            {/* Others */}
+            <Route
+              path="/master/item"
+              element={
+                <LazyLoad>
+                  <ItemList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/unit"
+              element={
+                <LazyLoad>
+                  <UnitList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/master/shade"
+              element={
+                <LazyLoad>
+                  <ShadeList />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/quotation" element={<QuotationList />} />
-            <Route path="/quotation/create" element={<QuotationForm />} />
-            <Route path="/quotation/edit/:id" element={<QuotationForm />} />
-            <Route path="/quotation/view/:id" element={<QuotationView />} />
+            {/* Purchase */}
+            <Route
+              path="/purchase"
+              element={
+                <LazyLoad>
+                  <PurchaseList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/purchase/create"
+              element={
+                <LazyLoad>
+                  <PurchaseForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/purchase/edit/:id"
+              element={
+                <LazyLoad>
+                  <PurchaseForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/purchase/view/:id"
+              element={
+                <LazyLoad>
+                  <PurchaseView />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/billing" element={<BillingList />} />
-            <Route path="/billing/create" element={<BillingForm />} />
-            <Route path="/billing/edit/:id" element={<BillingForm />} />
-            <Route path="/billing/view/:id" element={<BillingView />} />
+            {/* Quotation */}
+            <Route
+              path="/quotation"
+              element={
+                <LazyLoad>
+                  <QuotationList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/quotation/create"
+              element={
+                <LazyLoad>
+                  <QuotationForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/quotation/edit/:id"
+              element={
+                <LazyLoad>
+                  <QuotationForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/quotation/view/:id"
+              element={
+                <LazyLoad>
+                  <QuotationView />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/tax-invoice" element={<TaxInvoiceList />} />
-            <Route path="/tax-invoice/create" element={<TaxInvoiceForm />} />
-            <Route path="/tax-invoice/edit/:id" element={<TaxInvoiceForm />} />
-            <Route path="/tax-invoice/view/:id" element={<TaxInvoice />} />
+            {/* Billing */}
+            <Route
+              path="/billing"
+              element={
+                <LazyLoad>
+                  <BillingList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/billing/create"
+              element={
+                <LazyLoad>
+                  <BillingForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/billing/edit/:id"
+              element={
+                <LazyLoad>
+                  <BillingForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/billing/view/:id"
+              element={
+                <LazyLoad>
+                  <BillingView />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/payment" element={<PaymentList />} />
-            <Route path="/payment/create" element={<PaymentForm />} />
-            <Route path="/payment/edit/:id" element={<PaymentForm />} />
+            {/* Tax Invoice */}
+            <Route
+              path="/tax-invoice"
+              element={
+                <LazyLoad>
+                  <TaxInvoiceList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/tax-invoice/create"
+              element={
+                <LazyLoad>
+                  <TaxInvoiceForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/tax-invoice/edit/:id"
+              element={
+                <LazyLoad>
+                  <TaxInvoiceForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/tax-invoice/view/:id"
+              element={
+                <LazyLoad>
+                  <TaxInvoiceView />
+                </LazyLoad>
+              }
+            />
 
-            <Route path="/trade-invoice" element={<TradeInvoiceList />} />
+            {/* Payment */}
+            <Route
+              path="/payment"
+              element={
+                <LazyLoad>
+                  <PaymentList />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/payment/create"
+              element={
+                <LazyLoad>
+                  <PaymentForm />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/payment/edit/:id"
+              element={
+                <LazyLoad>
+                  <PaymentForm />
+                </LazyLoad>
+              }
+            />
+
+            {/* Trade Invoice */}
+            <Route
+              path="/trade-invoice"
+              element={
+                <LazyLoad>
+                  <TradeInvoiceList />
+                </LazyLoad>
+              }
+            />
             <Route
               path="/trade-invoice/create"
-              element={<TradeInvoiceForm />}
+              element={
+                <LazyLoad>
+                  <TradeInvoiceForm />
+                </LazyLoad>
+              }
             />
             <Route
               path="/trade-invoice/edit/:id"
-              element={<TradeInvoiceForm />}
+              element={
+                <LazyLoad>
+                  <TradeInvoiceForm />
+                </LazyLoad>
+              }
             />
             <Route
               path="/trade-invoice/view/:id"
-              element={<TradeInvoiceView />}
+              element={
+                <LazyLoad>
+                  <TradeInvoiceView />
+                </LazyLoad>
+              }
             />
 
-            <Route path="/report-format" element={<ReportFormat />} />
+            {/* Report Format */}
+            <Route
+              path="/report-format"
+              element={
+                <LazyLoad>
+                  <ReportFormat />
+                </LazyLoad>
+              }
+            />
 
-            {/* report  */}
+            {/* Reports */}
+
+            <Route
+              path="/auth-report"
+              element={
+                <LazyLoad>
+                  <AuthReport />
+                </LazyLoad>
+              }
+            />
             <Route
               path="/report/balance-order"
-              element={<BalanceOrderTabs />}
-            />
-
-            {/* <Route
-              path="/report/balance-order"
-              element={<BalanceOrderReport />}
+              element={
+                <LazyLoad>
+                  <BalanceOrderTabs />
+                </LazyLoad>
+              }
             />
             <Route
-              path="/report/balance-close-order"
-              element={<BalanceCloseOrderReport />}
-            /> */}
-            <Route path="/report/price-rate" element={<PriceRateReport />} />
-            <Route path="/report/sales" element={<SalesReport />} />
-            <Route path="/report/mill-wise" element={<MillWiseReport />} />
-            <Route path="/report/party-wise" element={<PartyWiseReport />} />
+              path="/report/price-rate"
+              element={
+                <LazyLoad>
+                  <PriceRateReport />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/report/sales"
+              element={
+                <LazyLoad>
+                  <SalesReport />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/report/mill-wise"
+              element={
+                <LazyLoad>
+                  <MillWiseReport />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/report/party-wise"
+              element={
+                <LazyLoad>
+                  <PartyWiseReport />
+                </LazyLoad>
+              }
+            />
             <Route
               path="/report/balance"
-              element={<BalanceOrderTabsOne />}
-            />
-            {/* <Route
-              path="/report/balance-payable"
-              element={<BalancePayableReport />}
+              element={
+                <LazyLoad>
+                  <BalanceOrderTabsOne />
+                </LazyLoad>
+              }
             />
             <Route
-              path="/report/balance-receivable"
-              element={<BalanceReceivableReport />}
-            /> */}
-            {/* <Route path="/report/party" element={<PartyReport />} />
-            <Route path="/report/mill" element={<MillReport />} /> */}
-            <Route path="/report/ledger-report" element={<LedgerReport />} />
+              path="/report/ledger-report"
+              element={
+                <LazyLoad>
+                  <LedgerReport />
+                </LazyLoad>
+              }
+            />
           </Route>
 
-          {/* Fallback route */}
+          {/* Not Found */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </ErrorBoundry>

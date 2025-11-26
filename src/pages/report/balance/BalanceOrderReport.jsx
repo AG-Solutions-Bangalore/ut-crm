@@ -1,38 +1,23 @@
 /* eslint-disable no-unused-vars */
-import { useQuery } from "@tanstack/react-query";
 import { Button, Card, message } from "antd";
-import axios from "axios";
 import dayjs from "dayjs";
 import * as ExcelJS from "exceljs";
 import html2pdf from "html2pdf.js";
 import { Download, FileSpreadsheet, Printer } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import useToken from "../../../api/usetoken";
+import { BALANCE_ORDER_REPORT } from "../../../api";
 import Loader from "../../../components/common/Loader";
+import { useGetApiMutation } from "../../../hooks/useGetApiMutation";
 
 const BalanceOrderReport = () => {
-  const [reportData, setReportData] = useState([]);
   const containerRef = useRef(null);
-  const token = useToken();
-  const [activeTab, setActiveTab] = useState("Open");
-  const { isFetching } = useQuery({
+
+  const { data: result, isLoading } = useGetApiMutation({
+    url: BALANCE_ORDER_REPORT,
     queryKey: ["balanceOrderReport"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}balanceOrderReport`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setReportData(response.data.data || []);
-      return response.data;
-    },
-    enabled: !!token,
   });
+  const reportData = result?.data || [];
 
   const groupedReportData = reportData.reduce((acc, item) => {
     const millName = item.mill_name;
@@ -248,19 +233,13 @@ const BalanceOrderReport = () => {
 
   const overallTotals = calculateOverallTotals();
 
-  if (isFetching) {
+  if (isLoading) {
     return <Loader msg="Balance Order Report" />;
   }
   return (
     <div className="min-h-screen">
       <div className="max-w-full mx-auto">
-        <div className="text-center">
-          {!token && (
-            <div className="text-red-500 text-sm mt-2">
-              Please log in to access this feature
-            </div>
-          )}
-        </div>
+     
 
         <div className="flex flex-col lg:flex-row gap-2">
           <div className="w-full">
