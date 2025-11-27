@@ -90,6 +90,14 @@ const MillList = () => {
         <HighlightText text={record.mill_name} match={debouncedSearch} />
       ),
     },
+    {
+      title: "Deckle",
+      dataIndex: "mill_deckle",
+      key: "mill_deckle",
+      render: (_, record) => (
+        <HighlightText text={record.mill_deckle} match={debouncedSearch} />
+      ),
+    },
 
     {
       title: "Type",

@@ -86,7 +86,7 @@ const PendingBillsModal = ({
           {/* LEFT SECTION */}
           <div className="col-span-3">
             <h3 className="font-semibold mb-2">Available Bills</h3>
-            <div className="space-y-3 overflow-y-auto max-h-[70vh] pr-2">
+            <div className="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
               {bills.length ? (
                 bills.map((bill) => (
                   <Card
@@ -155,11 +155,11 @@ const PendingBillsModal = ({
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">
-                          {bill.billing_tones || ""}
+                          {bill.billing_sub_tones || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200">
-                          {bill.billing_bf || ""}
+                          {bill.billing_sub_bf || ""}
                         </td>
 
                         <td className="p-1 border border-gray-200 text-right">

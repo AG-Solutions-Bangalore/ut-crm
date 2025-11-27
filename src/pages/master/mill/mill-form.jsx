@@ -273,6 +273,9 @@ const MillForm = () => {
                   >
                     <Input placeholder="Enter commission" maxLength={5} />
                   </Form.Item>
+                  <Form.Item label="Deckle" name="mill_deckle">
+                    <Input placeholder="Enter Deckle" maxLength={50} />
+                  </Form.Item>
                 </div>
               </Card>
 

@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import reportlogo from "../../assets/report-logo.png";
 import ReportActions from "../reportformats/ReportActions";
-
-const devUrl = "/api/crmapi/public/assets/images/company_images/sign.jpeg";
+import companyFinalSiginImage from "../../components/common/Sigin";
 
 const Quotation = () => {
   const componentRef = useRef(null);
 
   const [showSignature, setShowSignature] = useState(true);
+  const SiginImagePath = companyFinalSiginImage();
 
   const toggleSignature = () => {
     setShowSignature(!showSignature);
@@ -216,7 +216,7 @@ const Quotation = () => {
             <div className="relative mt-12 mb-8">
               {showSignature && (
                 <img
-                  src={devUrl}
+                  src={SiginImagePath}
                   alt="Signature"
                   className="w-28 h-auto object-contain absolute left-12 -top-16"
                 />

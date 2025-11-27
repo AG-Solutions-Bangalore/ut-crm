@@ -106,9 +106,9 @@ const Dashboard = () => {
     },
     {
       title: "Mill Name",
-      dataIndex: "mill_name",
+      dataIndex: "mill_short",
       key: "mill",
-      width: 160,
+      width: 100,
       ellipsis: true,
       render: (text) => (
         <div className="flex items-center gap-2">
@@ -119,9 +119,9 @@ const Dashboard = () => {
     },
     {
       title: "Party Name",
-      dataIndex: "party_name",
+      dataIndex: "party_short",
       key: "party",
-      width: 160,
+      width: 100,
       ellipsis: true,
       render: (text) => (
         <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ const Dashboard = () => {
       title: "Bill Rate",
       dataIndex: "total_bill_rate",
       key: "bill_rate",
-      width: 80,
+      width: 40,
       align: "right",
       render: (amount) => (
         <div className="flex flex-col items-end">

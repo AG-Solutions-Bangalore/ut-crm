@@ -26,7 +26,7 @@ const PaymentList = () => {
   const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("Paybles");
+  const [activeTab, setActiveTab] = useState("Payables");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const navigate = useNavigate();
   const { trigger: deleteTrigger } = useApiMutation();
@@ -72,7 +72,7 @@ const PaymentList = () => {
           },
         ]
       : []),
-    ...(activeTab.includes("Paybles") || activeTab.includes("Payables")
+    ...(activeTab.includes("Payables") || activeTab.includes("Payables")
       ? [
           {
             title: "Mill Name",
@@ -169,7 +169,7 @@ const PaymentList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Paybles", label: "Paybles" },
+            { key: "Payables", label: "Payables" },
             { key: "Receivables", label: "Receivables" },
             { key: "Payables Adjust", label: "Payables Adjust" },
             { key: "Receivables Adjust", label: "Receivables Adjust" },
@@ -188,9 +188,9 @@ const PaymentList = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate("/payment/create?type=Paybles")}
+              onClick={() => navigate("/payment/create?type=Payables")}
             >
-              Paybles
+              Payables
             </Button>
             <Button
               type="primary"

@@ -44,11 +44,11 @@ const PaymentForm = () => {
   });
   const { mill, party, payment } = useMasterData({
     mill: isEditMode
-      ? initialData.payment_party_type == "Paybles"
-      : type === "Paybles",
+      ? initialData.payment_party_type == "Payables"
+      : type === "Payables",
     party: isEditMode
-      ? initialData.payment_party_type != "Paybles"
-      : type !== "Paybles",
+      ? initialData.payment_party_type != "Payables"
+      : type !== "Payables",
     payment: true,
   });
   const resetForm = () => {
@@ -223,10 +223,10 @@ const PaymentForm = () => {
                     placeholder="Select Payment From"
                     options={
                       isEditMode
-                        ? initialData?.payment_party_type === "Paybles"
+                        ? initialData?.payment_party_type === "Payables"
                           ? millOptions
                           : partyOptions
-                        : type === "Paybles"
+                        : type === "Payables"
                         ? millOptions
                         : partyOptions
                     }

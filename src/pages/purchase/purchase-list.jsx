@@ -115,7 +115,7 @@ const PurchaseList = () => {
   };
   const columns = [
     {
-      title: "P/O Ref No",
+      title: "PO Ref No",
       dataIndex: "purchase_orders_ref",
       key: "purchase_orders_ref",
       render: (text, record) => (
@@ -125,7 +125,7 @@ const PurchaseList = () => {
       ),
     },
     {
-      title: "P/O Date",
+      title: "PO Date",
       dataIndex: "purchase_orders_date",
       key: "purchase_orders_date",
       render: (_, record) =>
@@ -191,7 +191,7 @@ const PurchaseList = () => {
         <Space>
           {/* Show Edit only if status is NOT Close */}
           {record.purchase_orders_status !== "Close" && (
-            <Tooltip title="Edit P/O">
+            <Tooltip title="Edit PO">
               <Button
                 type="primary"
                 icon={<EditOutlined />}
@@ -201,7 +201,7 @@ const PurchaseList = () => {
             </Tooltip>
           )}
 
-          <Tooltip title="View P/O">
+          <Tooltip title="View PO">
             <Button
               type="primary"
               icon={<EyeOutlined />}
@@ -210,7 +210,7 @@ const PurchaseList = () => {
             />
           </Tooltip>
 
-          <Tooltip title="Delete P/O">
+          <Tooltip title="Delete PO">
             <Popconfirm
               title="Are you sure you want to delete this item?"
               onConfirm={() => handleDelete(record?.id)}
@@ -238,8 +238,8 @@ const PurchaseList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Open", label: "Open P/O List" },
-            { key: "Close", label: "Closed P/O List" },
+            { key: "Open", label: "Open PO List" },
+            { key: "Close", label: "Closed PO List" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -256,7 +256,7 @@ const PurchaseList = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate("/purchase/create")}
           >
-            Add P/O
+            Add PO
           </Button>
         </div>
       </div>
@@ -309,7 +309,7 @@ const PurchaseList = () => {
                 if (!invoice) {
                   return (
                     <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
-                      No P/O details Available
+                      No Billing details Available
                     </div>
                   );
                 }
@@ -374,7 +374,7 @@ const PurchaseList = () => {
           />
         ) : (
           <div className="text-center text-gray-500 py-20">
-            No P/O data found.
+            No PO data found.
           </div>
         )}
       </div>
