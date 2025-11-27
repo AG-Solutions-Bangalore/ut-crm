@@ -80,9 +80,19 @@ const BillingForm = () => {
         enabled: !!selectedRefId,
       },
     });
+  const main = getpurchaserefdetails?.data || {};
+  const subs = main?.subs || [];
   const resetForm = () => {
     form.resetFields();
   };
+  useEffect(() => {
+    if (main) {
+      console.log(main, "main");
+      form.setFieldsValue({
+        billing_party_id: main?.party_short,
+      });
+    }
+  }, [main]);
 
   const poRefOptions =
     purchaserefdata?.data?.map((item) => ({
@@ -159,7 +169,6 @@ const BillingForm = () => {
   };
   const handleChangeRef = (value) => {
     setSelectetReflId(value);
-
     form.resetFields(["subs"]);
   };
 
@@ -172,6 +181,7 @@ const BillingForm = () => {
         const sRate = parseFloat(row?.sale_rate) || 0;
         const tones = parseFloat(row?.billing_sub_tones) || 0;
 
+        const Comm = (sRate - pRate) * tones;
         const rateDiff = sRate - pRate;
 
         const salesAmount = tones * sRate;
@@ -186,6 +196,7 @@ const BillingForm = () => {
         return {
           ...row,
 
+          billing_commn: parseFloat(Comm.toFixed(2)),
           rate_diff: parseFloat(rateDiff.toFixed(2)),
           sales_amount: parseFloat(salesAmount.toFixed(2)),
           billing_due_days: dueDays,
@@ -329,8 +340,7 @@ const BillingForm = () => {
       message.error(error?.message || "Error while deleting sub-item.");
     }
   };
-  const main = getpurchaserefdetails?.data || {};
-  const subs = main?.subs || [];
+
   const loadingdata =
     item?.loading || fetchLoading || mill.loading || party.loading;
   return (
@@ -588,11 +598,11 @@ const BillingForm = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-2">
                           <p>
                             <span className="font-semibold">Mill:</span>{" "}
-                            {main?.mill_name}
+                            {main?.mill_short}
                           </p>
                           <p>
                             <span className="font-semibold">Party:</span>{" "}
-                            {main?.party_name}
+                            {main?.party_short}
                           </p>
                         </div>
 
@@ -629,57 +639,15 @@ const BillingForm = () => {
                                   : "+"}
                               </Button>
 
-                              <div className="rounded-md  text-xs grid grid-cols-3 gap-1">
+                              <div className="rounded-md  text-xs grid grid-cols-2 gap-1">
                                 <p>
-                                  <span className="font-medium text-gray-500">
-                                    GSM:
-                                  </span>{" "}
-                                  {item.gsm ?? "-"}
+                                  {" "}
+                                  {item.gsm ?? ""} / {item.bf ?? ""} / {item.size ?? ""}
+                                  
                                 </p>
                                 <p>
-                                  <span className="font-medium text-gray-500">
-                                    BF:
-                                  </span>{" "}
-                                  {item.bf ?? "-"}
-                                </p>
-
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Size:
-                                  </span>{" "}
-                                  {item.size ?? "-"}
-                                </p>
-
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Qty:
-                                  </span>{" "}
-                                  {item.qnty ?? "-"}
-                                </p>
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Unit:
-                                  </span>{" "}
-                                  {item.unit ?? "-"}
-                                </p>
-
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Bill:
-                                  </span>{" "}
-                                  ₹{item.bill_rate}
-                                </p>
-                                <p>
-                                  <span className="font-medium text-gray-500">
-                                    Agreed:
-                                  </span>{" "}
-                                  ₹{item.agreed_rate}
-                                </p>
-                                <p className="col-span-2">
-                                  <span className="font-medium text-gray-500">
-                                    Shade:
-                                  </span>{" "}
-                                  {item.shade ?? "-"}
+                                  {" "}
+                                  {item.bill_rate} / {item.agreed_rate}
                                 </p>
                               </div>
                             </Card>

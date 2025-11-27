@@ -27,6 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo1 from "../assets/logo-1.png";
 import { setShowUpdateDialog } from "../store/auth/versionSlice";
 import useFinalUserImage from "./common/Logo";
+import { Boxes, Shapes } from "lucide-react";
 
 const getMenuItems = (collapsed) => {
   const dashboardItems = [
@@ -53,6 +54,14 @@ const getMenuItems = (collapsed) => {
       key: "/master/shade",
       icon: <BookOutlined />,
       label: "Shade",
+    },
+  ];
+  const otherChildren = [
+    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    {
+      key: "/trade-invoice",
+      icon: <AuditOutlined />,
+      label: "Trade Invoice",
     },
   ];
 
@@ -110,20 +119,23 @@ const getMenuItems = (collapsed) => {
         label: "Management",
         children: managementChildren,
       },
-      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
-      { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+      { key: "/purchase", icon: <ShoppingCartOutlined />, label: "PO" },
+
       { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-      {
-        key: "/trade-invoice",
-        icon: <AuditOutlined />,
-        label: "Trade Invoice",
-      },
+
       {
         key: "/tax-invoice",
         icon: <ReconciliationOutlined />,
         label: "Tax Invoice",
       },
       { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
+      {
+        key: "sub2",
+        icon: <Shapes size={18} />,
+        label: "Other",
+        children: otherChildren,
+        className: "report-section",
+      },
       {
         key: "sub1",
         icon: <BookFilled />,
@@ -148,10 +160,10 @@ const getMenuItems = (collapsed) => {
         },
       ],
     },
-    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "P/O" },
-    { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
+    { key: "/purchase", icon: <ShoppingCartOutlined />, label: "PO" },
+    // { key: "/quotation", icon: <FileSearchOutlined />, label: "Quotation" },
     { key: "/billing", icon: <FileDoneOutlined />, label: "Billing" },
-    { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
+    // { key: "/trade-invoice", icon: <AuditOutlined />, label: "Trade Invoice" },
     {
       key: "/tax-invoice",
       icon: <ReconciliationOutlined />,
@@ -159,6 +171,18 @@ const getMenuItems = (collapsed) => {
     },
     { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
 
+    {
+      type: "group",
+      label: "Other",
+      children: [
+        {
+          key: "sub2",
+          icon: <Shapes size={18} />,
+          label: "Other",
+          children: otherChildren,
+        },
+      ],
+    },
     {
       type: "group",
       label: "Report",
@@ -224,7 +248,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
         }
 
         scrollContainer.scrollTo({
-          top: offset - 10,
+          top: offset - 20,
           behavior: "smooth",
         });
         setTimeout(() => {
@@ -342,7 +366,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
                     </span>
                   </div>
                   <div className="text-[11px] font-normal text-gray-500 mt-1">
-                    Updated on: 26-11-2025
+                    Updated on: 27-11-2025
                   </div>
                 </div>
               }

@@ -28,7 +28,7 @@ const UnifiedLedger = () => {
   }, [selectedLedgerType]);
 
   const config = {
-    Paybles: {
+    Payables: {
       title: "Payables Ledger",
       entityName: "Mill",
       apiEndpoint: "activeMills",
@@ -460,7 +460,7 @@ const UnifiedLedger = () => {
                         style={{ width: "100%", height: "32px" }}
                         className="text-xs"
                       >
-                        <Option value="Paybles">Payables (Mills)</Option>
+                        <Option value="Payables">Payables (Mills)</Option>
                         <Option value="Receivables">
                           Receivables (Parties)
                         </Option>

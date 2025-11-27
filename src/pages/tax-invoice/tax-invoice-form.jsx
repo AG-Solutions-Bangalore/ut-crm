@@ -142,8 +142,8 @@ const TaxInvoiceForm = () => {
             id: b.id || b.id,
             billing_ref: b.tax_invoice_sub_billing_ref,
             purchase_date: b.tax_invoice_sub_purchase_date || null,
-            billing_tones: b.tax_invoice_sub_tones || "",
-            billing_bf: b.tax_invoice_sub_bf || "",
+            billing_sub_tones: b.tax_invoice_sub_tones || "",
+            billing_sub_bf: b.tax_invoice_sub_bf || "",
             purchase_rate: b.tax_invoice_sub_purchase_rate || "",
             sale_rate: b.tax_invoice_sub_sale_rate || "",
             rate_diff: b.tax_invoice_sub_rate_diff || "",
@@ -172,15 +172,17 @@ const TaxInvoiceForm = () => {
       message.warning("Please add at least one bill before submitting.");
       return;
     }
+    console.log(selectedBills, "bill");
     const subsdata = selectedBills.map((bill) => ({
       id: isEditMode ? bill.id : null,
+
       tax_invoice_sub_billing_ref: bill.billing_ref,
 
       tax_invoice_sub_purchase_date: bill.purchase_date,
 
-      tax_invoice_sub_tones: bill.billing_tones,
+      tax_invoice_sub_tones: bill.billing_sub_tones,
 
-      tax_invoice_sub_bf: bill.billing_bf,
+      tax_invoice_sub_bf: bill.billing_sub_bf,
 
       tax_invoice_sub_sale_rate: bill.sale_rate,
 
@@ -315,8 +317,9 @@ const TaxInvoiceForm = () => {
           billing_ref: b.tax_invoice_sub_billing_ref || b.billing_ref,
           purchase_date:
             b.tax_invoice_sub_purchase_date || b.purchase_date || null,
-          billing_tones: b.tax_invoice_sub_tones || b.billing_tones || "",
-          billing_bf: b.tax_invoice_sub_bf || b.billing_bf || "",
+          billing_sub_tones:
+            b.tax_invoice_sub_tones || b.billing_sub_tones || "",
+          billing_sub_bf: b.tax_invoice_sub_bf || b.billing_sub_bf || "",
           purchase_rate:
             b.tax_invoice_sub_purchase_rate || b.purchase_rate || "",
           sale_rate: b.tax_invoice_sub_sale_rate || b.sale_rate || "",
@@ -537,11 +540,11 @@ const TaxInvoiceForm = () => {
                       </td>
 
                       <td className="p-1 border border-gray-200 text-right">
-                        {bill.billing_tones || ""}
+                        {bill.billing_sub_tones || ""}
                       </td>
 
                       <td className="p-1 border border-gray-200">
-                        {bill.billing_bf || ""}
+                        {bill.billing_sub_bf || ""}
                       </td>
 
                       <td className="p-1 border border-gray-200 text-right">

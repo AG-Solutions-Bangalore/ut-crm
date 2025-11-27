@@ -234,7 +234,7 @@ const PurchaseForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update P/O" : "Create P/O"}
+                {isEditMode ? "Update PO" : "Create PO"}
               </h2>
             }
             extra={
