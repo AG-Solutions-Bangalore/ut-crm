@@ -8,6 +8,7 @@ import {
   App,
   Button,
   Card,
+  Checkbox,
   DatePicker,
   Form,
   Input,
@@ -43,7 +44,7 @@ const PurchaseForm = () => {
     shade: true,
     unit: true,
   });
-
+const [addressOptions, setAddressOptions] = useState([]);
   const [latestPurchaseData, setLatestPurchaseData] = useState([]);
   const [selectedMill, setSelectedMill] = useState(null);
   const [selectedParty, setSelectedParty] = useState(null);
@@ -92,14 +93,48 @@ const PurchaseForm = () => {
     }
   }, [selectedMill?.value, selectedParty?.value]);
 
-  const handlePartyChange = (partyId) => {
-    const party = partyOptions.find((p) => p.value === partyId);
-    setSelectedParty(party || null);
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef.data?.data);
-    }
-  };
+  // const handlePartyChange = (partyId) => {
+  //   const party = partyOptions.find((p) => p.value === partyId);
+  //   setSelectedParty(party || null);
+  //   if (purchaseRef?.data?.data) {
+  //     form.setFieldValue("purchase_orders_ref", purchaseRef.data?.data);
+  //   }
+  // };
+  const handlePartyChange = async (partyId) => {
+  const party = partyOptions.find((p) => p.value === partyId);
+  setSelectedParty(party || null);
 
+  if (purchaseRef?.data?.data) {
+    form.setFieldValue("purchase_orders_ref", purchaseRef.data?.data);
+  }
+
+  try {
+    const res = await fetchAddress({
+      url: `${PARTY_ADDRESS}/${partyId}`,
+    });
+
+    if (res?.data) {
+      const apiData = res.data || [];
+
+      const options = apiData.map((item) => ({
+        label: item.party_delivery_address,
+        value: item.id,
+      }));
+
+      setAddressOptions(options); 
+
+      if (options.length == 1) {
+        form.setFieldValue("purchase_orders_party_m_address", options[0].value);
+      } else {
+        form.setFieldValue("purchase_orders_party_m_address", undefined);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch address", e);
+  }
+};
+
+const { trigger: fetchAddress, loading: addressloading } = useApiMutation();
   const { trigger: fetchLatestTrigger, loading: fetchlatestLoading } =
     useApiMutation();
   const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
@@ -290,28 +325,47 @@ const PurchaseForm = () => {
                         allowClear
                       />
                     </Form.Item>
-                    <Form.Item
-                      label={
-                        <span>
-                          Party <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="purchase_orders_party_id"
-                      rules={[{ required: true, message: "Select party" }]}
-                    >
-                      <Select
-                        placeholder="Select Party"
-                        options={partyOptions}
-                        onChange={handlePartyChange}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
+                     <div className="relative w-full">
+                                        <div className="absolute right-0 -top-6 flex items-center gap-2">
+                                          <span className="text-sm font-medium text-gray-700">
+                                            Multi Address
+                                          </span>
+                  
+                                          <Form.Item
+                                            name="purchase_orders_party_m_address"
+                                            valuePropName="checked"
+                                            initialValue={false}
+                                            className="!mt-4 p-0"
+                                          >
+                                            <Checkbox />
+                                          </Form.Item>
+                                        </div>
+                  
+                                        {/* Party Select */}
+                                        <Form.Item
+                                          label={
+                                            <span>
+                                              Party <span className="text-red-500">*</span>
+                                            </span>
+                                          }
+                                          name="purchase_orders_party_id"
+                                          rules={[{ required: true, message: "Select party" }]}
+                                        >
+                                          <Select
+                                            placeholder="Select Party"
+                                            options={partyOptions}
+                                            onChange={handlePartyChange}
+                                            filterOption={(input, option) =>
+                                              (option?.label ?? "")
+                                                .toLowerCase()
+                                                .includes(input.toLowerCase())
+                                            }
+                                            showSearch
+                                            allowClear
+                                          />
+                                          
+                                        </Form.Item>
+                                      </div>
 
                     <Form.Item>
                       <Input.TextArea
