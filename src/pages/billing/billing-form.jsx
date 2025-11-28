@@ -62,6 +62,8 @@ const BillingForm = () => {
     billing_note: "",
     billing_payment_type: null,
   });
+  const [diff, setDiff] = useState(0);
+  const [totalSaleAmount, setTotalSalesAmount] = useState("");
   const [selectedMillId, setSelectedMillId] = useState(null);
   const [selectedRefId, setSelectetReflId] = useState(null);
   const { trigger: deleteTrigger } = useApiMutation();
@@ -87,7 +89,6 @@ const BillingForm = () => {
   };
   useEffect(() => {
     if (main) {
-      console.log(main, "main");
       form.setFieldsValue({
         billing_party_id: main?.party_short,
       });
@@ -171,7 +172,12 @@ const BillingForm = () => {
     setSelectetReflId(value);
     form.resetFields(["subs"]);
   };
+  const handleSaleAmountChange = (value) => {
+    const sale = Number(value || 0);
+    const diffValue = totalSaleAmount - sale;
 
+    setDiff(Number(diffValue.toFixed(2)));
+  };
   const handleValueChange = (_, allValues) => {
     const { subs } = allValues;
 
@@ -205,6 +211,10 @@ const BillingForm = () => {
 
       form.setFieldsValue({ subs: updatedSubs });
 
+      const totalSalesAmount = updatedSubs.reduce(
+        (sum, row) => sum + (parseFloat(row.sales_amount) || 0),
+        0
+      );
       const totalTones = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_sub_tones) || 0),
         0
@@ -213,6 +223,8 @@ const BillingForm = () => {
         (sum, row) => sum + (parseFloat(row.billing_commn) || 0),
         0
       );
+      const salesWith18Percent = totalSalesAmount * 0.18;
+      setTotalSalesAmount(Number(salesWith18Percent.toFixed(2)) || "");
 
       form.setFieldsValue({
         billing_total_tones: totalTones,
@@ -562,22 +574,48 @@ const BillingForm = () => {
                         disabled
                       />
                     </Form.Item>
-                    <Form.Item
-                      name="billing_total_sale_amount"
-                      label={
-                        <span>
-                          Sale Amount <span className="text-red-500">*</span>
+                    <div>
+                      <Form.Item
+                        name="billing_total_sale_amount"
+                        label={
+                          <span>
+                            Sale Amount <span className="text-red-500">*</span>
+                          </span>
+                        }
+                        rules={[
+                          { required: true, message: "Enter Sale Amount" },
+                        ]}
+                        className="!mb-1"
+                      >
+                        <InputNumber
+                          placeholder="Enter Sale Amount"
+                          className="!w-full"
+                          onChange={handleSaleAmountChange}
+                        />
+                      </Form.Item>
+
+                      <div className="flex justify-between items-center text-xs">
+                        {/* Left */}
+                        <span className="text-gray-600">
+                          Total Sale:{" "}
+                          <span className="font-semibold">
+                            {totalSaleAmount}
+                          </span>
                         </span>
-                      }
-                      rules={[{ required: true, message: "Enter Sale Amount" }]}
-                      styles={{ width: "100%" }}
-                    >
-                      <InputNumber
-                        placeholder="Enter Sale Amount"
-                        className="!w-full"
-                        disabled
-                      />
-                    </Form.Item>
+
+                        <span
+                          className={`font-semibold ${
+                            diff > 0
+                              ? "text-green-600"
+                              : diff < 0
+                              ? "text-red-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          Diff: {diff}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <Form.Item name="billing_note" label="  Note">
                     <Input.TextArea placeholder="Enter Note" />
@@ -619,10 +657,10 @@ const BillingForm = () => {
                                 className="!absolute top-1 right-1 z-20 !p-1"
                                 disabled={subRows.some(
                                   (s) =>
-                                    s.billing_sub_bf == item.bf &&
-                                    s.billing_sub_tones == item.qnty &&
-                                    s.purchase_rate == item.agreed_rate &&
-                                    s.sale_rate == item.bill_rate
+                                    s?.billing_sub_bf == item?.bf &&
+                                    s?.billing_sub_tones == item?.qnty &&
+                                    s?.purchase_rate == item?.agreed_rate &&
+                                    s?.sale_rate == item?.bill_rate
                                 )}
                                 onClick={() => handleInsertSub(main, item)}
                               >
@@ -630,10 +668,10 @@ const BillingForm = () => {
                                   .getFieldValue("subs")
                                   ?.some(
                                     (s) =>
-                                      s.billing_sub_bf == item.bf &&
-                                      s.billing_sub_tones == item.qnty &&
-                                      s.purchase_rate == item.agreed_rate &&
-                                      s.sale_rate == item.bill_rate
+                                      s?.billing_sub_bf == item?.bf &&
+                                      s?.billing_sub_tones == item?.qnty &&
+                                      s?.purchase_rate == item?.agreed_rate &&
+                                      s?.sale_rate == item?.bill_rate
                                   )
                                   ? "✓"
                                   : "+"}
@@ -642,8 +680,8 @@ const BillingForm = () => {
                               <div className="rounded-md  text-xs grid grid-cols-2 gap-1">
                                 <p>
                                   {" "}
-                                  {item.gsm ?? ""} / {item.bf ?? ""} / {item.size ?? ""}
-                                  
+                                  {item.gsm ?? ""} / {item.bf ?? ""} /{" "}
+                                  {item.size ?? ""}
                                 </p>
                                 <p>
                                   {" "}

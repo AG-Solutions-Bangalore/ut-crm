@@ -2,6 +2,7 @@ import { App, Button, Form, Input, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { SHADE_LIST } from "../../../api";
 import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ShadeForm = ({ id, onSuccess }) => {
   const { message } = App.useApp();
@@ -10,6 +11,7 @@ const ShadeForm = ({ id, onSuccess }) => {
   const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const isEditMode = Boolean(id);
   const [initialData, setInitialData] = useState({});
+  const queryClient = useQueryClient();
 
   const resetForm = () => form.resetFields();
 
@@ -53,6 +55,10 @@ const ShadeForm = ({ id, onSuccess }) => {
       if (res.code === 201) {
         message.success(res.message || "Shade saved successfully!");
         onSuccess?.();
+        await queryClient.invalidateQueries({
+          queryKey: ["activeshadedata"],
+          exact: false,
+        });
         form.resetFields();
       } else {
         message.error(res.message || "Failed to save Shade.");

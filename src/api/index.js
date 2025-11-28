@@ -82,6 +82,7 @@ export const PAYMENT_BILLING_REF = "/getpendingbillingamount";
 export const PAYMENT_MODE = "/panel-fetch-payment-mode";
 //
 
+export const PARTY_ADDRESS = "/get-partys-address";
 export const GET_MONTHS = "/getMonth";
 export const SALES_REPORT = "/salesReport";
 export const MILL_WISE_REPORT = "/millwiseReport";

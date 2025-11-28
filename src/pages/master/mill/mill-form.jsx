@@ -73,6 +73,10 @@ const MillForm = () => {
           queryKey: ["milldata"],
           exact: false,
         });
+        await queryClient.invalidateQueries({
+          queryKey: ["activemilldata"],
+          exact: false,
+        });
         navigate("/master/mill");
       } else {
         message.error(res.message || "Failed to save mill.");
