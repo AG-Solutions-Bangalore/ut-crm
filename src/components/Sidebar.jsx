@@ -129,18 +129,19 @@ const getMenuItems = (collapsed) => {
         label: "Tax Invoice",
       },
       { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
-      {
-        key: "sub2",
-        icon: <Shapes size={18} />,
-        label: "Other",
-        children: otherChildren,
-        className: "report-section",
-      },
+
       {
         key: "sub1",
         icon: <BookFilled />,
         label: "Report",
         children: reportChildren,
+        className: "report-section",
+      },
+      {
+        key: "sub2",
+        icon: <Shapes size={18} />,
+        label: "Other",
+        children: otherChildren,
         className: "report-section",
       },
     ];
@@ -173,18 +174,6 @@ const getMenuItems = (collapsed) => {
 
     {
       type: "group",
-      label: "Other",
-      children: [
-        {
-          key: "sub2",
-          icon: <Shapes size={18} />,
-          label: "Other",
-          children: otherChildren,
-        },
-      ],
-    },
-    {
-      type: "group",
       label: "Report",
       children: [
         {
@@ -192,6 +181,18 @@ const getMenuItems = (collapsed) => {
           icon: <BookFilled />,
           label: "Report",
           children: reportChildren,
+        },
+      ],
+    },
+    {
+      type: "group",
+      label: "Other",
+      children: [
+        {
+          key: "sub2",
+          icon: <Shapes size={18} />,
+          label: "Other",
+          children: otherChildren,
         },
       ],
     },
