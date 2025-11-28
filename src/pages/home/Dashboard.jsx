@@ -249,7 +249,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <div className="font-bold text-white text-lg">
-                  Latest Purchase Orders
+                  Latest PO Details
                 </div>
               </div>
             </div>

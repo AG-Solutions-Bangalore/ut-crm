@@ -96,6 +96,10 @@ const PartyForm = () => {
           queryKey: ["partydata"],
           exact: false,
         });
+        await queryClient.invalidateQueries({
+          queryKey: ["activepartydata"],
+          exact: false,
+        });
         navigate("/master/party");
       } else {
         message.error(res.message || "Failed to save Party.");
@@ -203,7 +207,6 @@ const PartyForm = () => {
                   }
                   rules={[{ required: true, message: "State is required" }]}
                 >
-                  {/* <Input placeholder="Enter Enter" /> */}
                   <Select
                     placeholder="Select State"
                     options={state?.data?.data.map((item) => ({
@@ -219,6 +222,8 @@ const PartyForm = () => {
                     allowClear
                   />
                 </Form.Item>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Form.Item
                   label={
                     <span>
@@ -245,6 +250,26 @@ const PartyForm = () => {
                 </Form.Item>
                 <Form.Item label="Refered By" name="party_refered_by">
                   <Input placeholder="Enter Refered By" />
+                </Form.Item>
+                <Form.Item
+                  name="party_daily_mail"
+                  label="Mail"
+                  // rules={[{ required: true, message: "State is required" }]}
+                >
+                  <Select
+                    placeholder="Send Mail"
+                    options={[
+                      { value: "Yes", label: "Yes" },
+                      { value: "No", label: "No" },
+                    ]}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
                 </Form.Item>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -294,17 +319,9 @@ const PartyForm = () => {
                 </Form.Item>
 
                 <Form.Item
-                  label={
-                    <span>
-                      Mobile<span className="text-red-500">*</span>
-                    </span>
-                  }
+                  label="Mobile"
                   name="party_cp_mobile"
                   rules={[
-                    {
-                      required: true,
-                      message: "Mobile number is required",
-                    },
                     {
                       pattern: /^[0-9]+$/,
                       message: "Only digits are allowed",
@@ -334,17 +351,9 @@ const PartyForm = () => {
                 </Form.Item>
 
                 <Form.Item
-                  label={
-                    <span>
-                      Mobile<span className="text-red-500">*</span>
-                    </span>
-                  }
+                  label="Mobile"
                   name="party_cp_mobile1"
                   rules={[
-                    {
-                      required: true,
-                      message: "Mobile number is required",
-                    },
                     {
                       pattern: /^[0-9]+$/,
                       message: "Only digits are allowed",
