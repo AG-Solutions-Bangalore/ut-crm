@@ -213,17 +213,21 @@ const BillingForm = () => {
 
       const totalSalesAmount = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.sales_amount) || 0),
-        0
+        0,
       );
       const totalTones = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_sub_tones) || 0),
-        0
+        0,
       );
       const totalComm = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_commn) || 0),
-        0
+        0,
       );
-      const salesWith18Percent = totalSalesAmount * 0.18;
+      const totalPurRate = updatedSubs.reduce(
+        (sum, row) => sum + (parseFloat(row.purchase_rate) || 0),
+        0,
+      );
+      const salesWith18Percent = totalSalesAmount * totalPurRate * 0.18;
       setTotalSalesAmount(Number(salesWith18Percent.toFixed(2)) || "");
 
       form.setFieldsValue({
@@ -257,6 +261,9 @@ const BillingForm = () => {
         ? Number(item.billing_due_days)
         : 0,
     }));
+    const partyId = values.billing_party_id.value;
+    console.log(partyId, "values");
+
     const payload = {
       billing_no: values.billing_no ? values.billing_no : "",
       billing_mill_id: values.billing_mill_id ? values.billing_mill_id : "",
@@ -555,7 +562,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Tones"
                         className="!w-full"
-                        disabled
+                        readOnly
                       />
                     </Form.Item>
                     <Form.Item
@@ -571,7 +578,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Comm"
                         className="!w-full"
-                        disabled
+                        readOnly
                       />
                     </Form.Item>
                     <div>
@@ -608,8 +615,8 @@ const BillingForm = () => {
                             diff > 0
                               ? "text-green-600"
                               : diff < 0
-                              ? "text-red-600"
-                              : "text-gray-600"
+                                ? "text-red-600"
+                                : "text-gray-600"
                           }`}
                         >
                           Diff: {diff}
@@ -660,7 +667,7 @@ const BillingForm = () => {
                                     s?.billing_sub_bf == item?.bf &&
                                     s?.billing_sub_tones == item?.qnty &&
                                     s?.purchase_rate == item?.agreed_rate &&
-                                    s?.sale_rate == item?.bill_rate
+                                    s?.sale_rate == item?.bill_rate,
                                 )}
                                 onClick={() => handleInsertSub(main, item)}
                               >
@@ -671,7 +678,7 @@ const BillingForm = () => {
                                       s?.billing_sub_bf == item?.bf &&
                                       s?.billing_sub_tones == item?.qnty &&
                                       s?.purchase_rate == item?.agreed_rate &&
-                                      s?.sale_rate == item?.bill_rate
+                                      s?.sale_rate == item?.bill_rate,
                                   )
                                   ? "✓"
                                   : "+"}
@@ -708,35 +715,35 @@ const BillingForm = () => {
                     validator: async (_, subs) => {
                       if (!Array.isArray(subs) || subs.length === 0) {
                         return Promise.reject(
-                          new Error("Please add at least one sub item.")
+                          new Error("Please add at least one sub item."),
                         );
                       }
 
                       const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
-                          (val) => val !== undefined && val !== ""
-                        )
+                          (val) => val !== undefined && val !== "",
+                        ),
                       );
 
                       if (nonEmptyRows.length === 0) {
                         return Promise.reject(
                           new Error(
-                            "Please fill at least one sub item before submitting."
-                          )
+                            "Please fill at least one sub item before submitting.",
+                          ),
                         );
                       }
 
                       const emptyRows = subs.filter((row) =>
                         Object.values(row || {}).every(
-                          (val) => val === undefined || val === ""
-                        )
+                          (val) => val === undefined || val === "",
+                        ),
                       );
 
                       if (emptyRows.length > 0) {
                         return Promise.reject(
                           new Error(
-                            "Empty sub items are not allowed — please fill or remove them."
-                          )
+                            "Empty sub items are not allowed — please fill or remove them.",
+                          ),
                         );
                       }
 
@@ -910,7 +917,7 @@ const BillingForm = () => {
                                     size="medium"
                                     type="number"
                                     min={1}
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>
@@ -924,7 +931,7 @@ const BillingForm = () => {
                                     size="medium"
                                     type="number"
                                     min={1}
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>
@@ -936,7 +943,7 @@ const BillingForm = () => {
                                 >
                                   <InputNumber
                                     size="medium"
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>

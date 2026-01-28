@@ -89,7 +89,7 @@ const PurchaseForm = () => {
     if (purchaseRef?.data?.data) {
       form.setFieldValue(
         "purchase_orders_ref",
-        purchaseRef?.data?.data?.ref_no || ""
+        purchaseRef?.data?.data?.ref_no || "",
       );
     }
   };
@@ -188,7 +188,7 @@ const PurchaseForm = () => {
         ? "Yes"
         : "No",
       purchase_orders_billref: initialData.purchase_orders_billref || "",
-      purchase_orders_date: values.purchase_orders_datel
+      purchase_orders_date: values.purchase_orders_date
         ? dayjs(values.purchase_orders_date).format("YYYY-MM-DD")
         : null,
       subs: (values.subs || []).map((sub) => ({
@@ -439,7 +439,7 @@ const PurchaseForm = () => {
                         { required: true, message: "Enter reference number" },
                       ]}
                     >
-                      <Input disabled value={purchaseRef?.data?.data} />
+                      <Input readOnly value={purchaseRef?.data?.data} />
                     </Form.Item>
                     <Form.Item
                       label={
@@ -630,35 +630,35 @@ const PurchaseForm = () => {
                     validator: async (_, subs) => {
                       if (!Array.isArray(subs) || subs.length === 0) {
                         return Promise.reject(
-                          new Error("Please add at least one sub item.")
+                          new Error("Please add at least one sub item."),
                         );
                       }
 
                       const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
-                          (val) => val !== undefined && val !== ""
-                        )
+                          (val) => val !== undefined && val !== "",
+                        ),
                       );
 
                       if (nonEmptyRows.length === 0) {
                         return Promise.reject(
                           new Error(
-                            "Please fill at least one sub item before submitting."
-                          )
+                            "Please fill at least one sub item before submitting.",
+                          ),
                         );
                       }
 
                       const emptyRows = subs.filter((row) =>
                         Object.values(row || {}).every(
-                          (val) => val === undefined || val === ""
-                        )
+                          (val) => val === undefined || val === "",
+                        ),
                       );
 
                       if (emptyRows.length > 0) {
                         return Promise.reject(
                           new Error(
-                            "Empty sub items are not allowed — please fill or remove them."
-                          )
+                            "Empty sub items are not allowed — please fill or remove them.",
+                          ),
                         );
                       }
 
