@@ -30,18 +30,18 @@ const PendingBillsModal = ({
 
   const handleRemove = (bill) => {
     const existedInFetched = fetchedBills.some(
-      (b) => b.billing_ref === bill.billing_ref
+      (b) => b.billing_ref === bill.billing_ref,
     );
     if (existedInFetched) {
       setBills((prev) => {
         const alreadyExists = prev.some(
-          (b) => b.billing_ref === bill.billing_ref
+          (b) => b.billing_ref === bill.billing_ref,
         );
         return alreadyExists ? prev : [...prev, bill];
       });
     }
     setTempSelectedBills((prev) =>
-      prev.filter((b) => b.billing_ref !== bill.billing_ref)
+      prev.filter((b) => b.billing_ref !== bill.billing_ref),
     );
   };
 
@@ -51,14 +51,13 @@ const PendingBillsModal = ({
       return;
     }
 
-
     setSelectedBills(tempSelectedBills);
 
     setBills((prev) =>
       prev.filter(
         (b) =>
-          !tempSelectedBills.some((sel) => sel.billing_ref === b.billing_ref)
-      )
+          !tempSelectedBills.some((sel) => sel.billing_ref === b.billing_ref),
+      ),
     );
 
     onClose();
@@ -66,7 +65,7 @@ const PendingBillsModal = ({
 
   const handleCancel = () => {
     const toRestore = tempSelectedBills.filter((b) =>
-      fetchedBills.some((fb) => fb.billing_ref === b.billing_ref)
+      fetchedBills.some((fb) => fb.billing_ref === b.billing_ref),
     );
     setBills((prev) => [...prev, ...toRestore]);
     setTempSelectedBills([]);
@@ -131,10 +130,8 @@ const PendingBillsModal = ({
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-100 text-gray-700 font-medium border-b">
                     <tr>
-                      <th className="p-1 border border-gray-200">Purch Date</th>
-                      <th className="p-1 border border-gray-200">
-                        Billing Tons
-                      </th>
+                      <th className="p-1 border border-gray-200">Po Date</th>
+                      <th className="p-1 border border-gray-200">Tons</th>
                       <th className="p-1 border border-gray-200">Item</th>
                       <th className="p-1 border border-gray-200">
                         Purchase Rate

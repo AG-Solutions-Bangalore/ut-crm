@@ -26,7 +26,7 @@ const PaymentList = () => {
   const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("Payables");
+  const [activeTab, setActiveTab] = useState("Paybles");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const navigate = useNavigate();
   const { trigger: deleteTrigger } = useApiMutation();
@@ -65,14 +65,14 @@ const PaymentList = () => {
     ...(activeTab.includes("Receivable")
       ? [
           {
-            title: "Party Name",
+            title: "Party",
             dataIndex: "party_short",
             key: "party_short",
             render: (text, record) => <span>{record.party_short}</span>,
           },
         ]
       : []),
-    ...(activeTab.includes("Payables") || activeTab.includes("Payables")
+    ...(activeTab.includes("Paybles") || activeTab.includes("Paybles")
       ? [
           {
             title: "Mill Name",
@@ -83,8 +83,6 @@ const PaymentList = () => {
         ]
       : []),
 
- 
-
     {
       title: "Bill No",
       dataIndex: "billing_no",
@@ -92,35 +90,35 @@ const PaymentList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Sale Amount",
+      title: "Bill Amount",
       dataIndex: "billing_total_sale_amount",
       key: "billing_total_sale_amount",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
 
+    // {
+    //   title: "Payment Date",
+    //   key: "payment_date",
+    //   render: (_, record) => (
+    //     <div className="flex flex-col">
+    //       {record.payment_date
+    //         ? dayjs(record.payment_date).format("DD-MM-YYYY")
+    //         : "-"}
+    //     </div>
+    //   ),
+    // },
     {
-      title: "Payment Date",
-      key: "payment_date",
-      render: (_, record) => (
-        <div className="flex flex-col">
-          {record.payment_date
-            ? dayjs(record.payment_date).format("DD-MM-YYYY")
-            : "-"}
-        </div>
-      ),
-    },
-    {
-      title: "Payment Amount",
+      title: "Paid Amount",
       dataIndex: "payment_amount",
       key: "payment_amount",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
-    {
-      title: "Payment Type",
-      dataIndex: "payment_type",
-      key: "payment_type",
-      render: (text) => <span className="text-gray-800">{text}</span>,
-    },
+    // {
+    //   title: "Payment Type",
+    //   dataIndex: "payment_type",
+    //   key: "payment_type",
+    //   render: (text) => <span className="text-gray-800">{text}</span>,
+    // },
     {
       title: "Balance",
       dataIndex: "balance",
@@ -169,10 +167,10 @@ const PaymentList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Payables", label: "Payables" },
+            { key: "Paybles", label: "Paybles" },
             { key: "Receivables", label: "Receivables" },
-            { key: "Payables Adjust", label: "Payables Adjust" },
-            { key: "Receivables Adjust", label: "Receivables Adjust" },
+            { key: "Payment Details", label: "Payment Details" },
+            { key: "Receivables Details", label: "Receivables Details" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -188,9 +186,9 @@ const PaymentList = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate("/payment/create?type=Payables")}
+              onClick={() => navigate("/payment/create?type=Paybles")}
             >
-              Payables
+              Paybles
             </Button>
             <Button
               type="primary"

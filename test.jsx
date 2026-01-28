@@ -1,251 +1,119 @@
-import {
-  DeleteOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   App,
   Button,
   Card,
-  Checkbox,
-  DatePicker,
   Form,
   Input,
-  InputNumber,
   Popconfirm,
   Select,
   Spin,
   Switch,
 } from "antd";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { PARTY_LIST } from "../../../api";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+import { useMasterData } from "../../../hooks";
 import {
-  DELETE_ORDER_SUB,
-  PARTY_ADDRESS,
-  PURCHASE_LATEST_DATA,
-  PURCHASE_ORDER_LIST,
-} from "../../api";
-import orderOptions from "../../constants/orderTypes.json";
-import { useMasterData } from "../../hooks";
-import { useApiMutation } from "../../hooks/useApiMutation";
-import { useGetApiMutation } from "../../hooks/useGetApiMutation";
-const PurchaseForm = () => {
+  DeleteOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+const PartyForm = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
+  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
+  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
   const { id } = useParams();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { mill, party, purchaseRef, shade, unit, item } = useMasterData({
-    mill: true,
-    party: true,
-    item: true,
-    purchaseRef: true,
-    shade: true,
-    unit: true,
-  });
-
-  const [latestPurchaseData, setLatestPurchaseData] = useState([]);
-  const [selectedMill, setSelectedMill] = useState(null);
-  const [selectedParty, setSelectedParty] = useState(null);
-  const { trigger: fetchLatestTrigger, loading: fetchlatestLoading } =
-    useApiMutation();
-  const { trigger: fetchAddress, loading: addressloading } = useApiMutation();
-  const { trigger: fetchTrigger, loading: fetchLoading } = useApiMutation();
-  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
-  const { trigger: deleteTrigger } = useApiMutation();
   const [initialData, setInitialData] = useState({});
-  const [addressOptions, setAddressOptions] = useState([]);
-  const showAddress = Form.useWatch(
-    "purchase_orders_party_m_address_checkbox",
-    form
-  );
-
-  const millOptions =
-    mill?.data?.data?.map((item) => ({
-      label: item.mill_short,
-      value: item.id,
-      mill_billing_address: item.mill_billing_address,
-    })) || [];
-
-  const partyOptions =
-    party?.data?.data?.map((item) => ({
-      label: item.party_short,
-      value: item.id,
-      party_delivery_address: item.party_delivery_address,
-    })) || [];
-  const handleMillChange = (millId) => {
-    const mill = millOptions.find((m) => m.value === millId);
-    setSelectedMill(mill || null);
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef?.data?.data);
-    }
-  };
-  const fetchLatestPurchaseData = async () => {
-    try {
-      if (!selectedMill?.value || !selectedParty?.value) return;
-
-      const res = await fetchLatestTrigger({
-        url: `${PURCHASE_LATEST_DATA}/${selectedMill?.value}/${selectedParty?.value}`,
-      });
-
-      if (res?.data) {
-        setLatestPurchaseData(res.data);
-      } else {
-        setLatestPurchaseData(null);
-        message.warning("No latest purchase data found.");
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      message.error("Failed to load latest details.");
-    }
-  };
-  useEffect(() => {
-    if (selectedMill?.value && selectedParty?.value) {
-      fetchLatestPurchaseData();
-    }
-  }, [selectedMill?.value, selectedParty?.value]);
-
-  const handlePartyChange = async (partyId) => {
-    const party = partyOptions.find((p) => p.value === partyId);
-    setSelectedParty(party || null);
-
-    if (purchaseRef?.data?.data) {
-      form.setFieldValue("purchase_orders_ref", purchaseRef.data?.data);
-    }
-
-    try {
-      const res = await fetchAddress({
-        url: `${PARTY_ADDRESS}/${partyId}`,
-      });
-      if (res?.data) {
-        const apiData = res.data || [];
-
-        const options = apiData.map((item) => ({
-          label: item.party_delivery_address,
-          value: item.id,
-        }));
-        setAddressOptions(options);
-      }
-    } catch (e) {
-      console.error("Failed to fetch address", e);
-    }
+  const queryClient = useQueryClient();
+  const { state } = useMasterData({
+    state: true,
+  });
+  const resetForm = () => {
+    form.resetFields();
   };
 
-  const fetchPurchase = async () => {
+  const fetchParty = async () => {
     try {
       const res = await fetchTrigger({
-        url: `${PURCHASE_ORDER_LIST}/${id}`,
+        url: `${PARTY_LIST}/${id}`,
       });
       if (res?.data) {
+        const formattedSubs = Array.isArray(res.data.subs)
+          ? res.data.subs.map((item) => ({
+              ...item,
+              party_status: item.party_status == "Active",
+            }))
+          : [];
+
         const formattedData = {
           ...res.data,
-          purchase_orders_status:
-            res.data.purchase_orders_status == "Open" ? true : false,
-          purchase_orders_date: res.data.purchase_orders_date
-            ? dayjs(res.data.purchase_orders_date)
-            : null,
+          party_status: res.data.party_status === "Active",
+          subs: formattedSubs,
         };
-        setSelectedMill(res?.mill || null);
-        setLatestPurchaseData(res?.billing || []);
-        setSelectedParty(res?.party || null);
+
         setInitialData(formattedData);
-        setLatestPurchaseData(res?.billing);
         form.setFieldsValue(formattedData);
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      message.error("Failed to load purchase details.");
+      message.error("Failed to load party details.");
     }
   };
 
   useEffect(() => {
-    if (id) fetchPurchase();
-    else form.resetFields();
+    if (id) fetchParty();
+    else resetForm();
   }, [id]);
 
   const handleSubmit = async (values) => {
+    const formattedSubs = (values.subs || []).map((row) => ({
+      ...(isEditMode && row.id ? { id: row.id } : {}),
+      party_delivery_address: row.party_delivery_address,
+      party_gstin: row.party_gstin,
+      party_status: row.party_status ? "Active" : "Inactive",
+    }));
+
     const payload = {
       ...values,
-      purchase_orders_billref: initialData.purchase_orders_billref || "",
-      purchase_orders_date: values.purchase_orders_date
-        ? dayjs(values.purchase_orders_date).format("YYYY-MM-DD")
-        : null,
-      purchase_orders_party_m_address: values.purchase_orders_party_m_address
-        ? "Yes"
-        : "No",
-      subs: (values.subs || []).map((sub) => ({
-        id: sub?.id || "",
-        shade: sub?.shade || "",
-        bf: sub?.bf || "",
-        gsm: sub?.gsm || "",
-        size: sub?.size || "",
-        qnty: sub?.qnty || "",
-        unit: sub?.unit || "",
-        bill_rate: sub?.bill_rate || 0,
-        agreed_rate: sub?.agreed_rate || 0,
-        remarks: sub?.remarks || "",
-      })),
+      party_status: values.party_status ? "Active" : "Inactive",
+      subs: formattedSubs,
     };
-
-    if (isEditMode) {
-      payload.purchase_orders_status = values?.purchase_orders_status
-        ? "Open"
-        : "Close";
-    }
-
     try {
       const res = await submitTrigger({
-        url: isEditMode ? `${PURCHASE_ORDER_LIST}/${id}` : PURCHASE_ORDER_LIST,
+        url: isEditMode ? `${PARTY_LIST}/${id}` : `${PARTY_LIST}`,
         method: isEditMode ? "put" : "post",
         data: payload,
       });
 
-      if (res.code === 201) {
-        message.success(res.message || "Purchase order saved successfully!");
-        await queryClient.invalidateQueries({ queryKey: ["purchasedata"] });
-        navigate("/purchase");
+      if (res.code == 201) {
+        message.success(res.message || "Party saved successfully!");
+        await queryClient.invalidateQueries({
+          queryKey: ["partydata"],
+          exact: false,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["activepartydata"],
+          exact: false,
+        });
+        navigate("/master/party");
       } else {
-        message.error(res.message || "Failed to save purchase order.");
+        message.error(res.message || "Failed to save Party.");
       }
     } catch (error) {
       console.error(error);
-      message.error(error?.message || "Error while saving purchase order.");
+      message.error(
+        error?.response?.data?.message ||
+          "Something went wrong while saving party."
+      );
     }
   };
-  const handleDelete = async (subId) => {
-    if (!subId) {
-      message.error("Invalid sub-item ID.");
-      return;
-    }
+  const loading = fetchLoading || state.loading;
 
-    try {
-      const res = await deleteTrigger({
-        url: `${DELETE_ORDER_SUB}/${subId}`,
-        method: "delete",
-      });
-
-      if (res?.code === 201) {
-        message.success(res?.message || "Sub-item deleted successfully!");
-        fetchPurchase();
-      } else {
-        message.error(res?.message || "Failed to delete sub-item.");
-      }
-    } catch (error) {
-      console.error("Delete Error:", error);
-      message.error(error?.message || "Error while deleting sub-item.");
-    }
-  };
-
-  const loading =
-    fetchLoading ||
-    mill?.loading ||
-    party?.loading ||
-    shade?.loading ||
-    unit?.loading ||
-    item?.loading;
   return (
     <>
       {loading ? (
@@ -264,23 +132,22 @@ const PurchaseForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update PO" : "Create PO"}
+                {isEditMode ? "Update Party" : "Create Party"}
               </h2>
             }
             extra={
-              <div className="flex items-center gap-2">
+              <div className="flex gap-4">
                 {isEditMode && (
                   <Form.Item
-                    name="purchase_orders_status"
+                    name="party_status"
                     valuePropName="checked"
-                    className="!mb-0"
+                    className="!mb-0 !mt-2"
                   >
-                    {/* <Tooltip title="Status" placement="top"> */}
-                    <Switch checkedChildren="Open" unCheckedChildren="Close" />
-                    {/* </Tooltip> */}
+                    <Switch />
                   </Form.Item>
                 )}
-                <Form.Item className="text-center !mt-4">
+
+                <Form.Item className="text-center !mt-2">
                   <Button
                     type="primary"
                     htmlType="submit"
@@ -293,581 +160,388 @@ const PurchaseForm = () => {
             }
             variant="borderless"
           >
-            <Card size="small" className="!mb-2 !bg-gray-50 ">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="col-span-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2  gap-4">
-                    <Form.Item
-                      label={
-                        <span>
-                          Mill <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="purchase_orders_mill_id"
-                      rules={[{ required: true, message: "Select mill" }]}
-                    >
-                      <Select
-                        placeholder="Select Mill"
-                        options={millOptions}
-                        onChange={handleMillChange}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        autoFocus
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-                    <div className="relative w-full">
-                      {/* Absolute Label + Checkbox */}
-                      <div className="absolute right-0 -top-6 flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          Multi Address
-                        </span>
+            <Card
+              size="small"
+              title={<span className="font-semibold">Party Details</span>}
+              className=" bg-gray-50"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Form.Item
+                  name="party_short"
+                  label={
+                    <span>
+                      Party Short Name <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[
+                    { required: true, message: "Short name is required" },
+                  ]}
+                >
+                  <Input
+                    maxLength={50}
+                    autoFocus
+                    placeholder="Enter Party Short Name"
+                  />
+                </Form.Item>
 
-                        <Form.Item
-                          name="purchase_orders_party_m_address"
-                          valuePropName="checked"
-                          initialValue={false}
-                          className="!mt-4 p-0"
-                        >
-                          <Checkbox />
-                        </Form.Item>
-                      </div>
+                <Form.Item
+                  label={
+                    <span>
+                      Party Name <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="party_name"
+                  rules={[
+                    { required: true, message: "Party Name is required" },
+                  ]}
+                >
+                  <Input maxLength={100} placeholder="Enter Party Name" />
+                </Form.Item>
 
-                      {/* Party Select */}
-                      <Form.Item
-                        label={
-                          <span>
-                            Party <span className="text-red-500">*</span>
-                          </span>
-                        }
-                        name="purchase_orders_party_id"
-                        rules={[{ required: true, message: "Select party" }]}
-                      >
-                        <Select
-                          placeholder="Select Party"
-                          options={partyOptions}
-                          onChange={handlePartyChange}
-                          filterOption={(input, option) =>
-                            (option?.label ?? "")
-                              .toLowerCase()
-                              .includes(input.toLowerCase())
-                          }
-                          showSearch
-                          allowClear
-                        />
-                      </Form.Item>
-                    </div>
+                <Form.Item
+                  name="party_state"
+                  label={
+                    <span>
+                      State<span className="text-red-500">*</span>
+                    </span>
+                  }
+                  rules={[{ required: true, message: "State is required" }]}
+                >
+                  <Select
+                    placeholder="Select State"
+                    options={state?.data?.data.map((item) => ({
+                      value: item.state_name,
+                      label: item.state_name,
+                    }))}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Form.Item
+                  label={
+                    <span>
+                      GSTIN<span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="party_gstin"
+                  rules={[{ required: true, message: "GST is required" }]}
+                >
+                  <Input maxLength={15} placeholder="Enter GST" />
+                </Form.Item>
 
-                    {showAddress && (
-                      <Form.Item
-                        label={
-                          <span>
-                            Address <span className="text-red-500">*</span>
-                          </span>
-                        }
-                        name="purchase_orders_party_m_address"
-                        rules={[{ required: true, message: "Select Address" }]}
-                      >
-                        <Select
-                          placeholder="Select Address"
-                          options={addressOptions ?? []}
-                          filterOption={(input, option) =>
-                            (option?.label ?? "")
-                              .toLowerCase()
-                              .includes(input.toLowerCase())
-                          }
-                          showSearch
-                          allowClear
-                        />
-                      </Form.Item>
-                    )}
+                <Form.Item
+                  label="Due Days"
+                  name="party_due_days"
+                  rules={[
+                    {
+                      pattern: /^[0-9]*$/,
+                      message: "Only digits are allowed",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Enter Due Days" maxLength={3} />
+                </Form.Item>
+                <Form.Item label="Refered By" name="party_refered_by">
+                  <Input placeholder="Enter Refered By" />
+                </Form.Item>
+                <Form.Item
+                  name="party_daily_mail"
+                  label="Mail"
+                  // rules={[{ required: true, message: "State is required" }]}
+                >
+                  <Select
+                    placeholder="Send Mail"
+                    options={[
+                      { value: "Yes", label: "Yes" },
+                      { value: "No", label: "No" },
+                    ]}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Form.Item
+                  label={
+                    <span>
+                      Billing Address <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="party_billing_address"
+                  rules={[
+                    { required: true, message: "Billing Address  required" },
+                  ]}
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter Billing Address"
+                  />
+                </Form.Item>
 
-                    <Form.Item>
-                      <Input.TextArea
-                        value={selectedMill?.mill_billing_address}
-                        readOnly
-                        className="bg-gray-50"
-                      />
-                    </Form.Item>
-                    <Form.Item>
-                      <Input.TextArea
-                        value={selectedParty?.party_delivery_address}
-                        readOnly
-                        className="bg-gray-50"
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label={
-                        <span>
-                          Purchase Date <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="purchase_orders_date"
-                      rules={[
-                        { required: true, message: "Please select date" },
-                      ]}
-                    >
-                      <DatePicker className="w-full" format="DD-MM-YYYY" />
-                    </Form.Item>
-                    <Form.Item
-                      label={
-                        <span>
-                          Purchase Ref No{" "}
-                          <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="purchase_orders_ref"
-                      rules={[
-                        { required: true, message: "Enter reference number" },
-                      ]}
-                    >
-                      <Input disabled value={purchaseRef?.data?.data} />
-                    </Form.Item>
-                    <Form.Item
-                      label={
-                        <span>
-                          Order Type <span className="text-red-500">*</span>
-                        </span>
-                      }
-                      name="purchase_orders_type"
-                      rules={[{ required: true, message: "Select Order Type" }]}
-                    >
-                      <Select
-                        placeholder="Select Order Type"
-                        options={orderOptions}
-                        filterOption={(input, option) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        showSearch
-                        allowClear
-                      />
-                    </Form.Item>
-                    <Form.Item label="Notes" name="purchase_orders_note">
-                      <Input.TextArea rows={2} placeholder="Enter Notes" />
-                    </Form.Item>
-                  </div>
-                </div>
-                <div className="h-full min-h-[340px] max-h-[340px] overflow-y-auto col-span-2">
-                  {isEditMode ? (
-                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
-                      <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
-                        Latest Details
-                      </h4>
-                      {fetchlatestLoading ? (
-                        <div className="flex justify-center items-center py-4">
-                          <Spin size="small" />
-                        </div>
-                      ) : latestPurchaseData &&
-                        Object.keys(latestPurchaseData).length > 0 ? (
-                        <div className="border border-gray-100 rounded-md p-2 mb-2 shadow-sm">
-                          <div className="grid grid-cols-2 text-xs gap-3">
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Bill No:
-                              </span>{" "}
-                              {latestPurchaseData.billing_no ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Tones:
-                              </span>{" "}
-                              {latestPurchaseData.billing_tones ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Purchase Date:
-                              </span>{" "}
-                              {latestPurchaseData.purchase_date ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Purchase Rate:
-                              </span>{" "}
-                              {latestPurchaseData.purchase_rate ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Item:
-                              </span>{" "}
-                              {latestPurchaseData.billing_bf ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Sale Date:
-                              </span>{" "}
-                              {latestPurchaseData.sale_date ?? "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Sale Rate:
-                              </span>{" "}
-                              ₹{latestPurchaseData.sale_rate}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Amount:
-                              </span>{" "}
-                              ₹{latestPurchaseData.purchase_amount}
-                            </p>
-                            <p>
-                              <span className="font-medium text-gray-500">
-                                Comm:
-                              </span>{" "}
-                              ₹{latestPurchaseData.billing_commn}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-gray-50 border border-dashed border-gray-300 rounded-md p-3 text-center text-gray-500">
-                          No recent data available
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
-                      <h4 className="text-base font-semibold mb-2 text-gray-800 border-b pb-2">
-                        Latest Purchase Details
-                      </h4>
-                      {fetchlatestLoading ? (
-                        <div className="flex justify-center items-center py-4">
-                          <Spin size="small" />
-                        </div>
-                      ) : latestPurchaseData &&
-                        latestPurchaseData.length > 0 ? (
-                        latestPurchaseData.map((item, index) => (
-                          <div
-                            key={index}
-                            className="border border-gray-100 rounded-md p-2 mb-2 shadow-sm"
-                          >
-                            <div className="grid grid-cols-2 text-xs gap-1">
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  GSM:
-                                </span>{" "}
-                                {item.gsm ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  BF:
-                                </span>{" "}
-                                {item.bf ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Size:
-                                </span>{" "}
-                                {item.size ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Shade:
-                                </span>{" "}
-                                {item.shade ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Qty:
-                                </span>{" "}
-                                {item.qnty ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Unit:
-                                </span>{" "}
-                                {item.unit ?? "-"}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Bill Rate:
-                                </span>{" "}
-                                ₹{item.bill_rate}
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-500">
-                                  Agreed Rate:
-                                </span>{" "}
-                                ₹{item.agreed_rate}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="bg-gray-50 border border-dashed border-gray-300 rounded-md p-3 text-center text-gray-500">
-                          No recent data available
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <Form.Item
+                  label={
+                    <span>
+                      Delivery Address <span className="text-red-500">*</span>
+                    </span>
+                  }
+                  name="party_delivery_address"
+                  rules={[
+                    { required: true, message: "Delivery Address is required" },
+                  ]}
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter Delivery Address"
+                  />
+                </Form.Item>
               </div>
             </Card>
-            <Card size="small" className="bg-gray-50 my-4">
-              <Form.List
-                name="subs"
-                initialValue={[{}]}
-                rules={[
-                  {
-                    validator: async (_, subs) => {
-                      if (!Array.isArray(subs) || subs.length === 0) {
-                        return Promise.reject(
-                          new Error("Please add at least one sub item.")
-                        );
-                      }
+            <Card
+              size="small"
+              title={<span className="font-semibold">Contact Person</span>}
+              className="!mt-2 bg-gray-50"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Form.Item label="Name" name="party_cp_name">
+                  <Input placeholder="Enter Contact Name" />
+                </Form.Item>
 
-                      const nonEmptyRows = subs.filter((row) =>
-                        Object.values(row || {}).some(
-                          (val) => val !== undefined && val !== ""
-                        )
-                      );
-
-                      if (nonEmptyRows.length === 0) {
-                        return Promise.reject(
-                          new Error(
-                            "Please fill at least one sub item before submitting."
-                          )
-                        );
-                      }
-
-                      const emptyRows = subs.filter((row) =>
-                        Object.values(row || {}).every(
-                          (val) => val === undefined || val === ""
-                        )
-                      );
-
-                      if (emptyRows.length > 0) {
-                        return Promise.reject(
-                          new Error(
-                            "Empty sub items are not allowed — please fill or remove them."
-                          )
-                        );
-                      }
-
-                      return Promise.resolve();
+                <Form.Item
+                  label="Mobile"
+                  name="party_cp_mobile"
+                  rules={[
+                    {
+                      pattern: /^[0-9]+$/,
+                      message: "Only digits are allowed",
                     },
-                  },
-                ]}
-                validateTrigger={["onSubmit"]}
-              >
-                {(fields, { add, remove }, { errors }) => (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="font-semibold text-lg">Sub Details</div>
-                      <Button
-                        type="dashed"
-                        htmlType="button"
-                        onClick={() => add()}
-                        icon={<PlusOutlined />}
-                      >
-                        Add Item
-                      </Button>
-                    </div>
+                    {
+                      len: 10,
+                      message: "Mobile number must be exactly 10 digits",
+                    },
+                  ]}
+                >
+                  <Input maxLength={10} placeholder="Enter Mobile Number" />
+                </Form.Item>
 
+                <Form.Item label="Email" name="party_cp_email">
+                  <Input type="email" placeholder="Enter Email" />
+                </Form.Item>
+              </div>
+            </Card>
+            <Card
+              size="small"
+              title={<span className="font-semibold">Contact Person 1</span>}
+              className="!my-2 bg-gray-50"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Form.Item label="Name" name="party_cp_name1">
+                  <Input placeholder="Enter Contact Name" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Mobile"
+                  name="party_cp_mobile1"
+                  rules={[
+                    {
+                      pattern: /^[0-9]+$/,
+                      message: "Only digits are allowed",
+                    },
+                    {
+                      len: 10,
+                      message: "Mobile number must be exactly 10 digits",
+                    },
+                  ]}
+                >
+                  <Input maxLength={10} placeholder="Enter Mobile Number" />
+                </Form.Item>
+
+                <Form.Item label="Email" name="party_cp_email1">
+                  <Input type="email" placeholder="Enter Email" />
+                </Form.Item>
+              </div>
+            </Card>
+
+            <Form.List
+              name="subs"
+              rules={[
+                {
+                  validator: async (_, subs) => Promise.resolve(),
+                },
+              ]}
+              validateTrigger={["onSubmit"]}
+            >
+              {(fields, { add, remove }) => (
+                <>
+                  <div className="flex justify-between mb-2">
+                    <div className="font-semibold text-lg"></div>
+
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      icon={<PlusOutlined />}
+                    >
+                      Add Multiple Delivery Address
+                    </Button>
+                  </div>
+
+                  {fields.length > 0 && (
                     <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
-                        <div className="md:col-span-2">Shade</div>
-                        <div className="md:col-span-2">Item</div>
-                        <div>GSM</div>
-                        <div>Size</div>
-                        <div>Quantity</div>
-                        <div>Unit</div>
-                        <div>Bill Rate</div>
-                        <div>Mill Rate</div>
-                        <div className="md:col-span-2">Remarks</div>
+                      <div
+                        className={`grid grid-cols-1 ${
+                          isEditMode ? "md:grid-cols-4" : "md:grid-cols-3"
+                        } bg-gray-100 text-gray-700 font-semibold text-sm p-2`}
+                      >
+                        <div className="col-span-2">Delivery Address</div>
+                        <div>GST</div>
+                        {isEditMode && <div>Status</div>}
                       </div>
 
                       <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
                         {fields.map(({ key, name, ...restField }) => {
                           const subItem = form.getFieldValue(["subs", name]);
-                          const hasId = subItem?.id;
+                          const hasId = subItem?.id; // existing row or new row?
 
                           return (
                             <div
                               key={key}
-                              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-3 p-2 items-center hover:bg-gray-50 transition relative"
+                              className={`grid grid-cols-1 ${
+                                isEditMode ? "md:grid-cols-4" : "md:grid-cols-3"
+                              } gap-2 mt-2 p-2 relative`}
                             >
-                              {/* Delete button (absolute right) */}
-                              {fields.length > 1 &&
-                                (hasId ? (
-                                  <Popconfirm
-                                    title="Are you sure you want to delete this sub-item?"
-                                    onConfirm={() => handleDelete(subItem?.id)}
-                                    okText="Yes"
-                                    cancelText="No"
-                                  >
-                                    <Button
-                                      type="text"
-                                      danger
-                                      icon={<DeleteOutlined />}
-                                      className="!absolute top-0 right-0 z-10 text-red-500"
-                                    />
-                                  </Popconfirm>
-                                ) : (
-                                  <Button
-                                    type="text"
-                                    danger
-                                    icon={<MinusCircleOutlined />}
-                                    className="!absolute top-0 right-0 z-10"
-                                    onClick={() => remove(name)}
-                                  />
-                                ))}
-
-                              {/* Inputs */}
-                              <Form.Item
-                                {...restField}
-                                name={[name, "shade"]}
-                                noStyle
-                                className="!relative"
-                              >
-                                <Select
-                                  className="md:col-span-2"
-                                  placeholder="Shade"
-                                  options={shade?.data?.data?.map((item) => ({
-                                    label: item.shade,
-                                    value: item.shade,
-                                  }))}
-                                  loading={shade?.loading}
-                                  showSearch
-                                  allowClear
-                                  filterOption={(input, option) =>
-                                    (option?.label ?? "")
-                                      .toLowerCase()
-                                      .includes(input.toLowerCase())
-                                  }
+                              {/* Delete button only for new rows */}
+                              {fields.length > 1 && !hasId && (
+                                <Button
+                                  type="text"
+                                  danger
+                                  icon={<MinusCircleOutlined />}
+                                  className="!absolute top-0 right-0 z-10 text-red-500"
+                                  onClick={() => remove(name)}
                                 />
-                              </Form.Item>
+                              )}
 
-                              <Form.Item
-                                {...restField}
-                                name={[name, "bf"]}
-                                noStyle
-                              >
-                                <Select
-                                  className="md:col-span-2"
-                                  placeholder="Item"
-                                  options={item?.data?.data?.map((item) => ({
-                                    label: item.bf,
-                                    value: item.bf,
-                                  }))}
-                                  loading={item?.loading}
-                                  showSearch
-                                  allowClear
-                                  filterOption={(input, option) =>
-                                    (option?.label ?? "")
-                                      .toLowerCase()
-                                      .includes(input.toLowerCase())
-                                  }
-                                />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "gsm"]}
-                                noStyle
-                              >
-                                <Input placeholder="GSM" />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "size"]}
-                                noStyle
-                              >
-                                <Input placeholder="Size" />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "qnty"]}
-                                noStyle
-                              >
-                                <InputNumber
-                                  min={1}
-                                  className="!w-full"
-                                  placeholder="Qty"
-                                />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "unit"]}
-                                noStyle
-                              >
-                                <Select
-                                  placeholder="Unit"
-                                  options={unit?.data?.data?.map((item) => ({
-                                    label: item.unit,
-                                    value: item.unit,
-                                  }))}
-                                  loading={unit?.loading}
-                                  showSearch
-                                  allowClear
-                                  filterOption={(input, option) =>
-                                    (option?.label ?? "")
-                                      .toLowerCase()
-                                      .includes(input.toLowerCase())
-                                  }
-                                />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "bill_rate"]}
-                                noStyle
-                              >
-                                <InputNumber
-                                  min={1}
-                                  className="!w-full"
-                                  type="number"
-                                  placeholder="Rate"
-                                />
-                              </Form.Item>
-
-                              <Form.Item
-                                {...restField}
-                                name={[name, "agreed_rate"]}
-                                noStyle
-                              >
-                                <InputNumber
-                                  min={1}
-                                  className="!w-full"
-                                  type="number"
-                                  placeholder="Mill Rate"
-                                />
-                              </Form.Item>
-
+                              {/* Delivery Address */}
                               <div className="md:col-span-2">
                                 <Form.Item
                                   {...restField}
-                                  name={[name, "remarks"]}
-                                  noStyle
+                                  name={[name, "party_delivery_address"]}
+                                  rules={[
+                                    {
+                                      validator(_, value) {
+                                        const gst = form.getFieldValue([
+                                          "subs",
+                                          name,
+                                          "party_gstin",
+                                        ]);
+
+                                        // NEW ROW → always required
+                                        if (!hasId) {
+                                          if (!value) {
+                                            return Promise.reject(
+                                              new Error(
+                                                "Delivery Address is required."
+                                              )
+                                            );
+                                          }
+                                        }
+
+                                        // EXISTING ROW → required only if GST filled
+                                        if (hasId && !value && gst) {
+                                          return Promise.reject(
+                                            new Error(
+                                              "Delivery Address is required when GST is filled."
+                                            )
+                                          );
+                                        }
+
+                                        return Promise.resolve();
+                                      },
+                                    },
+                                  ]}
+                                  validateTrigger={["onBlur", "onSubmit"]}
                                 >
                                   <Input.TextArea
-                                    rows={1}
-                                    placeholder="Remarks"
+                                    placeholder="Enter Delivery Address"
+                                    rows={2}
+                                    size="medium"
                                   />
                                 </Form.Item>
                               </div>
+
+                              {/* GST */}
+                              <Form.Item
+                                {...restField}
+                                name={[name, "party_gstin"]}
+                                rules={[
+                                  {
+                                    validator(_, value) {
+                                      const address = form.getFieldValue([
+                                        "subs",
+                                        name,
+                                        "party_delivery_address",
+                                      ]);
+
+                                      // NEW ROW → always required
+                                      if (!hasId) {
+                                        if (!value) {
+                                          return Promise.reject(
+                                            new Error("GST is required.")
+                                          );
+                                        }
+                                      }
+
+                                      // EXISTING ROW → required only if address filled
+                                      if (hasId && !value && address) {
+                                        return Promise.reject(
+                                          new Error(
+                                            "GST is required when Delivery Address is filled."
+                                          )
+                                        );
+                                      }
+
+                                      return Promise.resolve();
+                                    },
+                                  },
+                                ]}
+                                validateTrigger={["onBlur", "onSubmit"]}
+                              >
+                                <Input
+                                  placeholder="Enter GST"
+                                  maxLength={15}
+                                  size="medium"
+                                />
+                              </Form.Item>
+
+                              {/* Status Switch (only for edit mode & existing row) */}
+                              {isEditMode && hasId && (
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, "party_status"]}
+                                  valuePropName="checked"
+                                >
+                                  <Switch />
+                                </Form.Item>
+                              )}
                             </div>
                           );
                         })}
                       </div>
                     </div>
-
-                    {errors.length > 0 && (
-                      <div className="text-red-500 text-sm mt-2">
-                        {errors[0]}
-                      </div>
-                    )}
-                  </>
-                )}
-              </Form.List>
-            </Card>
+                  )}
+                </>
+              )}
+            </Form.List>
           </Card>
         </Form>
       )}
@@ -875,4 +549,4 @@ const PurchaseForm = () => {
   );
 };
 
-export default PurchaseForm;
+export default PartyForm;

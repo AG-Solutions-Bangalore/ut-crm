@@ -63,7 +63,7 @@ const BillingList = () => {
       if (res?.code === 200 || res?.code === 201) {
         message.success(
           res.message ||
-            `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
+            `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`,
         );
         setActiveTab(newStatus);
         queryClient.invalidateQueries([
@@ -80,14 +80,14 @@ const BillingList = () => {
       message.error(
         error?.response?.data?.message ||
           error.message ||
-          "Error updating order status."
+          "Error updating order status.",
       );
     }
   };
 
   const columns = [
     {
-      title: "Purchase Ref No",
+      title: "PO Ref No",
       key: "purchase_orders_ref",
       fixed: "left",
       render: (_, record) => (
@@ -116,27 +116,27 @@ const BillingList = () => {
     },
 
     {
-      title: "Mill Name",
+      title: "Mill",
       dataIndex: "mill_short",
       key: "mill_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Party Name",
+      title: "Party",
       dataIndex: "party_short",
       key: "party_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
 
     {
-      title: "Total Tones",
+      title: "Tones",
       dataIndex: "billing_total_tones",
       key: "billing_total_tones",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
     {
-      title: "Total Comm",
+      title: "Comm",
       dataIndex: "billing_total_commn",
       key: "billing_total_commn",
       align: "right",
@@ -144,19 +144,19 @@ const BillingList = () => {
     },
 
     {
-      title: "Total Amount",
+      title: "Amount",
       dataIndex: "billing_total_sale_amount",
       key: "billing_total_sale_amount",
       align: "right",
       render: (text) => <span>{Number(text).toFixed(2)}</span>,
     },
 
-    {
-      title: "Billing Type",
-      dataIndex: "billing_type",
-      key: "billing_type",
-      render: (text) => <span className="capitalize">{text}</span>,
-    },
+    // {
+    //   title: "Billing Type",
+    //   dataIndex: "billing_type",
+    //   key: "billing_type",
+    //   render: (text) => <span className="capitalize">{text}</span>,
+    // },
 
     {
       title: "Status",
@@ -299,7 +299,7 @@ const BillingList = () => {
                 if (!invoice && payments.length === 0) {
                   return (
                     <div className="bg-gray-50 rounded-md p-4 text-gray-500 italic text-center">
-                      No Tax Invoice or Payments Available
+                      No Commission or Payments Available
                     </div>
                   );
                 }
@@ -309,7 +309,7 @@ const BillingList = () => {
                     {invoice && (
                       <div>
                         <h4 className="font-semibold text-gray-800 mb-2 border-b border-gray-200 pb-1">
-                          Tax Invoice Details
+                          Commission Details
                         </h4>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center">
@@ -317,7 +317,7 @@ const BillingList = () => {
                             {
                               label: "Date",
                               value: dayjs(invoice.tax_invoice_date).format(
-                                "DD-MM-YYYY"
+                                "DD-MM-YYYY",
                               ),
                             },
                             {
@@ -395,7 +395,7 @@ const BillingList = () => {
                                     .reduce(
                                       (total, p) =>
                                         total + Number(p.payment_amount || 0),
-                                      0
+                                      0,
                                     )
                                     .toLocaleString()}
                                 </td>

@@ -58,10 +58,11 @@ const BillingForm = () => {
     purchase_orders_ref: null,
     billing_total_commn: "",
     billing_total_sale_amount: "",
-    billing_type: null,
+    billing_type: "Comm",
     billing_note: "",
-    billing_payment_type: null,
+    billing_payment_type: "",
   });
+  console.log(initialData, "initialData");
   const [diff, setDiff] = useState(0);
   const [totalSaleAmount, setTotalSalesAmount] = useState("");
   const [selectedMillId, setSelectedMillId] = useState(null);
@@ -88,9 +89,9 @@ const BillingForm = () => {
     form.resetFields();
   };
   useEffect(() => {
-    if (main) {
+    if (main?.purchase_orders_party_id) {
       form.setFieldsValue({
-        billing_party_id: main?.party_short,
+        billing_party_id: main?.purchase_orders_party_id,
       });
     }
   }, [main]);
@@ -144,6 +145,9 @@ const BillingForm = () => {
           ...res.data,
           purchase_date: res.data.purchase_date
             ? dayjs(res.data.purchase_date)
+            : null,
+          billing_party_id: res.data.billing_party_id
+            ? res.data.billing_party_id
             : null,
           sale_date: res.data.sale_date ? dayjs(res.data.sale_date) : null,
           billing_status: res.data.billing_status === "Open",
@@ -213,18 +217,26 @@ const BillingForm = () => {
 
       const totalSalesAmount = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.sales_amount) || 0),
-        0
+        0,
       );
       const totalTones = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_sub_tones) || 0),
-        0
+        0,
       );
       const totalComm = updatedSubs.reduce(
         (sum, row) => sum + (parseFloat(row.billing_commn) || 0),
-        0
+        0,
       );
-      const salesWith18Percent = totalSalesAmount * 0.18;
-      setTotalSalesAmount(Number(salesWith18Percent.toFixed(2)) || "");
+      const totalPurRate = updatedSubs.reduce(
+        (sum, row) => sum + (parseFloat(row.purchase_rate) || 0),
+        0,
+      );
+      const salesWithTones = totalTones * totalSalesAmount;
+      const salesWith18Percent = salesWithTones * 0.18;
+
+      const total = Number(salesWithTones + salesWith18Percent).toFixed(2);
+
+      setTotalSalesAmount(total);
 
       form.setFieldsValue({
         billing_total_tones: totalTones,
@@ -257,6 +269,9 @@ const BillingForm = () => {
         ? Number(item.billing_due_days)
         : 0,
     }));
+    const partyId = values.billing_party_id.value;
+    console.log(partyId, "values");
+
     const payload = {
       billing_no: values.billing_no ? values.billing_no : "",
       billing_mill_id: values.billing_mill_id ? values.billing_mill_id : "",
@@ -416,14 +431,14 @@ const BillingForm = () => {
                     <Form.Item
                       label={
                         <span>
-                          Mill Name <span className="text-red-500">*</span>
+                          Mill <span className="text-red-500">*</span>
                         </span>
                       }
                       name="billing_mill_id"
-                      rules={[{ required: true, message: "Select Mill Name" }]}
+                      rules={[{ required: true, message: "Select Mill" }]}
                     >
                       <Select
-                        placeholder="Select Mill Name"
+                        placeholder="Select Mill"
                         options={millOptions}
                         onChange={handleChange}
                         filterOption={(input, option) =>
@@ -438,13 +453,11 @@ const BillingForm = () => {
 
                     <Form.Item
                       name="purchase_orders_ref"
-                      label="PO Reference"
-                      rules={[
-                        { required: true, message: "Select PO Reference" },
-                      ]}
+                      label="PO Ref"
+                      rules={[{ required: true, message: "Select PO Ref" }]}
                     >
                       <Select
-                        placeholder="Select PO Reference"
+                        placeholder="Select PO Ref"
                         options={poRefOptions}
                         loading={isLoading}
                         onChange={handleChangeRef}
@@ -462,14 +475,12 @@ const BillingForm = () => {
                       name="billing_no"
                       label={
                         <span>
-                          Billing No <span className="text-red-500">*</span>
+                          Bill No <span className="text-red-500">*</span>
                         </span>
                       }
-                      rules={[
-                        { required: true, message: "Enter Billing Number" },
-                      ]}
+                      rules={[{ required: true, message: "Enter Bill No" }]}
                     >
-                      <Input placeholder="Enter Billing No" />
+                      <Input placeholder="Enter Bill No" />
                     </Form.Item>
 
                     <Form.Item
@@ -530,7 +541,7 @@ const BillingForm = () => {
                       <Select
                         placeholder="Select Payment Type"
                         options={[
-                          { label: "Payables", value: "Payables" },
+                          { label: "Paybles", value: "Payables" },
                           { label: "Receivables", value: "Receivables" },
                         ]}
                         filterOption={(input, option) =>
@@ -555,7 +566,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Tones"
                         className="!w-full"
-                        disabled
+                        readOnly
                       />
                     </Form.Item>
                     <Form.Item
@@ -571,7 +582,7 @@ const BillingForm = () => {
                       <InputNumber
                         placeholder="Enter Comm"
                         className="!w-full"
-                        disabled
+                        readOnly
                       />
                     </Form.Item>
                     <div>
@@ -608,8 +619,8 @@ const BillingForm = () => {
                             diff > 0
                               ? "text-green-600"
                               : diff < 0
-                              ? "text-red-600"
-                              : "text-gray-600"
+                                ? "text-red-600"
+                                : "text-gray-600"
                           }`}
                         >
                           Diff: {diff}
@@ -660,7 +671,7 @@ const BillingForm = () => {
                                     s?.billing_sub_bf == item?.bf &&
                                     s?.billing_sub_tones == item?.qnty &&
                                     s?.purchase_rate == item?.agreed_rate &&
-                                    s?.sale_rate == item?.bill_rate
+                                    s?.sale_rate == item?.bill_rate,
                                 )}
                                 onClick={() => handleInsertSub(main, item)}
                               >
@@ -671,7 +682,7 @@ const BillingForm = () => {
                                       s?.billing_sub_bf == item?.bf &&
                                       s?.billing_sub_tones == item?.qnty &&
                                       s?.purchase_rate == item?.agreed_rate &&
-                                      s?.sale_rate == item?.bill_rate
+                                      s?.sale_rate == item?.bill_rate,
                                   )
                                   ? "✓"
                                   : "+"}
@@ -708,35 +719,35 @@ const BillingForm = () => {
                     validator: async (_, subs) => {
                       if (!Array.isArray(subs) || subs.length === 0) {
                         return Promise.reject(
-                          new Error("Please add at least one sub item.")
+                          new Error("Please add at least one sub item."),
                         );
                       }
 
                       const nonEmptyRows = subs.filter((row) =>
                         Object.values(row || {}).some(
-                          (val) => val !== undefined && val !== ""
-                        )
+                          (val) => val !== undefined && val !== "",
+                        ),
                       );
 
                       if (nonEmptyRows.length === 0) {
                         return Promise.reject(
                           new Error(
-                            "Please fill at least one sub item before submitting."
-                          )
+                            "Please fill at least one sub item before submitting.",
+                          ),
                         );
                       }
 
                       const emptyRows = subs.filter((row) =>
                         Object.values(row || {}).every(
-                          (val) => val === undefined || val === ""
-                        )
+                          (val) => val === undefined || val === "",
+                        ),
                       );
 
                       if (emptyRows.length > 0) {
                         return Promise.reject(
                           new Error(
-                            "Empty sub items are not allowed — please fill or remove them."
-                          )
+                            "Empty sub items are not allowed — please fill or remove them.",
+                          ),
                         );
                       }
 
@@ -763,8 +774,8 @@ const BillingForm = () => {
                     </div>
                     <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
                       <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-10 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
-                        <div>Pur Date</div>
-                        <div>Pur Rate</div>
+                        <div>Po Date</div>
+                        <div>Po Rate</div>
                         <div>Sale Date</div>
                         <div>Sale Rate</div>
                         <div className="col-span-2">Item</div>
@@ -910,7 +921,7 @@ const BillingForm = () => {
                                     size="medium"
                                     type="number"
                                     min={1}
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>
@@ -924,7 +935,7 @@ const BillingForm = () => {
                                     size="medium"
                                     type="number"
                                     min={1}
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>
@@ -936,7 +947,7 @@ const BillingForm = () => {
                                 >
                                   <InputNumber
                                     size="medium"
-                                    disabled
+                                    readOnly
                                     className="!w-24"
                                   />
                                 </Form.Item>

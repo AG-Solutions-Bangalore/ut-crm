@@ -36,8 +36,8 @@ const PaymentForm = () => {
     payment_from_id: null,
     payment_billing_ref: "",
     payment_billing_no: null,
-    payment_date: null,
-    payment_type: null,
+    payment_date: dayjs(),
+    payment_type: "Bank",
     payment_transaction: "",
     payment_amount: "",
     payment_party_type: "",
@@ -227,8 +227,8 @@ const PaymentForm = () => {
                           ? millOptions
                           : partyOptions
                         : type === "Payables"
-                        ? millOptions
-                        : partyOptions
+                          ? millOptions
+                          : partyOptions
                     }
                     onChange={handleMillChange}
                     filterOption={(input, option) =>

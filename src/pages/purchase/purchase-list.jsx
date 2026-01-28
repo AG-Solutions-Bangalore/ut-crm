@@ -69,7 +69,7 @@ const PurchaseList = () => {
       if (res?.code === 200 || res?.code === 201) {
         message.success(
           res.message ||
-            `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`
+            `Order marked as ${newStatus === "Open" ? "Open" : "Closed"}`,
         );
         setActiveTab(newStatus);
         queryClient.invalidateQueries([
@@ -86,7 +86,7 @@ const PurchaseList = () => {
       message.error(
         error?.response?.data?.message ||
           error.message ||
-          "Error updating order status."
+          "Error updating order status.",
       );
     }
   };
@@ -132,30 +132,31 @@ const PurchaseList = () => {
         dayjs(record.purchase_orders_date).format("DD-MM-YYYY"),
     },
     {
-      title: "Mill Name",
+      title: "Mill",
       dataIndex: "mill_short",
       key: "mill_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Party Name",
+      title: "Party",
       dataIndex: "party_short",
       key: "party_short",
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
-      title: "Total Bill Rate",
-      dataIndex: "total_bill_rate",
-      key: "total_bill_rate",
+      title: "A/B Rate",
+      key: "ab_rate",
       align: "right",
-      render: (text) => <span>{Number(text).toFixed(2)}</span>,
-    },
-    {
-      title: "Total Agreed Rate",
-      dataIndex: "total_adreed_rate",
-      key: "total_adreed_rate",
-      align: "right",
-      render: (text) => <span>{Number(text).toFixed(2)}</span>,
+      render: (_, record) => {
+        const agreed = Number(record.total_adreed_rate || 0).toFixed(2);
+        const bill = Number(record.total_bill_rate || 0).toFixed(2);
+
+        return (
+          <span className="whitespace-nowrap">
+            {agreed} / {bill}
+          </span>
+        );
+      },
     },
     {
       title: "Status",
