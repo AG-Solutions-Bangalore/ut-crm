@@ -152,6 +152,10 @@ const PurchaseForm = () => {
         url: `${PURCHASE_ORDER_LIST}/${id}`,
       });
       if (res?.data) {
+        console.log(
+          res.data.purchase_orders_party_m_address,
+          "res.data.purchase_orders_party_m_address",
+        );
         const formattedData = {
           ...res.data,
           purchase_orders_status:
@@ -159,6 +163,8 @@ const PurchaseForm = () => {
           purchase_orders_date: res.data.purchase_orders_date
             ? dayjs(res.data.purchase_orders_date)
             : null,
+          purchase_orders_party_m_address:
+            res.data.purchase_orders_party_m_address == "Yes" ? true : false,
         };
         setSelectedMill(res?.mill || null);
         setLatestPurchaseData(res?.billing || []);
@@ -417,7 +423,7 @@ const PurchaseForm = () => {
                     <Form.Item
                       label={
                         <span>
-                          Purchase Date <span className="text-red-500">*</span>
+                          Po Date <span className="text-red-500">*</span>
                         </span>
                       }
                       name="purchase_orders_date"
@@ -430,7 +436,7 @@ const PurchaseForm = () => {
                     <Form.Item
                       label={
                         <span>
-                          Purchase Ref No{" "}
+                          Po Ref No{" "}
                           <span className="text-red-500">*</span>
                         </span>
                       }

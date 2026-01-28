@@ -58,10 +58,11 @@ const BillingForm = () => {
     purchase_orders_ref: null,
     billing_total_commn: "",
     billing_total_sale_amount: "",
-    billing_type: null,
+    billing_type: "Comm",
     billing_note: "",
-    billing_payment_type: null,
+    billing_payment_type: "",
   });
+  console.log(initialData, "initialData");
   const [diff, setDiff] = useState(0);
   const [totalSaleAmount, setTotalSalesAmount] = useState("");
   const [selectedMillId, setSelectedMillId] = useState(null);
@@ -88,9 +89,9 @@ const BillingForm = () => {
     form.resetFields();
   };
   useEffect(() => {
-    if (main) {
+    if (main?.purchase_orders_party_id) {
       form.setFieldsValue({
-        billing_party_id: main?.party_short,
+        billing_party_id: main?.purchase_orders_party_id,
       });
     }
   }, [main]);
@@ -144,6 +145,9 @@ const BillingForm = () => {
           ...res.data,
           purchase_date: res.data.purchase_date
             ? dayjs(res.data.purchase_date)
+            : null,
+          billing_party_id: res.data.billing_party_id
+            ? res.data.billing_party_id
             : null,
           sale_date: res.data.sale_date ? dayjs(res.data.sale_date) : null,
           billing_status: res.data.billing_status === "Open",
@@ -227,8 +231,12 @@ const BillingForm = () => {
         (sum, row) => sum + (parseFloat(row.purchase_rate) || 0),
         0,
       );
-      const salesWith18Percent = totalSalesAmount * totalPurRate * 0.18;
-      setTotalSalesAmount(Number(salesWith18Percent.toFixed(2)) || "");
+      const salesWithTones = totalTones * totalSalesAmount;
+      const salesWith18Percent = salesWithTones * 0.18;
+
+      const total = Number(salesWithTones + salesWith18Percent).toFixed(2);
+
+      setTotalSalesAmount(total);
 
       form.setFieldsValue({
         billing_total_tones: totalTones,
@@ -423,14 +431,14 @@ const BillingForm = () => {
                     <Form.Item
                       label={
                         <span>
-                          Mill Name <span className="text-red-500">*</span>
+                          Mill <span className="text-red-500">*</span>
                         </span>
                       }
                       name="billing_mill_id"
-                      rules={[{ required: true, message: "Select Mill Name" }]}
+                      rules={[{ required: true, message: "Select Mill" }]}
                     >
                       <Select
-                        placeholder="Select Mill Name"
+                        placeholder="Select Mill"
                         options={millOptions}
                         onChange={handleChange}
                         filterOption={(input, option) =>
@@ -445,13 +453,11 @@ const BillingForm = () => {
 
                     <Form.Item
                       name="purchase_orders_ref"
-                      label="PO Reference"
-                      rules={[
-                        { required: true, message: "Select PO Reference" },
-                      ]}
+                      label="PO Ref"
+                      rules={[{ required: true, message: "Select PO Ref" }]}
                     >
                       <Select
-                        placeholder="Select PO Reference"
+                        placeholder="Select PO Ref"
                         options={poRefOptions}
                         loading={isLoading}
                         onChange={handleChangeRef}
@@ -469,14 +475,12 @@ const BillingForm = () => {
                       name="billing_no"
                       label={
                         <span>
-                          Billing No <span className="text-red-500">*</span>
+                          Bill No <span className="text-red-500">*</span>
                         </span>
                       }
-                      rules={[
-                        { required: true, message: "Enter Billing Number" },
-                      ]}
+                      rules={[{ required: true, message: "Enter Bill No" }]}
                     >
-                      <Input placeholder="Enter Billing No" />
+                      <Input placeholder="Enter Bill No" />
                     </Form.Item>
 
                     <Form.Item
@@ -537,7 +541,7 @@ const BillingForm = () => {
                       <Select
                         placeholder="Select Payment Type"
                         options={[
-                          { label: "Payables", value: "Payables" },
+                          { label: "Paybles", value: "Payables" },
                           { label: "Receivables", value: "Receivables" },
                         ]}
                         filterOption={(input, option) =>
@@ -770,8 +774,8 @@ const BillingForm = () => {
                     </div>
                     <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
                       <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-10 gap-3 bg-gray-100 text-gray-700 font-semibold text-sm p-2">
-                        <div>Pur Date</div>
-                        <div>Pur Rate</div>
+                        <div>Po Date</div>
+                        <div>Po Rate</div>
                         <div>Sale Date</div>
                         <div>Sale Rate</div>
                         <div className="col-span-2">Item</div>

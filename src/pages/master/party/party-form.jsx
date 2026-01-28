@@ -69,6 +69,20 @@ const PartyForm = () => {
     if (id) fetchParty();
     else resetForm();
   }, [id]);
+  const addDeliveryAddress = () => {
+    const subs = form.getFieldValue("subs") || [];
+
+    form.setFieldsValue({
+      subs: [
+        ...subs,
+        {
+          party_delivery_address: "",
+          party_gstin: "",
+          party_status: true,
+        },
+      ],
+    });
+  };
 
   const handleSubmit = async (values) => {
     const formattedSubs = (values.subs || []).map((row) => ({
@@ -108,7 +122,7 @@ const PartyForm = () => {
       console.error(error);
       message.error(
         error?.response?.data?.message ||
-          "Something went wrong while saving party."
+          "Something went wrong while saving party.",
       );
     }
   };
@@ -307,11 +321,20 @@ const PartyForm = () => {
                   />
                 </Form.Item>
               </div>
+              <div className="flex justify-end mb-2">
+                <Button
+                  type="dashed"
+                  onClick={addDeliveryAddress}
+                  icon={<PlusOutlined />}
+                >
+                  Add Multiple Delivery Address
+                </Button>
+              </div>
             </Card>
             <Card
               size="small"
-              title={<span className="font-semibold">Contact Person</span>}
-              className="!mt-2 bg-gray-50"
+              title={<span className="font-semibold">Contact Persons</span>}
+              className="!my-2 bg-gray-50"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Form.Item label="Name" name="party_cp_name">
@@ -339,8 +362,34 @@ const PartyForm = () => {
                   <Input type="email" placeholder="Enter Email" />
                 </Form.Item>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Form.Item label="Name" name="party_cp_name1">
+                  <Input placeholder="Enter Contact Name 1" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Mobile "
+                  name="party_cp_mobile1"
+                  rules={[
+                    {
+                      pattern: /^[0-9]+$/,
+                      message: "Only digits are allowed",
+                    },
+                    {
+                      len: 10,
+                      message: "Mobile number must be exactly 10 digits",
+                    },
+                  ]}
+                >
+                  <Input maxLength={10} placeholder="Enter Mobile Number 1" />
+                </Form.Item>
+
+                <Form.Item label="Email" name="party_cp_email1">
+                  <Input type="email" placeholder="Enter Email 1" />
+                </Form.Item>
+              </div>
             </Card>
-            <Card
+            {/* <Card
               size="small"
               title={<span className="font-semibold">Contact Person 1</span>}
               className="!my-2 bg-gray-50"
@@ -371,7 +420,7 @@ const PartyForm = () => {
                   <Input type="email" placeholder="Enter Email" />
                 </Form.Item>
               </div>
-            </Card>
+            </Card> */}
 
             <Form.List
               name="subs"
@@ -384,7 +433,7 @@ const PartyForm = () => {
             >
               {(fields, { add, remove }) => (
                 <>
-                  <div className="flex justify-between mb-2">
+                  {/* <div className="flex justify-between mb-2">
                     <div className="font-semibold text-lg"></div>
 
                     <Button
@@ -394,7 +443,7 @@ const PartyForm = () => {
                     >
                       Add Multiple Delivery Address
                     </Button>
-                  </div>
+                  </div> */}
 
                   {fields.length > 0 && (
                     <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white shadow-sm">
@@ -418,7 +467,7 @@ const PartyForm = () => {
                               key={key}
                               className={`grid grid-cols-1 ${
                                 isEditMode ? "md:grid-cols-4" : "md:grid-cols-3"
-                              } gap-2 mt-2 p-2 relative`}
+                              } gap-2  p-2 relative`}
                             >
                               {/* Delete button only for new rows */}
                               {fields.length > 1 && !hasId && (
@@ -450,8 +499,8 @@ const PartyForm = () => {
                                           if (!value) {
                                             return Promise.reject(
                                               new Error(
-                                                "Delivery Address is required."
-                                              )
+                                                "Delivery Address is required.",
+                                              ),
                                             );
                                           }
                                         }
@@ -460,8 +509,8 @@ const PartyForm = () => {
                                         if (hasId && !value && gst) {
                                           return Promise.reject(
                                             new Error(
-                                              "Delivery Address is required when GST is filled."
-                                            )
+                                              "Delivery Address is required when GST is filled.",
+                                            ),
                                           );
                                         }
 
@@ -496,7 +545,7 @@ const PartyForm = () => {
                                       if (!hasId) {
                                         if (!value) {
                                           return Promise.reject(
-                                            new Error("GST is required.")
+                                            new Error("GST is required."),
                                           );
                                         }
                                       }
@@ -505,8 +554,8 @@ const PartyForm = () => {
                                       if (hasId && !value && address) {
                                         return Promise.reject(
                                           new Error(
-                                            "GST is required when Delivery Address is filled."
-                                          )
+                                            "GST is required when Delivery Address is filled.",
+                                          ),
                                         );
                                       }
 

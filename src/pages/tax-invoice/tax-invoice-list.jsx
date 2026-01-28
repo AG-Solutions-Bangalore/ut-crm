@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import {
   App,
   Button,
@@ -123,7 +128,7 @@ const TaxInvoiceList = () => {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Edit Tax Invoice">
+          <Tooltip title="Edit Commission Bill">
             <Button
               icon={<EditOutlined />}
               type="primary"
@@ -131,7 +136,7 @@ const TaxInvoiceList = () => {
               onClick={() => navigate(`/tax-invoice/edit/${record.id}`)}
             />
           </Tooltip>
-          <Tooltip title="View Tax Invoice">
+          <Tooltip title="View Commission Bill">
             <Button
               icon={<EyeOutlined />}
               type="primary"
@@ -139,7 +144,7 @@ const TaxInvoiceList = () => {
               onClick={() => navigate(`/tax-invoice/view/${record.id}`)}
             />
           </Tooltip>
-          <Tooltip title="Delete Tax Invoice">
+          <Tooltip title="Delete Commission Bill">
             <Popconfirm
               title="Are you sure to delete this bill?"
               onConfirm={() => handleDelete(record.id)}
@@ -160,7 +165,7 @@ const TaxInvoiceList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-semibold">Tax-Invoice List</h2>
+        <h2 className="text-2xl font-semibold">Commission Bill List</h2>
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"
@@ -175,7 +180,7 @@ const TaxInvoiceList = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate("/tax-invoice/create")}
           >
-            Add Tax-Invoice
+            Add Commission Bill
           </Button>
         </div>
       </div>

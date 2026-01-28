@@ -29,12 +29,12 @@ const UnifiedLedger = () => {
 
   const config = {
     Payables: {
-      title: "Payables Ledger",
+      title: "Paybles Ledger",
       entityName: "Mill",
       apiEndpoint: "activeMills",
       entityKey: "mill_id",
-      fileNamePrefix: "Payables-Ledger",
-      pdfTitle: "Payables Ledger",
+      fileNamePrefix: "Paybles-Ledger",
+      pdfTitle: "Paybles Ledger",
       placeholder: "Select mill",
       label: "Mill Name",
     },
@@ -97,7 +97,7 @@ const UnifiedLedger = () => {
     if (!ledgerData?.payment) return 0;
     return ledgerData.payment.reduce(
       (total, item) => total + (Number(item.payment_amount) || 0),
-      0
+      0,
     );
   };
 
@@ -105,7 +105,7 @@ const UnifiedLedger = () => {
     if (!ledgerData?.received) return 0;
     return ledgerData.received.reduce(
       (total, item) => total + (Number(item.sales_amount) || 0),
-      0
+      0,
     );
   };
 
@@ -168,7 +168,7 @@ const UnifiedLedger = () => {
     const options = {
       margin: [10, 10, 10, 10],
       filename: `${currentConfig.fileNamePrefix}-${dayjs().format(
-        "DD-MM-YYYY"
+        "DD-MM-YYYY",
       )}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
@@ -266,7 +266,7 @@ const UnifiedLedger = () => {
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(
-        `${currentConfig.entityName} Ledger Report`
+        `${currentConfig.entityName} Ledger Report`,
       );
 
       worksheet.mergeCells("A1:D1");
@@ -306,7 +306,7 @@ const UnifiedLedger = () => {
       let rowIndex = 7;
       ledgerData?.payment?.forEach((item) => {
         worksheet.getCell(`A${rowIndex}`).value = dayjs(
-          item.payment_date
+          item.payment_date,
         ).format("DD-MM-YYYY");
         worksheet.getCell(`B${rowIndex}`).value = Number(item.payment_amount);
         rowIndex++;
@@ -340,10 +340,10 @@ const UnifiedLedger = () => {
       let creditRowIndex = rowIndex;
       ledgerData?.received?.forEach((item) => {
         worksheet.getCell(`D${creditRowIndex}`).value = dayjs(
-          item.sale_date
+          item.sale_date,
         ).format("DD-MM-YYYY");
         worksheet.getCell(`E${creditRowIndex}`).value = Number(
-          item.sales_amount
+          item.sales_amount,
         );
         creditRowIndex++;
       });
@@ -384,7 +384,7 @@ const UnifiedLedger = () => {
       const link = document.createElement("a");
       link.href = url;
       link.download = `${currentConfig.entityName.toLowerCase()}-ledger-report-${dayjs().format(
-        "DD-MM-YYYY"
+        "DD-MM-YYYY",
       )}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
@@ -406,7 +406,7 @@ const UnifiedLedger = () => {
       return `Unknown ${currentConfig?.entityName || "Entity"}`;
     }
     const entity = entitiesData.data.find(
-      (entity) => entity.id === searchParams[currentConfig.entityKey]
+      (entity) => entity.id === searchParams[currentConfig.entityKey],
     );
     return (
       entity?.[`${currentConfig.entityName.toLowerCase()}_name`] ||
@@ -460,7 +460,7 @@ const UnifiedLedger = () => {
                         style={{ width: "100%", height: "32px" }}
                         className="text-xs"
                       >
-                        <Option value="Payables">Payables (Mills)</Option>
+                        <Option value="Payables">Paybles (Mills)</Option>
                         <Option value="Receivables">
                           Receivables (Parties)
                         </Option>
@@ -654,7 +654,7 @@ const UnifiedLedger = () => {
                               >
                                 <td className="text-center border p-2">
                                   {dayjs(item.payment_date).format(
-                                    "DD-MM-YYYY"
+                                    "DD-MM-YYYY",
                                   )}
                                 </td>
                                 <td className="text-center border p-2">

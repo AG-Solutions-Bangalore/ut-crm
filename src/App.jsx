@@ -299,7 +299,6 @@ function App() {
               }
             />
 
-            {/* Tax Invoice */}
             <Route
               path="/tax-invoice"
               element={

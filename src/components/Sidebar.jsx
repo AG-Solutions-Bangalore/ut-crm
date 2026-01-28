@@ -126,7 +126,7 @@ const getMenuItems = (collapsed) => {
       {
         key: "/tax-invoice",
         icon: <ReconciliationOutlined />,
-        label: "Tax Invoice",
+        label: "Commission Bill",
       },
       { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
 
@@ -168,7 +168,7 @@ const getMenuItems = (collapsed) => {
     {
       key: "/tax-invoice",
       icon: <ReconciliationOutlined />,
-      label: "Tax Invoice",
+      label: "Commission Bill",
     },
     { key: "/payment", icon: <DollarCircleOutlined />, label: "Payment" },
 

@@ -34,7 +34,7 @@ const TaxInvoiceForm = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const companystate = useSelector(
-    (state) => state?.auth?.userDetails?.company_state?.toLowerCase() || ""
+    (state) => state?.auth?.userDetails?.company_state?.toLowerCase() || "",
   );
   const [bills, setBills] = useState([]);
   const [selectedBills, setSelectedBills] = useState([]);
@@ -66,14 +66,14 @@ const TaxInvoiceForm = () => {
     tax_invoice_date: dayjs(),
     tax_invoice_ref: "",
     tax_invoice_mill_id: null,
-    tax_invoice_description: "",
+    tax_invoice_description: "Sales Commission for the Month of",
     tax_invoice_discount: "",
     tax_invoice_sgst: "",
     tax_invoice_cgst: "",
     tax_invoice_igst: "",
     tax_invoice_hsn_code: "996111",
     tax_invoice_payment_terms: "",
-    tax_invoice_type: null,
+    tax_invoice_type: "Commission",
   });
   const handleMillChange = (millId) => {
     setSelectedBills([]);
@@ -111,12 +111,12 @@ const TaxInvoiceForm = () => {
     if (type == "COM") {
       form.setFieldValue(
         "tax_invoice_description",
-        "Sales Commission for the Month of"
+        "Sales Commission for the Month of",
       );
     } else if (type == "COD") {
       form.setFieldValue(
         "tax_invoice_description",
-        "Sales Variable Cash Commission for the Month of"
+        "Sales Variable Cash Commission for the Month of",
       );
     }
   };
@@ -252,7 +252,7 @@ const TaxInvoiceForm = () => {
       if (res?.code === 201) {
         message.success(res?.message || "Sub-item deleted successfully!");
         setTempSelectedBills((prev) =>
-          prev.filter((bill) => bill.id !== subId)
+          prev.filter((bill) => bill.id !== subId),
         );
         setSelectedBills((prev) => prev.filter((bill) => bill.id !== subId));
 
@@ -266,13 +266,13 @@ const TaxInvoiceForm = () => {
             !selectedBills.some((sel) => {
               const selectedRef = sel.billing_ref;
               return selectedRef == bill.billing_ref;
-            })
+            }),
         );
         const filtereddata = updatedFetched.filter((bill) =>
           selectedBills.some((sel) => {
             const selectedRef = sel.billing_ref;
             return selectedRef == bill.billing_ref;
-          })
+          }),
         );
 
         setFetchedBills(filtered);
@@ -305,7 +305,7 @@ const TaxInvoiceForm = () => {
             const selectedRef =
               sel.billing_ref || sel.tax_invoice_sub_billing_ref;
             return selectedRef === bill.billing_ref;
-          })
+          }),
       );
 
       setFetchedBills(data);
@@ -358,7 +358,9 @@ const TaxInvoiceForm = () => {
           <Card
             title={
               <h2 className="text-2xl font-bold">
-                {isEditMode ? "Update Tax Invoice" : "Create Tax Invoice"}
+                {isEditMode
+                  ? "Update Commission Bill"
+                  : "Create Commission Bill"}
               </h2>
             }
             extra={
@@ -381,7 +383,7 @@ const TaxInvoiceForm = () => {
                 <Form.Item
                   label={
                     <span>
-                      Invoice Date <span className="text-red-500">*</span>
+                      Bill Date <span className="text-red-500">*</span>
                     </span>
                   }
                   name="tax_invoice_date"
@@ -431,7 +433,7 @@ const TaxInvoiceForm = () => {
                       (item) => ({
                         label: item,
                         value: item,
-                      })
+                      }),
                     )}
                     onChange={handleTypeChange}
                     filterOption={(input, option) =>
@@ -446,13 +448,11 @@ const TaxInvoiceForm = () => {
                 <Form.Item
                   label={
                     <span>
-                      Tax Invoice Ref <span className="text-red-500">*</span>
+                      Bill Ref <span className="text-red-500">*</span>
                     </span>
                   }
                   name="tax_invoice_ref"
-                  rules={[
-                    { required: true, message: "Enter reference number" },
-                  ]}
+                  rules={[{ required: true, message: "Enter Bill Ref" }]}
                 >
                   <Input readOnly value={taxinvoice?.data?.data} disabled />
                 </Form.Item>
