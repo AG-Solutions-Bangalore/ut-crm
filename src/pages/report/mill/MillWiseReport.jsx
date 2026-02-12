@@ -1,0 +1,595 @@
+/* eslint-disable no-unused-vars */
+import { Button, Card, DatePicker, Form, message, Select } from "antd";
+import dayjs from "dayjs";
+import * as ExcelJS from "exceljs";
+import html2pdf from "html2pdf.js";
+import { Download, FileSpreadsheet, Printer } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { MILL_WISE_REPORT } from "../../../api";
+import { useMasterData } from "../../../hooks";
+import { useApiMutation } from "../../../hooks/useApiMutation";
+
+const MillWiseReport = () => {
+  const [form] = Form.useForm();
+  const [reportData, setReportData] = useState([]);
+  const containerRef = useRef(null);
+  const { trigger: submitTrigger, loading: submitLoading } = useApiMutation();
+
+  const { mill, party } = useMasterData({ mill: true, party: true });
+  const millOptions =
+    mill?.data?.data?.map((item) => ({
+      label: item.mill_short,
+      value: item.id,
+    })) || [];
+  const partyOptions =
+    party?.data?.data?.map((item) => ({
+      label: item.party_short,
+      value: item.id,
+      fullData: item,
+    })) || [];
+
+  const groupedReportData = reportData.reduce((acc, item) => {
+    const millName = item.mill_name;
+    if (!acc[millName]) {
+      acc[millName] = [];
+    }
+    acc[millName].push(item);
+    return acc;
+  }, {});
+
+  const calculateMillTotals = (millData) => {
+    return millData.reduce(
+      (acc, item) => {
+        acc.tones += parseFloat(item.billing_tones) || 0;
+        acc.amount += parseFloat(item.amount) || 0;
+        return acc;
+      },
+      { tones: 0, amount: 0 }
+    );
+  };
+
+  const calculateOverallTotals = () => {
+    return reportData.reduce(
+      (acc, item) => {
+        acc.tones += parseFloat(item.billing_tones) || 0;
+        acc.amount += parseFloat(item.amount) || 0;
+        return acc;
+      },
+      { tones: 0, amount: 0 }
+    );
+  };
+
+  const handleGenerateReport = async (values) => {
+    try {
+      const { from_date, to_date, selectedMill, selectedParty } = values;
+
+      const payload = {
+        from_date: from_date.format("YYYY-MM-DD"),
+        to_date: to_date.format("YYYY-MM-DD"),
+        mill_id: selectedMill || "",
+        party_id: selectedParty || "",
+      };
+
+      const response = await submitTrigger({
+        url: MILL_WISE_REPORT,
+        method: "post",
+        data: payload,
+      });
+      setReportData(response.data || []);
+
+      if (response.data && response.data.length > 0) {
+        message.success("Report generated successfully");
+      } else {
+        message.info("No data found for the selected criteria");
+      }
+    } catch (error) {
+      console.error("Error generating report:", error);
+      message.error("Failed to generate report");
+    }
+  };
+
+  const handleReset = () => {
+    form.resetFields();
+    setReportData([]);
+  };
+
+  const handleDownload = () => {
+    const element = containerRef?.current;
+
+    if (!element) {
+      message.error("Failed to generate PDF");
+      return;
+    }
+
+    const elementForPdf = element.cloneNode(true);
+    const printHideElements = elementForPdf.querySelectorAll(".print-hide");
+    printHideElements.forEach((el) => el.remove());
+
+    const style = document.createElement("style");
+    style.textContent = `
+      * {
+        color: #000000 !important;
+        background-color: transparent !important;
+      }
+      .bg-gray-200, .bg-gray-100, .bg-white {
+        background-color: #ffffff !important;
+      }
+    `;
+    elementForPdf.appendChild(style);
+
+    const options = {
+      margin: [10, 10, 10, 10],
+      filename: `Mill-Wise-Report-${dayjs().format("DD-MM-YYYY")}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: elementForPdf.scrollHeight,
+        backgroundColor: "#FFFFFF",
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+      },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+    };
+
+    html2pdf()
+      .from(elementForPdf)
+      .set(options)
+      .save()
+      .then(() => {
+        message.success("PDF downloaded successfully");
+      })
+      .catch((error) => {
+        console.error("PDF download error:", error);
+        message.error("Failed to download PDF");
+      });
+  };
+
+  const handlePrint = useReactToPrint({
+    content: () => containerRef.current,
+    documentTitle: `Mill-Wise-Report-${dayjs().format("DD-MM-YYYY")}`,
+    removeAfterPrint: true,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        .print-hide {
+          display: none !important;
+        }
+        .ant-card {
+          box-shadow: none !important;
+          border: none !important;
+        }
+        .ant-card-body {
+          padding: 0 !important;
+        }
+      }
+    `,
+  });
+
+  const handleExcelExport = async () => {
+    if (reportData.length === 0) {
+      message.error("No data to export");
+      return;
+    }
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Mill Wise Report");
+
+      worksheet.columns = [
+        { header: "Mill Name", key: "mill_name", width: 30 },
+        { header: "P Date", key: "purchase_date", width: 12 },
+        { header: "Party Name", key: "party_name", width: 30 },
+        { header: "S Date", key: "sale_date", width: 12 },
+        { header: "Bill No", key: "billing_no", width: 15 },
+        { header: "BF", key: "billing_bf", width: 15 },
+        { header: "Tones", key: "billing_tones", width: 12 },
+        { header: "Rate", key: "purchase_rate", width: 12 },
+        { header: "Amount", key: "amount", width: 15 },
+      ];
+
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" },
+      };
+
+      let currentRow = 2;
+      const overallTotals = calculateOverallTotals();
+
+      Object.entries(groupedReportData).forEach(([millName, millData]) => {
+        const millTotals = calculateMillTotals(millData);
+
+        millData.forEach((item) => {
+          worksheet.addRow({
+            mill_name: millName,
+            purchase_date: dayjs(item.purchase_date).format("DD-MM-YYYY"),
+            party_name: item.party_name,
+            sale_date: dayjs(item.purchase_date).format("DD-MM-YYYY"),
+            billing_no: item.billing_no,
+            billing_bf: item.billing_bf,
+            billing_tones: parseFloat(item.billing_tones).toFixed(2),
+            purchase_rate: `₹${parseFloat(item.purchase_rate).toFixed(2)}`,
+            amount: `₹${parseFloat(item.amount).toFixed(2)}`,
+          });
+          currentRow++;
+        });
+
+        const totalRow = worksheet.addRow({
+          mill_name: `${millName} - Total`,
+          billing_tones: millTotals.tones.toFixed(2),
+          amount: `₹${millTotals.amount.toFixed(2)}`,
+        });
+        totalRow.font = { bold: true };
+        totalRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF0F0F0" },
+        };
+        currentRow++;
+      });
+
+      const grandTotalRow = worksheet.addRow({
+        mill_name: "GRAND TOTAL",
+        billing_tones: overallTotals.tones.toFixed(2),
+        amount: `₹${overallTotals.amount.toFixed(2)}`,
+      });
+      grandTotalRow.font = { bold: true, size: 12 };
+      grandTotalRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFC0C0C0" },
+      };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Mill-Wise-Report-${dayjs().format("DD-MM-YYYY")}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      message.success("Excel file downloaded successfully");
+    } catch (error) {
+      console.error("Excel export error:", error);
+      message.error("Failed to export Excel file");
+    }
+  };
+
+  const overallTotals = calculateOverallTotals();
+
+  return (
+    <div className="min-h-screen">
+      <div className="max-w-full mx-auto">
+        <div className="flex flex-col lg:flex-row gap-2">
+          <div className="w-full lg:w-2/6">
+            <Card
+              title="Mill Report Criteria"
+              className="shadow-lg sticky"
+              extra={
+                <Button type="link" onClick={handleReset} size="small">
+                  Reset
+                </Button>
+              }
+            >
+              <Form
+                form={form}
+                requiredMark={false}
+                onFinish={handleGenerateReport}
+                layout="vertical"
+                className="p-2"
+                initialValues={{
+                  from_date: dayjs().startOf("month"),
+                  to_date: dayjs(),
+                }}
+              >
+                <div className="mb-6">
+                  <Form.Item
+                    name="from_date"
+                    label={
+                      <span>
+                        From Date <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    required
+                    rules={[
+                      { required: true, message: "From Date is Required" },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="DD-MM-YYYY"
+                      placeholder="Select From Date"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="to_date"
+                    label={
+                      <span>
+                        To Date <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    required
+                    rules={[
+                      { required: true, message: "To Date  is Required" },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="DD-MM-YYYY"
+                      placeholder="Select To Date"
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="mb-6">
+                  <Form.Item label="Mill" name="selectedmill">
+                    <Select
+                      placeholder="Select Mill"
+                      loading={mill.loading}
+                      options={millOptions}
+                      showSearch
+                      allowClear
+                      filterOption={(input, option) =>
+                        option?.label
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="mb-6">
+                  <Form.Item label="Party (Optional)" name="selectedParty">
+                    <Select
+                      placeholder="Select Party"
+                      options={partyOptions}
+                      loading={party.loading}
+                      showSearch
+                      allowClear
+                      filterOption={(input, option) =>
+                        option?.label
+                          ?.toLowerCase()
+                          ?.includes(input.toLowerCase())
+                      }
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    className="bg-blue-600 hover:bg-blue-700"
+                    loading={submitLoading}
+                  >
+                    Generate Report
+                  </Button>
+                </div>
+              </Form>
+            </Card>
+          </div>
+
+          <div className="w-full lg:w-4/6">
+            <Card
+              title="Mill Report"
+              className="shadow-lg min-h-[800px]"
+              extra={
+                <div className="text-sm text-gray-500">
+                  {reportData.length > 0
+                    ? `${reportData.length} records found`
+                    : "No data to display"}
+                </div>
+              }
+            >
+              {reportData.length > 0 ? (
+                <div>
+                  <div className="print-hide flex justify-between items-center p-2 rounded-lg mb-5 bg-gray-200">
+                    <h1 className="text-xl font-bold">Mill Wise Report</h1>
+                    <div className="flex flex-row items-center gap-4 font-bold">
+                      <span className="mr-2">
+                        From -{" "}
+                        {form.getFieldValue("from_date")
+                          ? dayjs(form.getFieldValue("from_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}
+                      </span>
+                      To -{" "}
+                      {form.getFieldValue("to_date")
+                        ? dayjs(form.getFieldValue("to_date")).format(
+                            "DD-MMM-YYYY"
+                          )
+                        : "--"}
+                      <Button
+                        className="ml-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={handleDownload}
+                      >
+                        <Download className="h-4 w-4" /> PDF
+                      </Button>
+                      <Button
+                        className="ml-2 bg-green-600 hover:bg-green-700 text-white"
+                        onClick={handleExcelExport}
+                      >
+                        <FileSpreadsheet className="h-4 w-4" /> Excel
+                      </Button>
+                      <Button
+                        className="ml-2 bg-orange-600 hover:bg-orange-700 text-white"
+                        onClick={handlePrint}
+                      >
+                        <Printer className="h-4 w-4" /> Print
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div ref={containerRef} className="md:overflow-x-auto">
+                    <div className="p-4">
+                      <h1 className="text-2xl font-bold text-center">
+                        Mill Wise Report
+                      </h1>
+                      <div className="text-center text-lg mt-2">
+                        Period:{" "}
+                        {form.getFieldValue("from_date")
+                          ? dayjs(form.getFieldValue("from_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}{" "}
+                        to{" "}
+                        {form.getFieldValue("to_date")
+                          ? dayjs(form.getFieldValue("to_date")).format(
+                              "DD-MMM-YYYY"
+                            )
+                          : "--"}
+                      </div>
+                    </div>
+
+                    <div>
+                      {Object.entries(groupedReportData).map(
+                        ([millName, millData]) => {
+                          const totals = calculateMillTotals(millData);
+
+                          return (
+                            <div
+                              key={millName}
+                              className="mb-6 border-t border-l border-r border-black text-[13px]"
+                            >
+                              <h2 className="p-2 bg-gray-200 font-bold border-b border-black">
+                                {millName}
+                              </h2>
+
+                              <div
+                                className="grid bg-white"
+                                style={{
+                                  gridTemplateColumns:
+                                    "0.8fr 1.5fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+                                }}
+                              >
+                                {[
+                                  "P Date",
+                                  "Party Name",
+                                  "S Date",
+                                  "Bill No",
+                                  "BF",
+                                  "Tones",
+                                  "Rate",
+                                ].map((header, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-2 font-bold border-b border-r border-t border-black text-gray-900 text-center"
+                                  >
+                                    {header}
+                                  </div>
+                                ))}
+
+                                {millData.map((item, index) => (
+                                  <React.Fragment key={index}>
+                                    <div className="p-2 border-b border-r border-black text-center">
+                                      {dayjs(item.purchase_date).format(
+                                        "DD-MM-YYYY"
+                                      )}
+                                    </div>
+                                    <div className="p-2 border-b border-r border-black">
+                                      {item.party_name}
+                                    </div>
+                                    <div className="p-2 border-b border-r border-black text-center">
+                                      {dayjs(item.purchase_date).format(
+                                        "DD-MM-YYYY"
+                                      )}
+                                    </div>
+                                    <div className="p-2 border-b border-r border-black text-center">
+                                      {item.billing_no}
+                                    </div>
+                                    <div className="p-2 border-b border-r border-black text-center">
+                                      {item.billing_sub_bf}
+                                    </div>
+                                    <div className="p-2 border-b border-r border-black text-right">
+                                      {parseFloat(item.billing_tones).toFixed(
+                                        2
+                                      )}
+                                    </div>
+                                    <div className="p-2 border-b border-black text-right">
+                                      ₹
+                                      {parseFloat(item.purchase_rate).toFixed(
+                                        2
+                                      )}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+
+                                <div className="p-2 border-b border-r border-black font-bold"></div>
+                                <div className="p-2 border-b border-r border-black"></div>
+                                <div className="p-2 border-b border-r border-black"></div>
+                                <div className="p-2 border-b border-r border-black"></div>
+                                <div className="p-2 border-b border-r border-black font-bold text-center">
+                                  Total
+                                </div>
+                                <div className="p-2 border-b border-r border-black font-bold text-right">
+                                  {totals.tones.toFixed(2)}
+                                </div>
+                                <div className="p-2 border-b border-black"></div>
+                              </div>
+                            </div>
+                          );
+                        }
+                      )}
+
+                      <div
+                        className="grid bg-gray-100 border-t border-l border-r border-black font-bold text-[13px]"
+                        style={{
+                          gridTemplateColumns:
+                            "0.8fr 1.5fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+                        }}
+                      >
+                        <div className="p-2 border-b border-black"></div>
+                        <div className="p-2 border-b border-black"></div>
+                        <div className="p-2 border-b border-black"></div>
+                        <div className="p-2 border-b border-black"></div>
+                        <div className="p-2 border-b border-r border-black font-bold text-center">
+                          Grand Total
+                        </div>
+                        <div className="p-2 border-b border-r border-black text-right">
+                          {overallTotals.tones.toFixed(2)}
+                        </div>
+                        <div className="p-2 border-b border-black"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-20 text-gray-400">
+                  <div className="text-6xl mb-4">📊</div>
+                  <h3 className="text-xl font-semibold mb-2">No Report Data</h3>
+                  <p>
+                    Please select date range, mill, and optionally a party to
+                    generate the report.
+                  </p>
+                </div>
+              )}
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MillWiseReport;
