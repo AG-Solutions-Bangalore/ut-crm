@@ -318,14 +318,14 @@ const PaymentForm = () => {
                   name="payment_amount"
                   label={
                     <span>
-                      Payment Amount <span className="text-red-500">*</span>
+                      Paid Amount <span className="text-red-500">*</span>
                     </span>
                   }
-                  rules={[{ required: true, message: "Enter  Payment Amount" }]}
+                  rules={[{ required: true, message: "Enter  Paid Amount" }]}
                 >
                   <InputNumber
                     type="number"
-                    placeholder="Enter Amount"
+                    placeholder="Enter Paid Amount"
                     className="!w-full"
                     min={1}
                   />

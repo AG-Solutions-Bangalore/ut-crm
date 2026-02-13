@@ -144,6 +144,12 @@ const PurchaseList = () => {
       render: (text) => <span className="text-gray-800">{text}</span>,
     },
     {
+      title: "Total Qty",
+      dataIndex: "total_qnty",
+      key: "total_qnty",
+      render: (text) => <span className="text-gray-800">{text}</span>,
+    },
+    {
       title: "A/B Rate",
       key: "ab_rate",
       align: "right",

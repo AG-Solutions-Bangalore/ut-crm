@@ -541,7 +541,7 @@ const BillingForm = () => {
                       <Select
                         placeholder="Select Payment Type"
                         options={[
-                          { label: "Paybles", value: "Payables" },
+                          { label: "Payables", value: "Payables" },
                           { label: "Receivables", value: "Receivables" },
                         ]}
                         filterOption={(input, option) =>

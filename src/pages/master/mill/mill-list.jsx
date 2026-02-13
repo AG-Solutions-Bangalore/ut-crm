@@ -13,6 +13,7 @@ import {
   Popconfirm,
   Space,
   Spin,
+  Tabs,
   Tag,
   Tooltip,
 } from "antd";
@@ -33,6 +34,7 @@ const MillList = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
+  const [activeTab, setActiveTab] = useState("Active");
   const navigate = useNavigate();
   const {
     data: mills,
@@ -40,8 +42,8 @@ const MillList = () => {
     refetch,
   } = useGetApiMutation({
     url: MILL_LIST,
-    queryKey: ["milldata", debouncedSearch, page],
-    params: { search: debouncedSearch, page },
+    queryKey: ["milldata", debouncedSearch, page, activeTab],
+    params: { search: debouncedSearch, page, type: activeTab },
   });
 
   const handlePageChange = (newPage) => {
@@ -62,7 +64,7 @@ const MillList = () => {
       if (res?.code === 201) {
         message.success(
           res.message ||
-            `User marked as ${newStatus == "active" ? "Active" : "Inactive"}`
+            `User marked as ${newStatus == "active" ? "Active" : "Inactive"}`,
         );
         refetch();
       } else {
@@ -167,8 +169,17 @@ const MillList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Mill List</h2>
-
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => {
+            setActiveTab(key);
+            setPage(1);
+          }}
+          items={[
+            { key: "Active", label: "Actice Mill" },
+            { key: "Inactive", label: "Inactice Mill" },
+          ]}
+        />
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"

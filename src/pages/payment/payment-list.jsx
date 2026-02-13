@@ -26,7 +26,7 @@ const PaymentList = () => {
   const { message } = App.useApp();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("Paybles");
+  const [activeTab, setActiveTab] = useState("Payables");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const navigate = useNavigate();
   const { trigger: deleteTrigger } = useApiMutation();
@@ -72,7 +72,7 @@ const PaymentList = () => {
           },
         ]
       : []),
-    ...(activeTab.includes("Paybles") || activeTab.includes("Paybles")
+    ...(activeTab.includes("Payables") || activeTab.includes("Payables")
       ? [
           {
             title: "Mill Name",
@@ -108,7 +108,7 @@ const PaymentList = () => {
     //   ),
     // },
     {
-      title: "Paid Amount",
+      title: activeTab === "Payables" ? "Paid Amount" : "Received Amount",
       dataIndex: "payment_amount",
       key: "payment_amount",
       render: (text) => <span className="text-gray-800">{text}</span>,
@@ -167,10 +167,10 @@ const PaymentList = () => {
             setPage(1);
           }}
           items={[
-            { key: "Paybles", label: "Paybles" },
+            { key: "Payables", label: "Payables" },
             { key: "Receivables", label: "Receivables" },
-            { key: "Payment Details", label: "Payment Details" },
-            { key: "Receivables Details", label: "Receivables Details" },
+            { key: "Payables Adjust", label: "Payables Adjust" },
+            { key: "Receivables Adjust", label: "Receivables Adjust" },
           ]}
         />
         <div className="flex-1 flex gap-4 sm:justify-end">
@@ -186,9 +186,9 @@ const PaymentList = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate("/payment/create?type=Paybles")}
+              onClick={() => navigate("/payment/create?type=Payables")}
             >
-              Paybles
+              Payables
             </Button>
             <Button
               type="primary"
