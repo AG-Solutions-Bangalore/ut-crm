@@ -13,6 +13,7 @@ import {
   Popconfirm,
   Space,
   Spin,
+  Tabs,
   Tag,
   Tooltip,
 } from "antd";
@@ -34,14 +35,15 @@ const PartyList = () => {
   const { trigger: UpdateStatus } = useApiMutation();
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Active");
   const {
     data: partydata,
     isLoading,
     refetch,
   } = useGetApiMutation({
     url: PARTY_LIST,
-    queryKey: ["partydata", debouncedSearch, page],
-    params: { search: debouncedSearch, page },
+    queryKey: ["partydata", debouncedSearch, page, activeTab],
+    params: { search: debouncedSearch, page, type: activeTab },
   });
 
   const handlePageChange = (newPage) => {
@@ -62,7 +64,7 @@ const PartyList = () => {
       if (res?.code === 201) {
         message.success(
           res.message ||
-            `User marked as ${newStatus == "active" ? "Active" : "Inactive"}`
+            `User marked as ${newStatus == "active" ? "Active" : "Inactive"}`,
         );
         refetch();
       } else {
@@ -113,8 +115,8 @@ const PartyList = () => {
                 days > 30
                   ? "bg-red-100 text-red-700"
                   : days > 10
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-green-100 text-green-700"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-green-100 text-green-700"
               }`}
             >
               {days} Days
@@ -175,8 +177,17 @@ const PartyList = () => {
   return (
     <Card>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold heading">Party List</h2>
-
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => {
+            setActiveTab(key);
+            setPage(1);
+          }}
+          items={[
+            { key: "Active", label: "Actice Party" },
+            { key: "Inactive", label: "Inactice Party" },
+          ]}
+        />
         <div className="flex-1 flex gap-4 sm:justify-end">
           <Search
             placeholder="Search"
